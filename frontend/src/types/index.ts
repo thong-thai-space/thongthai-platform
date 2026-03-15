@@ -30,6 +30,7 @@ export type NotificationType =
 
 export type Language = 'VI' | 'EN';
 export type Currency = 'VND' | 'USD';
+export type InvitationStatus = 'PENDING' | 'ACCEPTED' | 'EXPIRED' | 'REVOKED';
 
 // ==================== MODELS ====================
 
@@ -272,4 +273,15 @@ export interface Conversation {
   user: User;
   lastMessage: Message;
   unreadCount: number;
+}
+
+export interface Invitation {
+  id: string;
+  email: string;
+  role: UserRole;
+  status: InvitationStatus;
+  expiresAt: string;
+  acceptedAt?: string;
+  invitedBy: { id: string; name: string; email: string };
+  createdAt: string;
 }

@@ -1,7 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { UserService } from './user.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { MailService } from '../../shared/mail/mail.service';
 
 const mockPrisma = {
   user: {
@@ -9,6 +11,14 @@ const mockPrisma = {
     findUnique: jest.fn(),
     update: jest.fn(),
   },
+};
+
+const mockMailService = {
+  sendInvitation: jest.fn(),
+};
+
+const mockConfigService = {
+  get: jest.fn().mockReturnValue('http://localhost:3000'),
 };
 
 describe('UserService', () => {
@@ -19,6 +29,8 @@ describe('UserService', () => {
       providers: [
         UserService,
         { provide: PrismaService, useValue: mockPrisma },
+        { provide: MailService, useValue: mockMailService },
+        { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile();
 

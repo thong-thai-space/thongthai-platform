@@ -21,6 +21,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { CreateMemberDto } from './dto/create-member.dto';
+import { InviteMemberDto } from './dto/invite-member.dto';
 import { Roles } from '../../shared/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { CurrentUser } from '../../shared/decorators/current-user.decorator';
@@ -90,6 +91,32 @@ export class UserController {
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   createMember(@Body() dto: CreateMemberDto) {
     return this.userService.createMember(dto);
+  }
+
+  // ── Invitations (protected) ──────────────────────────────────────────────
+
+  @Post('invitations')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  sendInvitation(
+    @CurrentUser('id') userId: string,
+    @Body() dto: InviteMemberDto,
+  ) {
+    return this.userService.sendInvitation(userId, dto);
+  }
+
+  @Get('invitations')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  getInvitations() {
+    return this.userService.getInvitations();
+  }
+
+  @Delete('invitations/:id')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  revokeInvitation(@Param('id') id: string) {
+    return this.userService.revokeInvitation(id);
   }
 
   @Get()

@@ -88,6 +88,13 @@ enum AiApplyRequestStatus {
   REJECTED
 }
 
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
 // ==================== MODELS ====================
 
 model User {
@@ -126,6 +133,7 @@ model User {
   aiUsageAudits    AiUsageAudit[]
   aiApplyRequestsSubmitted AiApplyRequest[] @relation("AiApplyRequester")
   aiApplyRequestsReviewed  AiApplyRequest[] @relation("AiApplyReviewer")
+  invitationsSent  Invitation[]     @relation("InvitationSender")
 
   @@map("users")
 }
@@ -497,4 +505,22 @@ model SiteContent {
   createdAt DateTime @default(now())
 
   @@map("site_contents")
+}
+
+model Invitation {
+  id          String           @id @default(cuid())
+  email       String
+  token       String           @unique
+  role        UserRole         @default(MEMBER)
+  status      InvitationStatus @default(PENDING)
+  invitedById String
+  invitedBy   User             @relation("InvitationSender", fields: [invitedById], references: [id])
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([email, status])
+  @@index([token])
+  @@map("invitations")
 }

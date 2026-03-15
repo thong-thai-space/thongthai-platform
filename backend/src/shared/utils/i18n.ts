@@ -21,6 +21,24 @@ const messages = {
     EN: 'User not found',
   },
 
+  // Invitation
+  'invitation.notFound': {
+    VI: 'Không tìm thấy lời mời',
+    EN: 'Invitation not found',
+  },
+  'invitation.expired': {
+    VI: 'Lời mời đã hết hạn',
+    EN: 'This invitation has expired',
+  },
+  'invitation.invalid': {
+    VI: 'Lời mời không còn hiệu lực',
+    EN: 'This invitation is no longer valid',
+  },
+  'invitation.alreadyPending': {
+    VI: 'Đã có lời mời đang chờ cho email này',
+    EN: 'An invitation for this email is already pending',
+  },
+
   // Project
   'project.notFound': {
     VI: 'Không tìm thấy dự án',

@@ -2,12 +2,20 @@
 
 import { DashboardHeader } from '@/components/dashboard/header';
 import { UserAvatar } from '@/components/user-avatar';
-import { useTeam, useCreateMember, useUpdateMember, useDeleteMember } from '@/hooks/use-team';
+import {
+  useTeam,
+  useCreateMember,
+  useUpdateMember,
+  useDeleteMember,
+  useInvitations,
+  useInviteMember,
+  useRevokeInvitation,
+} from '@/hooks/use-team';
 import { useAuth } from '@/lib/auth';
 import { formatDate } from '@/lib/utils';
-import { Search, Shield, ShieldCheck, User, UserCog, Plus, Pencil, Trash2, X } from 'lucide-react';
+import { Search, Shield, ShieldCheck, User, UserCog, Plus, Pencil, Trash2, X, Mail, Clock, Ban } from 'lucide-react';
 import { useState } from 'react';
-import type { UserRole, User as UserType } from '@/types';
+import type { UserRole, User as UserType, Invitation } from '@/types';
 
 const roleLabels: Record<UserRole, string> = {
   OWNER: 'Owner',
@@ -89,6 +97,88 @@ function CreateMemberModal({ onClose }: { onClose: () => void }) {
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  );
+}
+
+function InviteMemberModal({ onClose }: { onClose: () => void }) {
+  const inviteMember = useInviteMember();
+  const [form, setForm] = useState({ email: '', role: 'MEMBER' });
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    try {
+      await inviteMember.mutateAsync({ email: form.email, role: form.role });
+      setSuccess(true);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to send invitation');
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
+      <div className="w-full max-w-md rounded-xl border border-border bg-background p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">Invite Member</h2>
+          <button onClick={onClose} className="rounded p-1 hover:bg-muted"><X className="h-5 w-5" /></button>
+        </div>
+        {success ? (
+          <div className="py-4 text-center">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+              <Mail className="h-6 w-6 text-green-600" />
+            </div>
+            <p className="font-medium">Invitation sent!</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              An invitation email has been sent to <strong>{form.email}</strong>.
+            </p>
+            <button onClick={onClose} className="mt-4 rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90">
+              Done
+            </button>
+          </div>
+        ) : (
+          <>
+            {error && <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</div>}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Email address *</label>
+                <input
+                  required
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  placeholder="colleague@example.com"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Role</label>
+                <select
+                  value={form.role}
+                  onChange={(e) => setForm({ ...form, role: e.target.value })}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                >
+                  <option value="MEMBER">Member</option>
+                  <option value="ADMIN">Admin</option>
+                </select>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                The invited person will receive an email with a link to set up their account.
+              </p>
+              <div className="flex justify-end gap-3 pt-2">
+                <button type="button" onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-sm hover:bg-muted">Cancel</button>
+                <button type="submit" disabled={inviteMember.isPending}
+                  className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
+                  <Mail className="h-4 w-4" />
+                  {inviteMember.isPending ? 'Sending...' : 'Send Invitation'}
+                </button>
+              </div>
+            </form>
+          </>
+        )}
       </div>
     </div>
   );
@@ -201,17 +291,82 @@ function DeleteConfirmModal({ member, onClose }: { member: UserType; onClose: ()
   );
 }
 
+const invitationStatusColors: Record<string, string> = {
+  PENDING: 'bg-amber-100 text-amber-700',
+  ACCEPTED: 'bg-green-100 text-green-700',
+  EXPIRED: 'bg-gray-100 text-gray-500',
+  REVOKED: 'bg-red-100 text-red-600',
+};
+
+function PendingInvitationsPanel({ onClose }: { onClose: () => void }) {
+  const { data: invitations = [], isLoading } = useInvitations();
+  const revokeInvitation = useRevokeInvitation();
+
+  const pending = invitations.filter((inv) => inv.status === 'PENDING');
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
+      <div className="w-full max-w-lg rounded-xl border border-border bg-background p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">Pending Invitations</h2>
+          <button onClick={onClose} className="rounded p-1 hover:bg-muted"><X className="h-5 w-5" /></button>
+        </div>
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <div className="h-6 w-6 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          </div>
+        ) : pending.length === 0 ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">No pending invitations</p>
+        ) : (
+          <ul className="divide-y divide-border">
+            {pending.map((inv) => (
+              <li key={inv.id} className="flex items-center justify-between gap-3 py-3">
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-medium">{inv.email}</div>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${roleColors[inv.role]}`}>
+                      {roleLabels[inv.role]}
+                    </span>
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      Expires {formatDate(inv.expiresAt)}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => revokeInvitation.mutate(inv.id)}
+                  disabled={revokeInvitation.isPending}
+                  className="flex items-center gap-1 rounded px-2 py-1 text-xs text-red-600 hover:bg-red-50 disabled:opacity-50"
+                  title="Revoke invitation"
+                >
+                  <Ban className="h-3.5 w-3.5" />
+                  Revoke
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function TeamPage() {
   const { data: members = [], isLoading } = useTeam();
+  const { data: invitations = [] } = useInvitations();
   const { user } = useAuth();
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('ALL');
   const [showCreate, setShowCreate] = useState(false);
+  const [showInvite, setShowInvite] = useState(false);
+  const [showInvitations, setShowInvitations] = useState(false);
   const [editingMember, setEditingMember] = useState<UserType | null>(null);
   const [deletingMember, setDeletingMember] = useState<UserType | null>(null);
 
   const isOwnerOrAdmin = user?.role === 'OWNER' || user?.role === 'ADMIN';
   const isOwner = user?.role === 'OWNER';
+
+  const pendingCount = invitations.filter((inv) => inv.status === 'PENDING').length;
 
   const filtered = members.filter((m) => {
     const matchSearch =
@@ -248,13 +403,31 @@ export default function TeamPage() {
             </select>
           </div>
           {isOwnerOrAdmin && (
-            <button
-              onClick={() => setShowCreate(true)}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-            >
-              <Plus className="h-4 w-4" />
-              Add Member
-            </button>
+            <div className="flex items-center gap-2">
+              {pendingCount > 0 && (
+                <button
+                  onClick={() => setShowInvitations(true)}
+                  className="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700 hover:bg-amber-100"
+                >
+                  <Clock className="h-4 w-4" />
+                  {pendingCount} pending
+                </button>
+              )}
+              <button
+                onClick={() => setShowInvite(true)}
+                className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted"
+              >
+                <Mail className="h-4 w-4" />
+                Invite
+              </button>
+              <button
+                onClick={() => setShowCreate(true)}
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+              >
+                <Plus className="h-4 w-4" />
+                Add Member
+              </button>
+            </div>
           )}
         </div>
 
@@ -326,6 +499,8 @@ export default function TeamPage() {
       </main>
 
       {showCreate && <CreateMemberModal onClose={() => setShowCreate(false)} />}
+      {showInvite && <InviteMemberModal onClose={() => setShowInvite(false)} />}
+      {showInvitations && <PendingInvitationsPanel onClose={() => setShowInvitations(false)} />}
       {editingMember && <EditMemberModal member={editingMember} onClose={() => setEditingMember(null)} />}
       {deletingMember && <DeleteConfirmModal member={deletingMember} onClose={() => setDeletingMember(null)} />}
     </>
