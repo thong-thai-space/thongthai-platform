@@ -25,7 +25,12 @@ api.interceptors.response.use(
   (res) => res,
   async (error) => {
     const originalRequest = error.config;
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    const requestUrl = String(originalRequest?.url || '');
+    const isAuthEndpoint = ['/auth/login', '/auth/register', '/auth/refresh', '/auth/me'].some((path) =>
+      requestUrl.includes(path),
+    );
+
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry && !isAuthEndpoint) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({
@@ -49,7 +54,17 @@ api.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError);
         if (typeof window !== 'undefined') {
-          window.location.href = '/login';
+          const isAuthPage = ['/login', '/register', '/forgot-password', '/reset-password'].some(
+            (path) => window.location.pathname.startsWith(path),
+          );
+          const isProtectedPage = ['/dashboard', '/member', '/portal'].some((path) =>
+            window.location.pathname.startsWith(path),
+          );
+
+          // Redirect to login only from protected areas; keep public pages stable.
+          if (!isAuthPage && isProtectedPage) {
+            window.location.href = '/login';
+          }
         }
         return Promise.reject(refreshError);
       } finally {
