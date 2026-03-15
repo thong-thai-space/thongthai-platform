@@ -27,5 +27,5 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 
 EXPOSE 4000
-# Run pending migrations then start (migrate deploy is idempotent)
-CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy && node dist/src/main.js"]
+# Fail fast if migrations are missing in image, then run pending migrations and start.
+CMD ["sh", "-c", "if [ -z \"$(find prisma/migrations -mindepth 1 -maxdepth 1 -type d 2>/dev/null)\" ]; then echo 'ERROR: prisma/migrations is empty in container image'; exit 1; fi; node_modules/.bin/prisma migrate deploy && node dist/src/main.js"]
