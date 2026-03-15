@@ -1,0 +1,47 @@
+groups:
+  - name: thongthai-alerts
+    rules:
+      - alert: EndpointDown
+        expr: up{job=~"thongthai-backend|thongthai-backend-ready|thongthai-frontend-health"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Endpoint down: {{ $labels.job }}"
+          description: "Health endpoint for {{ $labels.job }} has been down for more than 1 minute."
+
+      - alert: HighHostCpuUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on {{ $labels.instance }}"
+          description: "Host CPU usage has been above 85% for 5 minutes."
+
+      - alert: HighHostMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on {{ $labels.instance }}"
+          description: "Host memory usage has been above 90% for 5 minutes."
+
+      - alert: LowDiskSpace
+        expr: (node_filesystem_avail_bytes{fstype!="tmpfs",mountpoint="/"} / node_filesystem_size_bytes{fstype!="tmpfs",mountpoint="/"}) * 100 < 15
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Low disk space on {{ $labels.instance }}"
+          description: "Disk free space on / is below 15% for 10 minutes."
+
+      - alert: ContainerRestartingTooMuch
+        expr: increase(container_start_time_seconds[15m]) > 3
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container restarting frequently"
+          description: "A container has restarted more than 3 times in 15 minutes."

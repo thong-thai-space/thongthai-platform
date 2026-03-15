@@ -1,0 +1,500 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==================== ENUMS ====================
+
+enum UserRole {
+  OWNER
+  ADMIN
+  MEMBER
+  CLIENT
+}
+
+enum ProjectStatus {
+  DRAFT
+  PROPOSAL_SENT
+  IN_PROGRESS
+  ON_HOLD
+  REVIEW
+  COMPLETED
+  CANCELLED
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  DONE
+  BLOCKED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum NotificationType {
+  TASK_ASSIGNED
+  TASK_UPDATED
+  PROJECT_UPDATE
+  PROJECT_REQUEST
+  CONTACT_REQUEST
+  INVOICE_PAID
+  CLIENT_MESSAGE
+  AI_COMPLETED
+  SYSTEM
+}
+
+enum Language {
+  VI
+  EN
+}
+
+enum Currency {
+  VND
+  USD
+}
+
+enum AiFeature {
+  CHAT
+  PROPOSAL
+  TASK_BREAKDOWN
+  CODE_REVIEW
+  ESTIMATE
+  PROGRESS_REPORT
+  STRATEGIC_PLAN
+  APPLY_STRATEGIC_PLAN
+  PUBLIC_CHAT
+}
+
+enum AiApplyRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// ==================== MODELS ====================
+
+model User {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  password         String
+  name             String
+  avatar           String?
+  phone            String?
+  role             UserRole  @default(CLIENT)
+  locale           Language  @default(EN)
+  isActive         Boolean   @default(true)
+  refreshTokenHash String?
+  lastLoginAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // Relations
+  ownedProjects   Project[]        @relation("ProjectOwner")
+  assignedTasks   Task[]           @relation("TaskAssignee")
+  createdTasks    Task[]           @relation("TaskCreator")
+  comments        Comment[]
+  notifications   Notification[]
+  aiConversations AiConversation[]
+  invoicesCreated Invoice[]        @relation("InvoiceCreator")
+  timeEntries     TimeEntry[]
+  activities      Activity[]
+
+  // Client relations
+  clientProjects Project[] @relation("ProjectClient")
+  clientInvoices Invoice[] @relation("InvoiceClient")
+
+  // Messaging
+  sentMessages     Message[] @relation("MessageSender")
+  receivedMessages Message[] @relation("MessageReceiver")
+  aiUsageAudits    AiUsageAudit[]
+  aiApplyRequestsSubmitted AiApplyRequest[] @relation("AiApplyRequester")
+  aiApplyRequestsReviewed  AiApplyRequest[] @relation("AiApplyReviewer")
+
+  @@map("users")
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  status      ProjectStatus @default(DRAFT)
+  startDate   DateTime?
+  endDate     DateTime?
+  deadline    DateTime?
+  budget      Decimal?      @db.Decimal(15, 2)
+  budgetUsd   Decimal?      @db.Decimal(15, 2)
+  currency    Currency      @default(VND)
+
+  // Tech stack & metadata
+  techStack String[] @default([])
+  repoUrl   String?
+  liveUrl   String?
+  figmaUrl  String?
+
+  // Relations
+  ownerId  String
+  owner    User    @relation("ProjectOwner", fields: [ownerId], references: [id])
+  clientId String?
+  client   User?   @relation("ProjectClient", fields: [clientId], references: [id])
+
+  tasks      Task[]
+  invoices   Invoice[]
+  comments      Comment[]
+  files         ProjectFile[]
+  milestones    Milestone[]
+  activities    Activity[]
+  messages      Message[]
+  aiUsageAudits AiUsageAudit[]
+  aiApplyRequests AiApplyRequest[]
+
+  // Portfolio
+  isShowcase    Boolean  @default(false)
+  showcaseOrder Int?
+  showcaseCategory String?
+  showcaseResults  String?
+  thumbnailUrl  String?
+  screenshots   String[] @default([])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("projects")
+}
+
+model Task {
+  id             String       @id @default(cuid())
+  title          String
+  description    String?
+  status         TaskStatus   @default(TODO)
+  priority       TaskPriority @default(MEDIUM)
+  dueDate        DateTime?
+  estimatedHours Float?
+  actualHours    Float?
+  order          Int          @default(0)
+
+  // Relations
+  projectId   String
+  project     Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assigneeId  String?
+  assignee    User?      @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  creatorId   String
+  creator     User       @relation("TaskCreator", fields: [creatorId], references: [id])
+  parentId    String?
+  parent      Task?      @relation("SubTasks", fields: [parentId], references: [id])
+  subTasks    Task[]     @relation("SubTasks")
+  milestoneId String?
+  milestone   Milestone? @relation(fields: [milestoneId], references: [id])
+
+  comments    Comment[]
+  timeEntries TimeEntry[]
+  labels      String[]   @default([])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("tasks")
+}
+
+model Milestone {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  dueDate     DateTime?
+  isCompleted Boolean   @default(false)
+  completedAt DateTime?
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks     Task[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("milestones")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  taskId    String?
+  task      Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  // AI-generated flag
+  isAiGenerated Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("comments")
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  invoiceNumber String        @unique
+  status        InvoiceStatus @default(DRAFT)
+  issueDate     DateTime      @default(now())
+  dueDate       DateTime
+  subtotal      Decimal       @db.Decimal(15, 2)
+  tax           Decimal       @default(0) @db.Decimal(15, 2)
+  discount      Decimal       @default(0) @db.Decimal(15, 2)
+  total         Decimal       @db.Decimal(15, 2)
+  totalUsd      Decimal?      @db.Decimal(15, 2)
+  currency      Currency      @default(VND)
+  notes         String?
+
+  // Relations
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id])
+  clientId  String
+  client    User     @relation("InvoiceClient", fields: [clientId], references: [id])
+  creatorId String
+  creator   User     @relation("InvoiceCreator", fields: [creatorId], references: [id])
+  items     InvoiceItem[]
+
+  paidAt        DateTime?
+  paidAmount    Decimal?  @db.Decimal(15, 2)
+  paymentMethod String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id          String  @id @default(cuid())
+  description String
+  quantity    Float   @default(1)
+  unitPrice   Decimal @db.Decimal(15, 2)
+  amount      Decimal @db.Decimal(15, 2)
+
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@map("invoice_items")
+}
+
+model TimeEntry {
+  id          String   @id @default(cuid())
+  description String?
+  hours       Float
+  date        DateTime @default(now())
+  billable    Boolean  @default(true)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+  taskId String?
+  task   Task?  @relation(fields: [taskId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@map("time_entries")
+}
+
+model ProjectFile {
+  id         String  @id @default(cuid())
+  name       String
+  url        String
+  mimeType   String
+  size       Int
+  projectId  String
+  project    Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  uploadedBy String
+
+  createdAt DateTime @default(now())
+
+  @@map("project_files")
+}
+
+model Notification {
+  id      String           @id @default(cuid())
+  type    NotificationType
+  title   String
+  message String
+  isRead  Boolean          @default(false)
+  data    Json?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+  @@map("notifications")
+}
+
+model AiConversation {
+  id       String      @id @default(cuid())
+  title    String?
+  context  String?
+  userId   String
+  user     User        @relation(fields: [userId], references: [id])
+  messages AiMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("ai_conversations")
+}
+
+model AiMessage {
+  id             String         @id @default(cuid())
+  role           String
+  content        String
+  tokenUsage     Int?
+  conversationId String
+  conversation   AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@map("ai_messages")
+}
+
+model AiUsageAudit {
+  id                 String    @id @default(cuid())
+  feature            AiFeature
+  model              String?
+  success            Boolean   @default(true)
+  inputTokens        Int?
+  outputTokens       Int?
+  totalTokens        Int?
+  estimatedCostUsd   Decimal?  @db.Decimal(12, 6)
+  durationMs         Int?
+  errorMessage       String?
+  metadata           Json?
+  effectivenessScore Int?
+  feedbackNote       String?
+
+  userId String?
+  user   User?    @relation(fields: [userId], references: [id])
+
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([feature, createdAt])
+  @@index([userId, createdAt])
+  @@index([projectId, createdAt])
+  @@map("ai_usage_audits")
+}
+
+model AiApplyRequest {
+  id          String               @id @default(cuid())
+  status      AiApplyRequestStatus @default(PENDING)
+  plan        Json
+  objective   String?
+  constraints String?
+  notes       String?
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  requesterId String
+  requester   User @relation("AiApplyRequester", fields: [requesterId], references: [id])
+
+  reviewerId String?
+  reviewer   User? @relation("AiApplyReviewer", fields: [reviewerId], references: [id])
+
+  reviewedAt DateTime?
+  appliedAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId, status])
+  @@index([requesterId, createdAt])
+  @@index([status, createdAt])
+  @@map("ai_apply_requests")
+}
+
+model Activity {
+  id         String   @id @default(cuid())
+  action     String
+  entityType String
+  entityId   String
+  details    Json?
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  projectId  String?
+  project    Project? @relation(fields: [projectId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@map("activities")
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  content    String
+  senderId   String
+  sender     User     @relation("MessageSender", fields: [senderId], references: [id])
+  receiverId String
+  receiver   User     @relation("MessageReceiver", fields: [receiverId], references: [id])
+  projectId  String?
+  project    Project? @relation(fields: [projectId], references: [id])
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([senderId, receiverId])
+  @@index([projectId])
+  @@map("messages")
+}
+
+enum ContactRequestStatus {
+  NEW
+  REVIEWED
+  CONTACTED
+  CONVERTED
+  CLOSED
+}
+
+model ContactRequest {
+  id        String               @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  company   String?
+  service   String?
+  budget    String?
+  message   String
+  status    ContactRequestStatus @default(NEW)
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+
+  @@map("contact_requests")
+}
+
+model SiteContent {
+  id        String   @id @default(cuid())
+  section   String   @unique
+  data      Json
+  isActive  Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@map("site_contents")
+}

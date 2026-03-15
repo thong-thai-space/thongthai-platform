@@ -1,0 +1,19 @@
+route:
+  receiver: default-receiver
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 30m
+
+receivers:
+  - name: default-receiver
+    # Add one or more integrations below.
+    # email_configs:
+    #   - to: devops@example.com
+    #     from: alerts@example.com
+    #     smarthost: smtp.example.com:587
+    #     auth_username: alerts@example.com
+    #     auth_password: your-smtp-password
+    #     require_tls: true
+
+    # webhook_configs:
+    #   - url: https://hooks.slack.com/services/XXX/YYY/ZZZ
