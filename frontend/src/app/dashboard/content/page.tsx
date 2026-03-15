@@ -69,8 +69,95 @@ const ABOUT_DEFAULTS = {
   ],
 };
 
+const HERO_DEFAULTS = {
+  badge: 'Smart technology solutions',
+  title: 'Turn ideas into',
+  titleHighlight: 'outstanding digital',
+  titleEnd: 'products',
+  subtitle:
+    'Thong Thai Space specializes in Web & App development, AI integration, and IT consulting.',
+  primaryCta: { text: 'Get a free quote', href: '/contact' },
+  secondaryCta: { text: 'View our projects', href: '/portfolio' },
+  stats: [
+    { value: '50+', label: 'Projects completed' },
+    { value: '30+', label: 'Trusted clients' },
+    { value: '5+', label: 'Years of experience' },
+    { value: '99%', label: 'Client satisfaction' },
+  ],
+};
+
+const SERVICES_DEFAULTS = {
+  title: 'Our Services',
+  subtitle: 'Comprehensive technology solutions, from idea to finished product',
+  items: [
+    {
+      icon: 'Globe',
+      title: 'Web Development',
+      description:
+        'Websites, web apps, and e-commerce with modern technology.',
+      features: ['Landing page', 'Web application'],
+    },
+  ],
+};
+
+const PROCESS_DEFAULTS = {
+  title: 'Our Process',
+  subtitle: '4 simple steps from idea to finished product',
+  steps: [
+    {
+      icon: 'MessageSquare',
+      step: '01',
+      title: 'Discuss & Analyze',
+      description: 'Listen to requirements and analyze business needs.',
+    },
+  ],
+};
+
+const TESTIMONIALS_DEFAULTS = {
+  title: 'What our clients say',
+  subtitle: 'Feedback from clients who have trusted and partnered with us',
+  items: [
+    {
+      name: 'Client Name',
+      role: 'CEO',
+      content: 'Great collaboration and delivery quality.',
+      rating: 5,
+    },
+  ],
+};
+
+const FOOTER_DEFAULTS = {
+  brand: {
+    name: 'Thong Thai Space',
+    description:
+      'Smart technology solutions for businesses. Specializing in Web, App, AI development and IT consulting.',
+    email: 'contact@thongthai.space',
+    phone: '0123 456 789',
+    address: 'Ho Chi Minh City, Vietnam',
+  },
+  links: {
+    Services: [
+      { href: '/services#web', label: 'Web Development' },
+      { href: '/services#app', label: 'Mobile Apps' },
+    ],
+    Company: [
+      { href: '/about', label: 'About' },
+      { href: '/portfolio', label: 'Portfolio' },
+    ],
+    Support: [
+      { href: '/login', label: 'Sign in' },
+      { href: '/register', label: 'Sign up' },
+    ],
+  },
+};
+
 const SECTION_DEFAULTS: Record<string, unknown> = {
+  hero: HERO_DEFAULTS,
   about: ABOUT_DEFAULTS,
+  services: SERVICES_DEFAULTS,
+  process: PROCESS_DEFAULTS,
+  testimonials: TESTIMONIALS_DEFAULTS,
+  footer: FOOTER_DEFAULTS,
 };
 
 type AboutSectionData = {
@@ -114,6 +201,42 @@ function buildDefaultFromTemplate(template: unknown): unknown {
   if (typeof template === 'boolean') return false;
   if (template === null) return null;
   return '';
+}
+
+function normalizeByTemplate(value: unknown, template: unknown): unknown {
+  if (Array.isArray(template)) {
+    if (!Array.isArray(value)) return template;
+    if (template.length === 0) return value;
+
+    const sample = template[0];
+    return value.map((item) => normalizeByTemplate(item, sample));
+  }
+
+  if (isObjectValue(template)) {
+    if (!isObjectValue(value)) return template;
+
+    const normalized: Record<string, unknown> = { ...value };
+    Object.entries(template).forEach(([key, templateValue]) => {
+      normalized[key] = normalizeByTemplate(value[key], templateValue);
+    });
+    return normalized;
+  }
+
+  if (template === null) return value === null ? null : null;
+
+  if (typeof template === 'number') {
+    return typeof value === 'number' ? value : template;
+  }
+
+  if (typeof template === 'boolean') {
+    return typeof value === 'boolean' ? value : template;
+  }
+
+  if (typeof template === 'string') {
+    return typeof value === 'string' ? value : template;
+  }
+
+  return value;
 }
 
 function PrimitiveEditor({
@@ -791,8 +914,13 @@ function PortfolioDatabaseManager({ contentValue }: { contentValue: unknown }) {
         </div>
       ) : (
         <div className="space-y-3">
-          {showcaseProjects.map((project) => (
-            <div key={project.id} className="rounded-xl border border-border bg-background p-4">
+          {showcaseProjects.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-border bg-background p-6 text-sm text-muted-foreground">
+              No projects found yet. Create projects first in Dashboard → Projects, then enable "Show on Portfolio" here.
+            </div>
+          ) : (
+            showcaseProjects.map((project) => (
+              <div key={project.id} className="rounded-xl border border-border bg-background p-4">
               <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                 <div>
                   <div className="flex items-center gap-2">
@@ -931,8 +1059,9 @@ function PortfolioDatabaseManager({ contentValue }: { contentValue: unknown }) {
               <div className="mt-3 text-xs text-muted-foreground">
                 {savingId === project.id ? 'Saving portfolio metadata...' : 'Changes are saved to the project record in database.'}
               </div>
-            </div>
-          ))}
+              </div>
+            ))
+          )}
         </div>
       )}
     </div>
@@ -1005,6 +1134,11 @@ export default function ContentPage() {
     activeTab in draftData ? draftData[activeTab] : contentMap[activeTab];
 
   const activeMode = editorModeBySection[activeTab] ?? 'visual';
+  const activeTemplate = SECTION_DEFAULTS[activeTab];
+  const normalizedVisualValue =
+    activeTemplate !== undefined
+      ? normalizeByTemplate(currentValue, activeTemplate)
+      : currentValue;
 
   const handleSave = async (section: string) => {
     const value = section in draftData ? draftData[section] : contentMap[section];
@@ -1111,7 +1245,50 @@ export default function ContentPage() {
             </div>
 
             {activeTab === 'portfolio' && activeMode === 'visual' ? (
-              <PortfolioDatabaseManager contentValue={currentValue} />
+              <div className="space-y-4">
+                <PortfolioFeaturedProjectsEditor
+                  value={currentValue ?? PORTFOLIO_DEFAULTS}
+                  onChange={(v) =>
+                    setDraftData((prev) => ({
+                      ...prev,
+                      [activeTab]: v,
+                    }))
+                  }
+                />
+                <PortfolioDatabaseManager contentValue={currentValue ?? PORTFOLIO_DEFAULTS} />
+
+                <div className="mt-4 flex items-center gap-3">
+                  <button
+                    onClick={() => handleSave(activeTab)}
+                    disabled={updateContent.isPending}
+                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                  >
+                    {updateContent.isPending ? (
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Save className="h-4 w-4" />
+                    )}
+                    {updateContent.isPending ? 'Saving...' : 'Save Changes'}
+                  </button>
+                  <button
+                    onClick={() => handleDelete(activeTab)}
+                    disabled={deleteContent.isPending}
+                    className="inline-flex items-center gap-2 rounded-lg border border-destructive/30 px-4 py-2 text-sm text-destructive hover:bg-destructive/5 disabled:opacity-50"
+                  >
+                    {deleteContent.isPending ? (
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                    {deleteContent.isPending ? 'Deleting...' : 'Delete Section'}
+                  </button>
+                  {saved === activeTab && (
+                    <span className="inline-flex items-center gap-1 text-sm text-green-600">
+                      <Check className="h-4 w-4" /> Saved
+                    </span>
+                  )}
+                </div>
+              </div>
             ) : !currentValue ? (
               <div className="rounded-lg border border-dashed border-border p-6 text-muted-foreground">
                 <p className="mb-1 text-sm font-medium">No content for &quot;{activeTab}&quot; section yet.</p>
@@ -1191,7 +1368,7 @@ export default function ContentPage() {
                 ) : activeMode === 'visual' ? (
                   <VisualEditorNode
                     label={toDisplayLabel(activeTab)}
-                    value={currentValue}
+                    value={normalizedVisualValue}
                     onChange={(v) =>
                       setDraftData((prev) => ({
                         ...prev,
