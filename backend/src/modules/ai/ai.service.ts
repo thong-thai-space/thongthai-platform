@@ -135,7 +135,7 @@ export class AiService {
   private async buildOperationalSnapshot(userId: string, userRole?: UserRole) {
     // Client role only sees their own operational metrics.
     if (userRole === UserRole.CLIENT) {
-      const [clientProjects, clientTaskCounts] = await this.prisma.$transaction([
+      const [clientProjects, clientTasksInProgress] = await this.prisma.$transaction([
         this.prisma.project.count({
           where: {
             clientId: userId,
@@ -149,8 +149,7 @@ export class AiService {
             },
           },
         }),
-        this.prisma.task.groupBy({
-          by: ['status'],
+        this.prisma.task.count({
           where: {
             project: { clientId: userId },
             status: {
@@ -162,14 +161,8 @@ export class AiService {
               ],
             },
           },
-          _count: { status: true },
         }),
       ]);
-
-      const tasksInProgress = clientTaskCounts.reduce(
-        (sum, row) => sum + row._count.status,
-        0,
-      );
 
       return {
         scope: 'CLIENT_ONLY',
@@ -177,11 +170,11 @@ export class AiService {
         teamMembers: null,
         activeClients: null,
         projectsInProgress: clientProjects,
-        tasksInProgress,
+        tasksInProgress: clientTasksInProgress,
       };
     }
 
-    const [teamMembers, activeClients, projectsInProgress, taskCounts] =
+    const [teamMembers, activeClients, projectsInProgress, tasksInProgress] =
       await this.prisma.$transaction([
         this.prisma.user.count({
           where: {
@@ -207,8 +200,7 @@ export class AiService {
             },
           },
         }),
-        this.prisma.task.groupBy({
-          by: ['status'],
+        this.prisma.task.count({
           where: {
             status: {
               in: [
@@ -219,11 +211,8 @@ export class AiService {
               ],
             },
           },
-          _count: { status: true },
         }),
       ]);
-
-    const tasksInProgress = taskCounts.reduce((sum, row) => sum + row._count.status, 0);
 
     return {
       scope: 'INTERNAL',

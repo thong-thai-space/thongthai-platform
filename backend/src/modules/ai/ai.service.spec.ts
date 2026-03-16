@@ -37,7 +37,7 @@ const mockPrisma = {
     count: jest.fn(),
   },
   task: {
-    groupBy: jest.fn(),
+    count: jest.fn(),
   },
   $transaction: jest.fn(),
 };
@@ -68,7 +68,7 @@ describe('AiService', () => {
 
     mockPrisma.user.count.mockResolvedValue(0);
     mockPrisma.project.count.mockResolvedValue(0);
-    mockPrisma.task.groupBy.mockResolvedValue([]);
+    mockPrisma.task.count.mockResolvedValue(0);
     mockPrisma.$transaction.mockImplementation(async (queries: Promise<unknown>[]) =>
       Promise.all(queries),
     );
