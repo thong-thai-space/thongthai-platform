@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Controller,
   Get,
   Post,
@@ -7,9 +8,14 @@ import {
   Body,
   Query,
   UseGuards,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { memoryStorage } from 'multer';
+import { UserRole } from '@prisma/client';
 import { FileService } from './file.service';
 import { CurrentUser } from '../../shared/decorators/current-user.decorator';
 
@@ -31,7 +37,31 @@ export class FileController {
   }
 
   @Post()
-  create(
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: 25 * 1024 * 1024 },
+    }),
+  )
+  upload(
+    @UploadedFile() file: Express.Multer.File,
+    @Body('projectId') projectId: string,
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') role: UserRole,
+  ) {
+    if (!file) throw new BadRequestException('No file uploaded');
+    if (!projectId) throw new BadRequestException('projectId is required');
+
+    return this.fileService.uploadProjectFile({
+      file,
+      projectId,
+      uploadedBy: userId,
+      role,
+    });
+  }
+
+  @Post('metadata')
+  createMetadata(
     @Body()
     body: {
       name: string;

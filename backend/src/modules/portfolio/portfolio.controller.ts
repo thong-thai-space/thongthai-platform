@@ -13,18 +13,21 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { memoryStorage } from 'multer';
 import { PortfolioService } from './portfolio.service';
 import { UpdatePortfolioDto } from './dto/portfolio.dto';
 import { Roles } from '../../shared/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { R2StorageService } from '../../shared/storage/r2-storage.service';
 import { UserRole } from '@prisma/client';
 
 @ApiTags('Portfolio')
 @Controller('portfolio')
 export class PortfolioController {
-  constructor(private portfolioService: PortfolioService) {}
+  constructor(
+    private portfolioService: PortfolioService,
+    private r2StorageService: R2StorageService,
+  ) {}
 
   @Get()
   getShowcase() {
@@ -48,16 +51,13 @@ export class PortfolioController {
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   @UseInterceptors(
     FileInterceptor('thumbnail', {
-      storage: diskStorage({
-        destination: './uploads/portfolio',
-        filename: (_req, file, cb) => {
-          const uniqueName = `portfolio-${Date.now()}${extname(file.originalname)}`;
-          cb(null, uniqueName);
-        },
-      }),
+      storage: memoryStorage(),
       fileFilter: (_req, file, cb) => {
         if (!file.mimetype.match(/^image\/(jpeg|png|gif|webp)$/)) {
-          return cb(new BadRequestException('Only image files are allowed'), false);
+          return cb(
+            new BadRequestException('Only image files are allowed'),
+            false,
+          );
         }
         cb(null, true);
       },
@@ -70,8 +70,14 @@ export class PortfolioController {
   ) {
     if (!file) throw new BadRequestException('No file uploaded');
 
+    const thumbnailUrl = await this.r2StorageService.uploadPublicFile({
+      folder: 'portfolio',
+      file,
+      keyPrefix: projectId,
+    });
+
     return this.portfolioService.updateShowcase(projectId, {
-      thumbnailUrl: `/uploads/portfolio/${file.filename}`,
+      thumbnailUrl,
     });
   }
 }

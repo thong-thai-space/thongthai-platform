@@ -14,17 +14,20 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { memoryStorage } from 'multer';
 import { ContentService } from './content.service';
 import { Roles } from '../../shared/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { R2StorageService } from '../../shared/storage/r2-storage.service';
 import { UserRole } from '@prisma/client';
 
 @ApiTags('Content')
 @Controller('content')
 export class ContentController {
-  constructor(private contentService: ContentService) {}
+  constructor(
+    private contentService: ContentService,
+    private r2StorageService: R2StorageService,
+  ) {}
 
   @Get()
   findAll() {
@@ -65,13 +68,7 @@ export class ContentController {
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   @UseInterceptors(
     FileInterceptor('image', {
-      storage: diskStorage({
-        destination: './uploads/content',
-        filename: (_req, file, cb) => {
-          const uniqueName = `content-${Date.now()}${extname(file.originalname)}`;
-          cb(null, uniqueName);
-        },
-      }),
+      storage: memoryStorage(),
       fileFilter: (_req, file, cb) => {
         if (!file.mimetype.match(/^image\/(jpeg|png|gif|webp)$/)) {
           return cb(new BadRequestException('Only image files are allowed'), false);
@@ -81,8 +78,13 @@ export class ContentController {
       limits: { fileSize: 5 * 1024 * 1024 },
     }),
   )
-  uploadImage(@UploadedFile() file: Express.Multer.File) {
+  async uploadImage(@UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('No file uploaded');
-    return { url: `/uploads/content/${file.filename}` };
+    const url = await this.r2StorageService.uploadPublicFile({
+      folder: 'content',
+      file,
+      keyPrefix: 'content',
+    });
+    return { url };
   }
 }

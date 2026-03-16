@@ -14,8 +14,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { memoryStorage } from 'multer';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -24,6 +23,7 @@ import { CreateMemberDto } from './dto/create-member.dto';
 import { Roles } from '../../shared/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { CurrentUser } from '../../shared/decorators/current-user.decorator';
+import { R2StorageService } from '../../shared/storage/r2-storage.service';
 import { UserRole } from '@prisma/client';
 
 @ApiTags('Users')
@@ -31,7 +31,10 @@ import { UserRole } from '@prisma/client';
 @UseGuards(AuthGuard('jwt'))
 @Controller('users')
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private r2StorageService: R2StorageService,
+  ) {}
 
   @Get('me')
   getProfile(@CurrentUser('id') userId: string) {
@@ -57,13 +60,7 @@ export class UserController {
   @Post('me/avatar')
   @UseInterceptors(
     FileInterceptor('avatar', {
-      storage: diskStorage({
-        destination: './uploads/avatars',
-        filename: (_req: any, file, cb) => {
-          const uniqueName = `${_req.user.id}-${Date.now()}${extname(file.originalname)}`;
-          cb(null, uniqueName);
-        },
-      }),
+      storage: memoryStorage(),
       fileFilter: (_req, file, cb) => {
         if (!file.mimetype.match(/^image\/(jpeg|png|gif|webp)$/)) {
           return cb(
@@ -81,7 +78,11 @@ export class UserController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     if (!file) throw new BadRequestException('No file uploaded');
-    const avatarUrl = `/uploads/avatars/${file.filename}`;
+    const avatarUrl = await this.r2StorageService.uploadPublicFile({
+      folder: 'avatars',
+      file,
+      keyPrefix: userId,
+    });
     return this.userService.updateProfile(userId, { avatar: avatarUrl });
   }
 
