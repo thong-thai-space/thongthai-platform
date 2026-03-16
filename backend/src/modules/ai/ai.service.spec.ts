@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AiService } from './ai.service';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -19,7 +19,7 @@ jest.mock('@anthropic-ai/sdk', () => {
 
 const mockPrisma = {
   aiConversation: {
-    findUnique: jest.fn(),
+    findFirst: jest.fn(),
     create: jest.fn(),
   },
   aiMessage: {
@@ -31,7 +31,15 @@ const mockPrisma = {
   project: {
     findMany: jest.fn(),
     findUnique: jest.fn(),
+    count: jest.fn(),
   },
+  user: {
+    count: jest.fn(),
+  },
+  task: {
+    groupBy: jest.fn(),
+  },
+  $transaction: jest.fn(),
 };
 
 const mockConfigService = {
@@ -57,6 +65,13 @@ describe('AiService', () => {
 
     service = module.get<AiService>(AiService);
     jest.clearAllMocks();
+
+    mockPrisma.user.count.mockResolvedValue(0);
+    mockPrisma.project.count.mockResolvedValue(0);
+    mockPrisma.task.groupBy.mockResolvedValue([]);
+    mockPrisma.$transaction.mockImplementation(async (queries: Promise<unknown>[]) =>
+      Promise.all(queries),
+    );
   });
 
   describe('chat', () => {
@@ -86,8 +101,9 @@ describe('AiService', () => {
     });
 
     it('should use existing conversation when conversationId provided', async () => {
-      mockPrisma.aiConversation.findUnique.mockResolvedValue({
+      mockPrisma.aiConversation.findFirst.mockResolvedValue({
         id: 'conv-1',
+        userId: 'user-1',
         messages: [{ role: 'user', content: 'Previous' }],
       });
       mockPrisma.project.findMany.mockResolvedValue([]);
@@ -97,9 +113,20 @@ describe('AiService', () => {
       const result = await service.chat('user-1', 'Follow up', 'conv-1');
 
       expect(result.conversationId).toBe('conv-1');
-      expect(mockPrisma.aiConversation.findUnique).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { id: 'conv-1' } }),
+      expect(mockPrisma.aiConversation.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { id: 'conv-1', userId: 'user-1' } }),
       );
+    });
+
+    it('should block access to conversation not owned by current user', async () => {
+      mockPrisma.aiConversation.findFirst.mockResolvedValue(null);
+
+      await expect(service.chat('user-1', 'Follow up', 'conv-other')).rejects.toThrow(
+        ForbiddenException,
+      );
+
+      expect(mockPrisma.aiConversation.create).not.toHaveBeenCalled();
+      expect(mockCreate).not.toHaveBeenCalled();
     });
 
     it('should save both user and assistant messages', async () => {

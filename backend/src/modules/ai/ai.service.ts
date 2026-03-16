@@ -9,7 +9,15 @@ import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import Anthropic from '@anthropic-ai/sdk';
 import { PrismaService } from '../../prisma/prisma.service';
-import { AiFeature, Language, Prisma, TaskPriority, UserRole } from '@prisma/client';
+import {
+  AiFeature,
+  Language,
+  Prisma,
+  ProjectStatus,
+  TaskPriority,
+  TaskStatus,
+  UserRole,
+} from '@prisma/client';
 import { NotificationService } from '../notification/notification.service';
 import { NotificationType } from '@prisma/client';
 import {
@@ -124,17 +132,129 @@ export class AiService {
       .replace(/\b\d{9,16}\b/g, '[ID]');
   }
 
+  private async buildOperationalSnapshot(userId: string, userRole?: UserRole) {
+    // Client role only sees their own operational metrics.
+    if (userRole === UserRole.CLIENT) {
+      const [clientProjects, clientTaskCounts] = await this.prisma.$transaction([
+        this.prisma.project.count({
+          where: {
+            clientId: userId,
+            status: {
+              in: [
+                ProjectStatus.PROPOSAL_SENT,
+                ProjectStatus.IN_PROGRESS,
+                ProjectStatus.ON_HOLD,
+                ProjectStatus.REVIEW,
+              ],
+            },
+          },
+        }),
+        this.prisma.task.groupBy({
+          by: ['status'],
+          where: {
+            project: { clientId: userId },
+            status: {
+              in: [
+                TaskStatus.TODO,
+                TaskStatus.IN_PROGRESS,
+                TaskStatus.IN_REVIEW,
+                TaskStatus.BLOCKED,
+              ],
+            },
+          },
+          _count: { status: true },
+        }),
+      ]);
+
+      const tasksInProgress = clientTaskCounts.reduce(
+        (sum, row) => sum + row._count.status,
+        0,
+      );
+
+      return {
+        scope: 'CLIENT_ONLY',
+        generatedAt: new Date().toISOString(),
+        teamMembers: null,
+        activeClients: null,
+        projectsInProgress: clientProjects,
+        tasksInProgress,
+      };
+    }
+
+    const [teamMembers, activeClients, projectsInProgress, taskCounts] =
+      await this.prisma.$transaction([
+        this.prisma.user.count({
+          where: {
+            isActive: true,
+            role: { in: [UserRole.OWNER, UserRole.ADMIN, UserRole.MEMBER] },
+          },
+        }),
+        this.prisma.user.count({
+          where: {
+            isActive: true,
+            role: UserRole.CLIENT,
+          },
+        }),
+        this.prisma.project.count({
+          where: {
+            status: {
+              in: [
+                ProjectStatus.PROPOSAL_SENT,
+                ProjectStatus.IN_PROGRESS,
+                ProjectStatus.ON_HOLD,
+                ProjectStatus.REVIEW,
+              ],
+            },
+          },
+        }),
+        this.prisma.task.groupBy({
+          by: ['status'],
+          where: {
+            status: {
+              in: [
+                TaskStatus.TODO,
+                TaskStatus.IN_PROGRESS,
+                TaskStatus.IN_REVIEW,
+                TaskStatus.BLOCKED,
+              ],
+            },
+          },
+          _count: { status: true },
+        }),
+      ]);
+
+    const tasksInProgress = taskCounts.reduce((sum, row) => sum + row._count.status, 0);
+
+    return {
+      scope: 'INTERNAL',
+      generatedAt: new Date().toISOString(),
+      teamMembers,
+      activeClients,
+      projectsInProgress,
+      tasksInProgress,
+    };
+  }
+
   // ==================== CHAT ====================
 
   async chat(userId: string, message: string, conversationId?: string, userRole?: UserRole) {
     const sanitizedMessage = this.maskSensitiveData(message);
 
-    let conversation = conversationId
-      ? await this.prisma.aiConversation.findUnique({
-          where: { id: conversationId },
-          include: { messages: { orderBy: { createdAt: 'asc' }, take: 20 } },
-        })
-      : null;
+    let conversation = null;
+
+    if (conversationId) {
+      conversation = await this.prisma.aiConversation.findFirst({
+        where: {
+          id: conversationId,
+          userId,
+        },
+        include: { messages: { orderBy: { createdAt: 'asc' }, take: 20 } },
+      });
+
+      if (!conversation) {
+        throw new ForbiddenException('Conversation not found or access denied');
+      }
+    }
 
     if (!conversation) {
       conversation = await this.prisma.aiConversation.create({
@@ -161,7 +281,7 @@ export class AiService {
     );
     messages.push({ role: 'user', content: sanitizedMessage });
 
-    // Build dynamic system prompt with project context
+    // Build dynamic system prompt with project + operational context
     const projectWhere = userRole === 'CLIENT' ? { clientId: userId } : {};
     const projects = await this.prisma.project.findMany({
       where: projectWhere,
@@ -178,6 +298,8 @@ export class AiService {
       orderBy: { updatedAt: 'desc' },
     });
 
+    const operationalSnapshot = await this.buildOperationalSnapshot(userId, userRole);
+
     const projectContext = projects.length
       ? `\n\nCOMPANY PROJECTS (current data from database):\n${projects
           .map(
@@ -187,11 +309,19 @@ export class AiService {
           .join('\n')}`
       : '';
 
+    const operationsContext = `\n\nSYSTEM OPERATIONAL SNAPSHOT (live DB):\n${JSON.stringify(
+      operationalSnapshot,
+    )}`;
+
+    const accessDirective = `\n\nACCESS DIRECTIVE:\n- You DO have direct access to current system data via the provided snapshots.\n- Do NOT claim you cannot access the system/database when snapshot data exists.\n- If user asks for KPI report, answer with exact numbers from snapshots first, then recommendations.`;
+
     const systemPrompt =
       (userRole === 'CLIENT' ? CLIENT_ASSISTANT_PROMPT : GENERAL_ASSISTANT_PROMPT) +
       PROFESSIONAL_OUTPUT_RULES +
       this.roleDirective(userRole) +
-      projectContext;
+      projectContext +
+      operationsContext +
+      accessDirective;
 
     const startedAt = Date.now();
 
