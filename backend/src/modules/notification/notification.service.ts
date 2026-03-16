@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationGateway } from './notification.gateway';
+import { PushService } from './push.service';
 import { NotificationType, Prisma } from '@prisma/client';
 
 @Injectable()
@@ -8,6 +9,7 @@ export class NotificationService {
   constructor(
     private prisma: PrismaService,
     private gateway: NotificationGateway,
+    private pushService: PushService,
   ) {}
 
   async findByUser(userId: string) {
@@ -51,6 +53,14 @@ export class NotificationService {
   }) {
     const notification = await this.prisma.notification.create({ data });
     this.gateway.sendToUser(data.userId, 'notification', notification);
+
+    // Send browser push notification for offline delivery
+    this.pushService.sendPush(data.userId, {
+      title: data.title,
+      body: data.message,
+      url: '/dashboard',
+    });
+
     return notification;
   }
 }

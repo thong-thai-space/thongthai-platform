@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { PortalSidebar } from '@/components/portal/sidebar';
 import { AiChatWidget } from '@/components/portal/ai-chat-widget';
+import { PushNotificationPrompt } from '@/components/push-notification-prompt';
 
 export default function PortalLayout({
   children,
@@ -37,6 +38,7 @@ export default function PortalLayout({
     <div className="flex h-screen overflow-hidden">
       <PortalSidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
+        <PushNotificationPrompt />
         {children}
       </div>
       <AiChatWidget />

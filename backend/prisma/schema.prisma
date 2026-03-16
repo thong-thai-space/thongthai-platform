@@ -110,7 +110,8 @@ model User {
   assignedTasks   Task[]           @relation("TaskAssignee")
   createdTasks    Task[]           @relation("TaskCreator")
   comments        Comment[]
-  notifications   Notification[]
+  notifications      Notification[]
+  pushSubscriptions  PushSubscription[]
   aiConversations AiConversation[]
   invoicesCreated Invoice[]        @relation("InvoiceCreator")
   timeEntries     TimeEntry[]
@@ -497,4 +498,18 @@ model SiteContent {
   createdAt DateTime @default(now())
 
   @@map("site_contents")
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  endpoint  String
+  p256dh    String
+  auth      String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, endpoint])
+  @@index([userId])
+  @@map("push_subscriptions")
 }

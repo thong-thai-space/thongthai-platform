@@ -2,7 +2,23 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Bot, X, Send, Minimize2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { usePublicAiChat } from '@/hooks/use-ai';
+import { MarkdownContent } from '@/components/ui/markdown-content';
+
+function TypingIndicator() {
+  return (
+    <div className="flex justify-start">
+      <div className="rounded-xl bg-muted px-4 py-3">
+        <div className="flex items-center gap-1">
+          <span className="typing-dot h-2 w-2 rounded-full bg-muted-foreground/60" style={{ animationDelay: '0ms' }} />
+          <span className="typing-dot h-2 w-2 rounded-full bg-muted-foreground/60" style={{ animationDelay: '150ms' }} />
+          <span className="typing-dot h-2 w-2 rounded-full bg-muted-foreground/60" style={{ animationDelay: '300ms' }} />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function PublicAiChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,7 +31,7 @@ export function PublicAiChatWidget() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, chatMutation.isPending]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,94 +58,125 @@ export function PublicAiChatWidget() {
     }
   };
 
-  if (!isOpen) {
-    return (
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 hover:bg-primary/90"
-      >
-        <Bot className="h-7 w-7" />
-      </button>
-    );
-  }
-
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex h-120 w-90 flex-col rounded-2xl border border-border bg-background shadow-2xl">
-      {/* Header */}
-      <div className="flex items-center justify-between rounded-t-2xl bg-primary px-4 py-3 text-primary-foreground">
-        <div className="flex items-center gap-2">
-          <Bot className="h-5 w-5" />
-          <div>
-            <span className="text-sm font-semibold">Thong Thai Space</span>
-            <p className="text-[10px] text-primary-foreground/80">AI Assistant</p>
-          </div>
-        </div>
-        <div className="flex gap-1">
-          <button onClick={() => setIsOpen(false)} className="rounded p-1 hover:bg-primary-foreground/10">
-            <Minimize2 className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => {
-              setIsOpen(false);
-              setMessages([]);
-            }}
-            className="rounded p-1 hover:bg-primary-foreground/10"
+    <>
+      <AnimatePresence>
+        {!isOpen && (
+          <motion.button
+            key="chat-trigger"
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+            onClick={() => setIsOpen(true)}
+            className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 hover:bg-primary/90"
           >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-3">
-        {messages.length === 0 && (
-          <div className="space-y-2 text-center text-sm text-muted-foreground">
-            <p className="font-medium">Hello!</p>
-            <p>I&apos;m the AI assistant of Thong Thai Space. Do you have any questions about our services?</p>
-          </div>
+            <Bot className="h-7 w-7" />
+          </motion.button>
         )}
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            key="chat-window"
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            className="fixed bottom-6 right-6 z-50 flex h-120 w-90 flex-col rounded-2xl border border-border bg-background shadow-2xl"
           >
-            <div
-              className={`max-w-[80%] rounded-xl px-3 py-2 text-sm ${
-                msg.role === 'user'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted text-foreground'
-              }`}
-            >
-              {msg.content}
+            {/* Header */}
+            <div className="flex items-center justify-between rounded-t-2xl bg-primary px-4 py-3 text-primary-foreground">
+              <div className="flex items-center gap-2">
+                <Bot className="h-5 w-5" />
+                <div>
+                  <span className="text-sm font-semibold">Thong Thai Space</span>
+                  <p className="text-[10px] text-primary-foreground/80">AI Assistant</p>
+                </div>
+              </div>
+              <div className="flex gap-1">
+                <button onClick={() => setIsOpen(false)} className="rounded p-1 hover:bg-primary-foreground/10">
+                  <Minimize2 className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    setMessages([]);
+                  }}
+                  className="rounded p-1 hover:bg-primary-foreground/10"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
-        {chatMutation.isPending && (
-          <div className="flex justify-start">
-            <div className="rounded-xl bg-muted px-3 py-2 text-sm text-muted-foreground">
-              Thinking...
-            </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
 
-      {/* Input */}
-      <form onSubmit={handleSend} className="flex items-center gap-2 border-t border-border p-3">
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask about our services..."
-          className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-        />
-        <button
-          type="submit"
-          disabled={!input.trim() || chatMutation.isPending}
-          className="rounded-lg bg-primary p-2 text-primary-foreground disabled:opacity-50 hover:bg-primary/90"
-        >
-          <Send className="h-4 w-4" />
-        </button>
-      </form>
-    </div>
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-3 space-y-3">
+              {messages.length === 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="space-y-2 text-center text-sm text-muted-foreground"
+                >
+                  <p className="font-medium">Hello!</p>
+                  <p>I&apos;m the AI assistant of Thong Thai Space. Do you have any questions about our services?</p>
+                </motion.div>
+              )}
+              {messages.map((msg, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-[80%] rounded-xl px-3 py-2 text-sm ${
+                      msg.role === 'user'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-foreground'
+                    }`}
+                  >
+                    {msg.role === 'assistant' ? (
+                      <MarkdownContent content={msg.content} className="text-sm" />
+                    ) : (
+                      msg.content
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+              {chatMutation.isPending && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <TypingIndicator />
+                </motion.div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input */}
+            <form onSubmit={handleSend} className="flex items-center gap-2 border-t border-border p-3">
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask about our services..."
+                className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+              <button
+                type="submit"
+                disabled={!input.trim() || chatMutation.isPending}
+                className="rounded-lg bg-primary p-2 text-primary-foreground disabled:opacity-50 hover:bg-primary/90"
+              >
+                <Send className="h-4 w-4" />
+              </button>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

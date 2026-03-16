@@ -4,6 +4,7 @@ import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { MemberSidebar } from '@/components/member/sidebar';
+import { PushNotificationPrompt } from '@/components/push-notification-prompt';
 
 export default function MemberLayout({
   children,
@@ -37,6 +38,7 @@ export default function MemberLayout({
     <div className="flex h-screen overflow-hidden">
       <MemberSidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
+        <PushNotificationPrompt />
         {children}
       </div>
     </div>

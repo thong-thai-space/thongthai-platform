@@ -48,6 +48,9 @@ export function validateEnv(env: EnvRecord) {
   ensure(env, 'REDIS_URL');
   ensureUrl(env, 'FRONTEND_URL');
 
+  // VAPID keys are optional — push notifications are disabled without them.
+  // Generate with: npx web-push generate-vapid-keys
+
   // R2 is optional at startup. Upload endpoints validate R2 config at runtime so
   // a temporary or partial R2 setup does not break Railway healthchecks.
 

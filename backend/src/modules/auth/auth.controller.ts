@@ -26,12 +26,14 @@ export class AuthController {
   ) {}
 
   private cookieOptions(maxAgeMs: number): CookieOptions {
+    const isProduction = this.configService.get('NODE_ENV') === 'production';
     return {
       httpOnly: true,
-      secure: this.configService.get('NODE_ENV') === 'production',
-      sameSite: 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       path: '/',
       maxAge: maxAgeMs,
+      ...(isProduction && { domain: '.thongthaispace.com' }),
     };
   }
 
