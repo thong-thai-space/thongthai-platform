@@ -9,8 +9,8 @@ const defaults = {
     name: 'Thong Thai Space',
     description:
       'Smart technology solutions for businesses. Specializing in Web, App, AI development and IT consulting.',
-    email: 'contact@thongthai.space',
-    phone: '0123 456 789',
+    email: 'hoangthai229@gmail.com',
+    phone: '0345807906',
     address: 'Ho Chi Minh City, Vietnam',
   },
   links: {
