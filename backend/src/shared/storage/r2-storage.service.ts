@@ -2,6 +2,8 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  Logger,
+  OnModuleInit,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
@@ -18,7 +20,8 @@ const { PutObjectCommand, S3Client } = require('@aws-sdk/client-s3') as {
 type UploadFolder = 'avatars' | 'content' | 'portfolio' | 'project-files';
 
 @Injectable()
-export class R2StorageService {
+export class R2StorageService implements OnModuleInit {
+  private readonly logger = new Logger(R2StorageService.name);
   private readonly client: {
     send(command: unknown): Promise<unknown>;
   } | null;
@@ -60,6 +63,16 @@ export class R2StorageService {
         secretAccessKey,
       },
     });
+  }
+
+  onModuleInit() {
+    if (!this.client) {
+      this.logger.warn('R2 storage disabled: missing required R2_* environment variables');
+      return;
+    }
+
+    this.logger.log(`R2 storage enabled for bucket: ${this.bucketName}`);
+    this.logger.log(`R2 public URL: ${this.publicBaseUrl}`);
   }
 
   async uploadPublicFile({
