@@ -181,4 +181,43 @@ export class MessageService {
       data: { isRead: true },
     });
   }
+
+  async getUnreadCount(userId: string) {
+    return this.prisma.message.count({
+      where: { receiverId: userId, isRead: false },
+    });
+  }
+
+  async getUnreadByProject(userId: string) {
+    const unread = await this.prisma.message.groupBy({
+      by: ['projectId'],
+      where: {
+        receiverId: userId,
+        isRead: false,
+        projectId: { not: null },
+      },
+      _count: { id: true },
+    });
+
+    if (unread.length === 0) return [];
+
+    const projectIds = unread
+      .map((u) => u.projectId)
+      .filter((id): id is string => id !== null);
+
+    const projects = await this.prisma.project.findMany({
+      where: { id: { in: projectIds } },
+      select: { id: true, name: true },
+    });
+
+    const projectMap = new Map(projects.map((p) => [p.id, p.name]));
+
+    return unread
+      .filter((u) => u.projectId !== null)
+      .map((u) => ({
+        projectId: u.projectId!,
+        projectName: projectMap.get(u.projectId!) || '',
+        count: u._count.id,
+      }));
+  }
 }

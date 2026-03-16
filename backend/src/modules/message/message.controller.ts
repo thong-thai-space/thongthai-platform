@@ -28,6 +28,16 @@ export class MessageController {
     return this.messageService.create(userId, dto);
   }
 
+  @Get('unread-count')
+  getUnreadCount(@CurrentUser('id') userId: string) {
+    return this.messageService.getUnreadCount(userId);
+  }
+
+  @Get('unread-by-project')
+  getUnreadByProject(@CurrentUser('id') userId: string) {
+    return this.messageService.getUnreadByProject(userId);
+  }
+
   @Get('conversations')
   findConversations(@CurrentUser('id') userId: string) {
     return this.messageService.findConversations(userId);

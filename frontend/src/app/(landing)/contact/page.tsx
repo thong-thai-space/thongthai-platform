@@ -77,7 +77,15 @@ export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
   const { data } = useSectionContent('contact');
-  const c = (data?.data as ContactContent) || defaults;
+  const raw = (data?.data as Partial<ContactContent>) || {};
+  const c: ContactContent = {
+    ...defaults,
+    ...raw,
+    hero: { ...defaults.hero, ...raw.hero },
+    info: { ...defaults.info, ...raw.info },
+    responseCard: { ...defaults.responseCard, ...raw.responseCard },
+    form: { ...defaults.form, ...raw.form },
+  };
   const {
     register,
     handleSubmit,

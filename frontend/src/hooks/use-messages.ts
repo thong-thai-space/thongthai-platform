@@ -61,3 +61,19 @@ export function useMarkConversationRead() {
     },
   });
 }
+
+export function useUnreadMessageCount() {
+  return useQuery<number>({
+    queryKey: ['unread-message-count'],
+    queryFn: () => api.get('/messages/unread-count').then((r) => r.data),
+    refetchInterval: 30000,
+  });
+}
+
+export function useUnreadByProject() {
+  return useQuery<Array<{ projectId: string; projectName: string; count: number }>>({
+    queryKey: ['unread-by-project'],
+    queryFn: () => api.get('/messages/unread-by-project').then((r) => r.data),
+    refetchInterval: 30000,
+  });
+}

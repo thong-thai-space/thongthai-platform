@@ -23,7 +23,14 @@ const defaults = {
 
 export function HeroSection() {
   const { data } = useSectionContent('hero');
-  const c = (data?.data as typeof defaults) || defaults;
+  const raw = (data?.data as Partial<typeof defaults>) || {};
+  const c = {
+    ...defaults,
+    ...raw,
+    primaryCta: { ...defaults.primaryCta, ...raw.primaryCta },
+    secondaryCta: { ...defaults.secondaryCta, ...raw.secondaryCta },
+    stats: raw.stats?.length ? raw.stats : defaults.stats,
+  };
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-background via-background to-primary/5">

@@ -2,7 +2,8 @@
 
 import { MemberHeader } from '@/components/member/header';
 import { useProjects } from '@/hooks/use-projects';
-import { Search, FolderKanban } from 'lucide-react';
+import { Search, FolderKanban, MessageSquare } from 'lucide-react';
+import { useUnreadByProject } from '@/hooks/use-messages';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -28,6 +29,8 @@ const statusLabels: Record<string, string> = {
 
 export default function MemberProjectsPage() {
   const { data: projects, isLoading } = useProjects();
+  const { data: unreadByProject } = useUnreadByProject();
+  const unreadMap = new Map(unreadByProject?.map((u) => [u.projectId, u.count]) ?? []);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
@@ -98,7 +101,15 @@ export default function MemberProjectsPage() {
                   className="group rounded-xl border border-border bg-card p-5 transition-shadow hover:shadow-md"
                 >
                   <div className="mb-3 flex items-start justify-between">
-                    <h3 className="font-semibold group-hover:text-primary">{project.name}</h3>
+                    <h3 className="flex items-center gap-2 font-semibold group-hover:text-primary">
+                      {project.name}
+                      {(unreadMap.get(project.id) ?? 0) > 0 && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-bold text-white">
+                          <MessageSquare className="h-3 w-3" />
+                          {unreadMap.get(project.id)}
+                        </span>
+                      )}
+                    </h3>
                     <span
                       className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${statusColors[project.status]}`}
                     >

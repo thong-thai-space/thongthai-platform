@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#2563eb"/>
+  <path d="M256 120 L296 200 L384 200 L312 252 L336 336 L256 288 L176 336 L200 252 L128 200 L216 200 Z" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round"/>
+  <text x="256" y="440" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="700" font-size="100" fill="white">TTS</text>
+</svg>

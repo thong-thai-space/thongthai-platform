@@ -13,11 +13,9 @@ export class ContentService {
   }
 
   async findBySection(section: string) {
-    const content = await this.prisma.siteContent.findUnique({
+    return this.prisma.siteContent.findUnique({
       where: { section },
     });
-    if (!content) throw new NotFoundException(`Content section "${section}" not found`);
-    return content;
   }
 
   async upsert(section: string, data: any, isActive = true) {

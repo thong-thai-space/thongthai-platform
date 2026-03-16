@@ -10,7 +10,9 @@ import {
   Plus,
   Search,
   Trash2,
+  MessageSquare,
 } from 'lucide-react';
+import { useUnreadByProject } from '@/hooks/use-messages';
 
 const statusColors: Record<string, string> = {
   DRAFT: 'bg-gray-100 text-gray-600',
@@ -36,6 +38,8 @@ export default function ProjectsPage() {
   const { data: projects = [], isLoading } = useProjects();
   const deleteProject = useDeleteProject();
   const { isOwnerOrAdmin } = useAuth();
+  const { data: unreadByProject } = useUnreadByProject();
+  const unreadMap = new Map(unreadByProject?.map((u) => [u.projectId, u.count]) ?? []);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
 
@@ -122,7 +126,15 @@ export default function ProjectsPage() {
                 </div>
 
                 <Link href={`/dashboard/projects/${project.id}`}>
-                  <h3 className="mt-3 text-base font-semibold hover:text-primary">{project.name}</h3>
+                  <h3 className="mt-3 flex items-center gap-2 text-base font-semibold hover:text-primary">
+                    {project.name}
+                    {(unreadMap.get(project.id) ?? 0) > 0 && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-bold text-white">
+                        <MessageSquare className="h-3 w-3" />
+                        {unreadMap.get(project.id)}
+                      </span>
+                    )}
+                  </h3>
                 </Link>
                 {project.description && (
                   <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">

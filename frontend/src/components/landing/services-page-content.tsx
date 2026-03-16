@@ -120,7 +120,13 @@ export function ServicesPageContent() {
   const { data: pageData } = useSectionContent('servicesPage');
 
   const services = (servicesData?.data as { items?: typeof serviceDefaults } | undefined)?.items || serviceDefaults;
-  const c = (pageData?.data as ServicesPageContentType) || contentDefaults;
+  const rawPage = (pageData?.data as Partial<ServicesPageContentType>) || {};
+  const c: ServicesPageContentType = {
+    ...contentDefaults,
+    ...rawPage,
+    hero: { ...contentDefaults.hero, ...rawPage.hero },
+    cta: { ...contentDefaults.cta, ...rawPage.cta },
+  };
 
   const titleParts =
     c.hero.titleHighlight && c.hero.title.includes(c.hero.titleHighlight)

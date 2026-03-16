@@ -113,7 +113,13 @@ const defaults: PortfolioContent = {
 export function PortfolioPageContent() {
   const { data } = useSectionContent('portfolio');
   const { data: showcaseProjects = [] } = useShowcaseProjects();
-  const content = (data?.data as PortfolioContent) || defaults;
+  const raw = (data?.data as Partial<PortfolioContent>) || {};
+  const content: PortfolioContent = {
+    ...defaults,
+    ...raw,
+    hero: { ...defaults.hero, ...raw.hero },
+    cta: { ...defaults.cta, ...raw.cta },
+  };
 
   const dbItems = useMemo<PortfolioDisplayItem[]>(() => showcaseProjects.map(mapProjectToPortfolioItem), [showcaseProjects]);
   const items: PortfolioDisplayItem[] = dbItems;
