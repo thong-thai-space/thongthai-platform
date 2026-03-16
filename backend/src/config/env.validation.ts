@@ -43,25 +43,8 @@ export function validateEnv(env: EnvRecord) {
   ensure(env, 'REDIS_URL');
   ensureUrl(env, 'FRONTEND_URL');
 
-  const r2Keys = [
-    'R2_ACCOUNT_ID',
-    'R2_ACCESS_KEY_ID',
-    'R2_SECRET_ACCESS_KEY',
-    'R2_BUCKET_NAME',
-    'R2_PUBLIC_URL',
-  ];
-  const hasAnyR2Config = r2Keys.some((key) => {
-    const value = env[key];
-    return Boolean(value && value.trim() !== '');
-  });
-
-  if (hasAnyR2Config) {
-    ensure(env, 'R2_ACCOUNT_ID');
-    ensure(env, 'R2_ACCESS_KEY_ID');
-    ensure(env, 'R2_SECRET_ACCESS_KEY');
-    ensure(env, 'R2_BUCKET_NAME');
-    ensureUrl(env, 'R2_PUBLIC_URL');
-  }
+  // R2 is optional at startup. Upload endpoints validate R2 config at runtime so
+  // a temporary or partial R2 setup does not break Railway healthchecks.
 
   const port = ensureNumber(env, 'PORT', '4000');
 
