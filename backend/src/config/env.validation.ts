@@ -36,6 +36,11 @@ export function validateEnv(env: EnvRecord) {
     throw new Error('NODE_ENV must be one of: development, test, production');
   }
 
+  const storageProvider = env.STORAGE_PROVIDER?.trim() || 'local';
+  if (!['local', 'r2'].includes(storageProvider)) {
+    throw new Error('STORAGE_PROVIDER must be one of: local, r2');
+  }
+
   ensure(env, 'DATABASE_URL');
   ensure(env, 'JWT_SECRET');
   ensure(env, 'JWT_REFRESH_SECRET');
@@ -51,6 +56,7 @@ export function validateEnv(env: EnvRecord) {
   return {
     ...env,
     NODE_ENV: nodeEnv,
+    STORAGE_PROVIDER: storageProvider,
     PORT: String(port),
   };
 }

@@ -1,13 +1,15 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
   Logger,
   OnModuleInit,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
+import { mkdir, writeFile } from 'fs/promises';
 import { extname } from 'path';
+import { join } from 'path';
+import { dirname } from 'path';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { PutObjectCommand, S3Client } = require('@aws-sdk/client-s3') as {
@@ -22,6 +24,7 @@ type UploadFolder = 'avatars' | 'content' | 'portfolio' | 'project-files';
 @Injectable()
 export class R2StorageService implements OnModuleInit {
   private readonly logger = new Logger(R2StorageService.name);
+  private readonly storageProvider: 'local' | 'r2';
   private readonly client: {
     send(command: unknown): Promise<unknown>;
   } | null;
@@ -29,6 +32,9 @@ export class R2StorageService implements OnModuleInit {
   private readonly publicBaseUrl: string;
 
   constructor(private readonly configService: ConfigService) {
+    this.storageProvider =
+      this.configService.get<'local' | 'r2'>('STORAGE_PROVIDER') || 'local';
+
     const accountId = this.configService.get<string>('R2_ACCOUNT_ID')?.trim();
     const accessKeyId = this.configService
       .get<string>('R2_ACCESS_KEY_ID')
@@ -38,11 +44,12 @@ export class R2StorageService implements OnModuleInit {
       ?.trim();
     this.bucketName =
       this.configService.get<string>('R2_BUCKET_NAME')?.trim() || '';
-    this.publicBaseUrl =
-      this.configService
-        .get<string>('R2_PUBLIC_URL')
-        ?.trim()
-        .replace(/\/$/, '') || '';
+    const rawPublicBaseUrl = this.configService
+      .get<string>('R2_PUBLIC_URL')
+      ?.trim();
+    this.publicBaseUrl = rawPublicBaseUrl
+      ? rawPublicBaseUrl.replace(/\/$/, '')
+      : '';
 
     if (
       !accountId ||
@@ -66,8 +73,15 @@ export class R2StorageService implements OnModuleInit {
   }
 
   onModuleInit() {
+    if (this.storageProvider === 'local') {
+      this.logger.log('Storage provider: local filesystem (/uploads)');
+      return;
+    }
+
     if (!this.client) {
-      this.logger.warn('R2 storage disabled: missing required R2_* environment variables');
+      this.logger.warn(
+        'Storage provider set to r2 but R2 config is incomplete, falling back to local filesystem (/uploads)',
+      );
       return;
     }
 
@@ -84,12 +98,6 @@ export class R2StorageService implements OnModuleInit {
     file: Express.Multer.File;
     keyPrefix?: string;
   }) {
-    if (!this.client || !this.bucketName || !this.publicBaseUrl) {
-      throw new InternalServerErrorException(
-        'Cloudflare R2 is not configured. Set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME and R2_PUBLIC_URL.',
-      );
-    }
-
     if (!file.buffer || file.buffer.length === 0) {
       throw new BadRequestException('Uploaded file is empty');
     }
@@ -99,6 +107,15 @@ export class R2StorageService implements OnModuleInit {
       this.getExtensionFromMime(file.mimetype);
     const prefix = keyPrefix ? `${this.sanitizeSegment(keyPrefix)}-` : '';
     const key = `${folder}/${prefix}${Date.now()}-${randomUUID()}${extension}`;
+
+    if (
+      this.storageProvider === 'local' ||
+      !this.client ||
+      !this.bucketName ||
+      !this.publicBaseUrl
+    ) {
+      return this.uploadToLocal(key, file.buffer);
+    }
 
     await this.client.send(
       new PutObjectCommand({
@@ -111,6 +128,17 @@ export class R2StorageService implements OnModuleInit {
     );
 
     return `${this.publicBaseUrl}/${key}`;
+  }
+
+  private async uploadToLocal(key: string, buffer: Buffer) {
+    const normalizedKey = key.replace('project-files/', 'files/');
+    const outputPath = join(process.cwd(), 'uploads', normalizedKey);
+    const outputDir = dirname(outputPath);
+
+    await mkdir(outputDir, { recursive: true });
+    await writeFile(outputPath, buffer);
+
+    return `/uploads/${normalizedKey.replace(/\\/g, '/')}`;
   }
 
   private sanitizeSegment(value: string) {

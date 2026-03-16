@@ -25,7 +25,8 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
+COPY --from=builder /app/entrypoint.sh ./entrypoint.sh
 
 EXPOSE 4000
-# Fail fast if migrations are missing in image, then run pending migrations and start.
-CMD ["sh", "-c", "if [ -z \"$(find prisma/migrations -mindepth 1 -maxdepth 1 -type d 2>/dev/null)\" ]; then echo 'ERROR: prisma/migrations is empty in container image'; exit 1; fi; node_modules/.bin/prisma migrate deploy && node dist/src/main.js"]
+# Run migrations then start app.
+CMD ["sh", "./entrypoint.sh"]

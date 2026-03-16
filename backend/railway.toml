@@ -3,7 +3,7 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "node_modules/.bin/prisma migrate deploy && node dist/src/main.js"
+startCommand = "sh ./entrypoint.sh"
 healthcheckPath = "/api/healthz"
 healthcheckTimeout = 60
 restartPolicyType = "ON_FAILURE"
