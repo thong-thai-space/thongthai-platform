@@ -1,6 +1,6 @@
 'use client';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:4000';
+import { resolveBackendAssetUrl } from '@/lib/asset-url';
 
 export function UserAvatar({
   name,
@@ -17,11 +17,7 @@ export function UserAvatar({
     lg: 'h-12 w-12 text-lg',
   };
 
-  const avatarUrl = avatar
-    ? avatar.startsWith('http')
-      ? avatar
-      : `${API_BASE}${avatar}`
-    : null;
+  const avatarUrl = resolveBackendAssetUrl(avatar);
 
   const initial = name?.charAt(0).toUpperCase() || '?';
 

@@ -6,6 +6,7 @@ import { ArrowRight, ExternalLink } from 'lucide-react';
 import { useSectionContent } from '@/hooks/use-content';
 import { useShowcaseProjects } from '@/hooks/use-projects';
 import type { Project } from '@/types';
+import { getApiOrigin } from '@/lib/asset-url';
 
 const defaults = {
   title: 'Featured Projects',
@@ -137,6 +138,6 @@ function mapProjectToFeaturedCard(project: Project) {
 function resolveAssetUrl(path?: string) {
   if (!path) return undefined;
   if (path.startsWith('http')) return path;
-  const apiBase = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:4000';
+  const apiBase = getApiOrigin();
   return `${apiBase}${path}`;
 }

@@ -3,6 +3,7 @@
 
 import { Award, Heart, Target, Users } from 'lucide-react';
 import { useSectionContent } from '@/hooks/use-content';
+import { getApiOrigin } from '@/lib/asset-url';
 import type { ComponentType } from 'react';
 
 const iconMap: Record<string, ComponentType<{ className?: string }>> = {
@@ -157,6 +158,6 @@ export function AboutPageContent() {
 function resolveAssetUrl(path?: string) {
   if (!path) return '';
   if (path.startsWith('http')) return path;
-  const apiBase = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:4000';
+  const apiBase = getApiOrigin();
   return `${apiBase}${path}`;
 }

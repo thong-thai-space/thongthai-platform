@@ -7,6 +7,7 @@ import { useSectionContent } from '@/hooks/use-content';
 import { useShowcaseProjects } from '@/hooks/use-projects';
 import type { Project } from '@/types';
 import { useMemo, useState } from 'react';
+import { getApiOrigin } from '@/lib/asset-url';
 
 type PortfolioContent = {
   hero: {
@@ -277,6 +278,6 @@ function mapProjectToPortfolioItem(project: Project) {
 function resolveAssetUrl(path?: string) {
   if (!path) return undefined;
   if (path.startsWith('http')) return path;
-  const apiBase = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:4000';
+  const apiBase = getApiOrigin();
   return `${apiBase}${path}`;
 }

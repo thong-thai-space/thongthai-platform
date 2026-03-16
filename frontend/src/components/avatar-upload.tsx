@@ -2,6 +2,7 @@
 
 import { useAuth } from '@/lib/auth';
 import api from '@/lib/api';
+import { resolveBackendAssetUrl } from '@/lib/asset-url';
 import { useRef, useState } from 'react';
 import { Camera } from 'lucide-react';
 
@@ -33,11 +34,7 @@ export function AvatarUpload() {
     }
   };
 
-  const avatarUrl = user?.avatar
-    ? user.avatar.startsWith('http')
-      ? user.avatar
-      : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:4000'}${user.avatar}`
-    : null;
+  const avatarUrl = resolveBackendAssetUrl(user?.avatar);
 
   return (
     <div className="flex items-center gap-4">

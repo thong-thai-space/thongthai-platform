@@ -14,6 +14,7 @@ import {
   useUpdatePortfolioProject,
   useUploadPortfolioThumbnail,
 } from '@/hooks/use-projects';
+import { getApiOrigin } from '@/lib/asset-url';
 import { useMemo, useState } from 'react';
 import { Save, RefreshCw, Check, Trash2, Plus, Upload } from 'lucide-react';
 import type { Project } from '@/types';
@@ -1106,7 +1107,7 @@ function extractPortfolioCategories(value: unknown) {
 function resolveAssetUrl(path?: string) {
   if (!path) return '';
   if (path.startsWith('http')) return path;
-  const apiBase = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:4000';
+  const apiBase = getApiOrigin();
   return `${apiBase}${path}`;
 }
 
