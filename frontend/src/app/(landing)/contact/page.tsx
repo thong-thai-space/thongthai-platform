@@ -54,9 +54,9 @@ const defaults: ContactContent = {
   infoTitle: 'Contact Information',
   info: {
     emailLabel: 'Email',
-    email: 'contact@thongthai.space',
+    email: 'hoangthai229@gmail.com',
     phoneLabel: 'Phone',
-    phone: '0123 456 789',
+    phone: '0345807906',
     addressLabel: 'Address',
     address: 'Ho Chi Minh City, Vietnam',
   },
