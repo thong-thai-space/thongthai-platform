@@ -51,8 +51,8 @@ async function bootstrap() {
     SwaggerModule.setup('api/docs', app, document);
   }
 
-  const port = process.env.PORT || 4000;
-  await app.listen(port);
+  const port = Number(process.env.PORT || 4000);
+  await app.listen(port, '0.0.0.0');
   console.log(`🚀 Thông Thái Space API running on port ${port}`);
   if (!isProduction) {
     console.log(`📚 Swagger docs: http://localhost:${port}/api/docs`);
