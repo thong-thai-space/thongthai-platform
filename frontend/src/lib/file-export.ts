@@ -1,5 +1,3 @@
-import { jsPDF } from 'jspdf';
-
 function triggerDownload(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
@@ -245,42 +243,81 @@ function buildExcelHtml(title: string, content: string) {
 </html>`;
 }
 
-export async function exportTextAsPdf(title: string, content: string) {
-  if (typeof window === 'undefined' || typeof document === 'undefined') return;
+export function exportTextAsPdf(title: string, content: string) {
+  if (typeof window === 'undefined') return;
 
-  const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-  const html = renderStyledHtml(title, content || '-');
-  const parser = new DOMParser();
-  const parsed = parser.parseFromString(html, 'text/html');
+  const html = renderStyledHtmlForPrint(title, content || '-');
+  const win = window.open('', '_blank', 'width=900,height=700');
+  if (!win) return;
+  win.document.open();
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  // Slight delay so fonts/styles can load before print dialog
+  setTimeout(() => {
+    win.print();
+  }, 400);
+}
 
-  const container = document.createElement('div');
-  container.style.position = 'fixed';
-  container.style.left = '-10000px';
-  container.style.top = '0';
-  container.style.width = '794px';
-  container.style.background = '#ffffff';
-  container.innerHTML = parsed.body.innerHTML;
-  document.body.appendChild(container);
+function renderStyledHtmlForPrint(title: string, content: string) {
+  const blocks = parseContentBlocks(content);
 
-  try {
-    await doc.html(container, {
-      x: 0,
-      y: 0,
-      margin: [28, 24, 28, 24],
-      width: 547,
-      windowWidth: 794,
-      autoPaging: 'text',
-      html2canvas: {
-        scale: 0.75,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-      },
-    });
+  const body = blocks
+    .map((block) => {
+      if (block.type === 'h1') return `<h1>${escapeHtml(block.text)}</h1>`;
+      if (block.type === 'h2') return `<h2>${escapeHtml(block.text)}</h2>`;
+      if (block.type === 'h3') return `<h3>${escapeHtml(block.text)}</h3>`;
+      if (block.type === 'bullet') return `<li>${escapeHtml(block.text)}</li>`;
+      if (block.type === 'table') {
+        const head = `<tr>${block.headers.map((h) => `<th>${escapeHtml(h)}</th>`).join('')}</tr>`;
+        const rows = block.rows
+          .map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join('')}</tr>`)
+          .join('');
+        return `<table><thead>${head}</thead><tbody>${rows}</tbody></table>`;
+      }
+      return `<p>${escapeHtml(block.text)}</p>`;
+    })
+    .join('\n')
+    .replace(/(?:<li>[\s\S]*?<\/li>\n?)+/g, (listItems) => `<ul>${listItems}</ul>`);
 
-    doc.save(`${safeFilename(title)}.pdf`);
-  } finally {
-    document.body.removeChild(container);
-  }
+  return `<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>${escapeHtml(title)}</title>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        font-family: "Segoe UI", "Arial Unicode MS", Arial, sans-serif;
+        color: #1f2937;
+        padding: 32px 40px;
+        line-height: 1.6;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      h1 { font-size: 22pt; margin: 0 0 14px; color: #0f172a; }
+      h2 { font-size: 15pt; margin: 18px 0 8px; color: #1e3a8a; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; }
+      h3 { font-size: 13pt; margin: 14px 0 6px; color: #374151; }
+      p  { margin: 6px 0; font-size: 11pt; }
+      ul { margin: 8px 0 8px 22px; padding: 0; }
+      li { margin: 4px 0; font-size: 11pt; }
+      table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+      th, td { border: 1px solid #d1d5db; padding: 7px 9px; font-size: 10pt; text-align: left; }
+      th { background: #f3f4f6; color: #111827; font-weight: 700; }
+      .meta { margin-bottom: 18px; font-size: 9pt; color: #6b7280; }
+      @media print {
+        body { padding: 0; max-width: 100%; }
+        h2 { page-break-after: avoid; }
+        table { page-break-inside: avoid; }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>${escapeHtml(title)}</h1>
+    <div class="meta">Generated at ${new Date().toLocaleString('vi-VN')}</div>
+    ${body || '<p>-</p>'}
+  </body>
+</html>`;
 }
 
 export function exportTextAsWord(title: string, content: string) {
