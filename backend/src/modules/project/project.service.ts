@@ -174,38 +174,10 @@ export class ProjectService {
   }
 
   async update(id: string, dto: UpdateProjectDto) {
-    const project = await this.prisma.project.update({
+    return this.prisma.project.update({
       where: { id },
       data: dto,
-      select: { id: true, name: true, clientId: true, ownerId: true },
     });
-
-    // Notify relevant users about project update
-    const recipientIds = new Set<string>();
-    if (project.clientId) recipientIds.add(project.clientId);
-    if (project.ownerId) recipientIds.add(project.ownerId);
-
-    // Notify team members who have tasks in this project
-    const assignees = await this.prisma.task.findMany({
-      where: { projectId: id, assigneeId: { not: null } },
-      select: { assigneeId: true },
-      distinct: ['assigneeId'],
-    });
-    for (const t of assignees) {
-      if (t.assigneeId) recipientIds.add(t.assigneeId);
-    }
-
-    for (const userId of recipientIds) {
-      await this.notificationService.create({
-        type: NotificationType.PROJECT_UPDATE,
-        title: 'Project updated',
-        message: `Project "${project.name}" has been updated.`,
-        userId,
-        data: { projectId: project.id },
-      });
-    }
-
-    return project;
   }
 
   async remove(id: string) {

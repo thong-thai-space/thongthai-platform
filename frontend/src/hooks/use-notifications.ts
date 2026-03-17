@@ -22,24 +22,6 @@ export function useNotifications() {
         old ? [notification, ...old] : [notification],
       );
       qc.invalidateQueries({ queryKey: ['unread-count'] });
-
-      // Invalidate related data caches so UI stays in sync
-      const { type } = notification;
-      if (
-        type === 'PROJECT_UPDATE' ||
-        type === 'PROJECT_REQUEST'
-      ) {
-        qc.invalidateQueries({ queryKey: ['projects'] });
-      }
-      if (
-        type === 'TASK_ASSIGNED' ||
-        type === 'TASK_UPDATED'
-      ) {
-        qc.invalidateQueries({ queryKey: ['tasks'] });
-      }
-      if (type === 'INVOICE_PAID') {
-        qc.invalidateQueries({ queryKey: ['invoices'] });
-      }
     };
 
     socket.on('notification', handler);

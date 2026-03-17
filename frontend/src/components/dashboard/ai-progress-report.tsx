@@ -15,7 +15,9 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import {
-  exportDocument,
+  exportTextAsExcel,
+  exportTextAsPdf,
+  exportTextAsWord,
   importTextFile,
 } from '@/lib/file-export';
 
@@ -124,30 +126,21 @@ export function AiProgressReport() {
             <div className="mt-3 flex flex-wrap gap-2">
               <button
                 type="button"
-                onClick={() => {
-                  const projectName = projects?.find((p) => p.id === selectedProjectId)?.name;
-                  exportDocument('progress-report', 'pdf', { raw: result }, { projectName });
-                }}
+                onClick={() => exportTextAsPdf('ai-progress-report', result)}
                 className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-muted"
               >
                 <FileDown className="h-3.5 w-3.5" /> PDF
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  const projectName = projects?.find((p) => p.id === selectedProjectId)?.name;
-                  exportDocument('progress-report', 'docx', { raw: result }, { projectName });
-                }}
+                onClick={() => exportTextAsWord('ai-progress-report', result)}
                 className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-muted"
               >
                 <FileType className="h-3.5 w-3.5" /> Word
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  const projectName = projects?.find((p) => p.id === selectedProjectId)?.name;
-                  exportDocument('progress-report', 'xlsx', { raw: result }, { projectName });
-                }}
+                onClick={() => exportTextAsExcel('ai-progress-report', result)}
                 className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-muted"
               >
                 <FileSpreadsheet className="h-3.5 w-3.5" /> Excel

@@ -1,4 +1,4 @@
-import api from './api';
+import { jsPDF } from 'jspdf';
 
 function triggerDownload(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
@@ -11,45 +11,69 @@ function triggerDownload(blob: Blob, filename: string) {
   URL.revokeObjectURL(url);
 }
 
-export type ExportFormat = 'pdf' | 'docx' | 'xlsx';
+function safeFilename(input: string) {
+  return input
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'export';
+}
 
-export type ExportFeature =
-  | 'proposal'
-  | 'progress-report'
-  | 'estimate'
-  | 'task-breakdown'
-  | 'strategic-plan';
+export function exportTextAsPdf(title: string, content: string) {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
 
-/**
- * Export document via backend document generation service.
- * Backend generates professional PDF/DOCX/XLSX with proper formatting.
- */
-export async function exportDocument(
-  feature: ExportFeature,
-  format: ExportFormat,
-  content: unknown,
-  options?: { projectName?: string; locale?: string },
-) {
-  const response = await api.post(
-    `/ai/export/${feature}`,
-    {
-      format,
-      content,
-      projectName: options?.projectName,
-      locale: options?.locale,
-    },
-    { responseType: 'blob' },
-  );
+  doc.setFontSize(14);
+  doc.text(title, 14, 18);
 
-  // Extract filename from Content-Disposition header if available
-  const disposition = response.headers['content-disposition'] as string | undefined;
-  let filename = `${feature}.${format}`;
-  if (disposition) {
-    const match = disposition.match(/filename[*]?=(?:UTF-8'')?["']?([^"';\n]+)/i);
-    if (match) filename = decodeURIComponent(match[1]);
-  }
+  doc.setFontSize(10);
+  const lines = doc.splitTextToSize(content || '-', pageWidth - 28);
+  doc.text(lines, 14, 28);
 
-  triggerDownload(response.data as Blob, filename);
+  doc.save(`${safeFilename(title)}.pdf`);
+}
+
+export function exportTextAsWord(title: string, content: string) {
+  const html = `<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>${title}</title>
+  </head>
+  <body>
+    <h1>${title}</h1>
+    <pre style="white-space: pre-wrap; font-family: Arial, sans-serif; line-height: 1.45;">${escapeHtml(
+      content || '-',
+    )}</pre>
+  </body>
+</html>`;
+
+  const blob = new Blob([html], { type: 'application/msword;charset=utf-8' });
+  triggerDownload(blob, `${safeFilename(title)}.doc`);
+}
+
+export function exportTextAsExcel(title: string, content: string) {
+  const rows = (content || '-')
+    .split(/\r?\n/)
+    .map((line, index) => `${index + 1},"${line.replace(/"/g, '""')}"`);
+  const csv = ['Index,Content', ...rows].join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  triggerDownload(blob, `${safeFilename(title)}.csv`);
+}
+
+export function exportJsonAsExcel(title: string, data: unknown) {
+  const content = JSON.stringify(data, null, 2);
+  exportTextAsExcel(title, content);
+}
+
+export function exportJsonAsWord(title: string, data: unknown) {
+  const content = JSON.stringify(data, null, 2);
+  exportTextAsWord(title, content);
+}
+
+export function exportJsonAsPdf(title: string, data: unknown) {
+  const content = JSON.stringify(data, null, 2);
+  exportTextAsPdf(title, content);
 }
 
 export async function importTextFile(accept = '.txt,.md,.json,.csv'): Promise<string> {
@@ -76,35 +100,11 @@ export async function importTextFile(accept = '.txt,.md,.json,.csv'): Promise<st
   });
 }
 
-// Legacy client-side exports for non-AI pages (invoices, governance)
-
-function safeFilename(input: string) {
-  return input.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'export';
-}
-
 function escapeHtml(input: string) {
-  return input.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-
-export function exportTextAsPdf(title: string, content: string) {
-  import('jspdf').then(({ jsPDF }) => {
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    doc.setFontSize(14);
-    doc.text(title, 14, 18);
-    doc.setFontSize(10);
-    const lines = doc.splitTextToSize(content || '-', pageWidth - 28);
-    doc.text(lines, 14, 28);
-    doc.save(`${safeFilename(title)}.pdf`);
-  });
-}
-
-export function exportJsonAsExcel(title: string, data: unknown) {
-  const content = JSON.stringify(data, null, 2);
-  const rows = (content || '-')
-    .split(/\r?\n/)
-    .map((line: string, index: number) => `${index + 1},"${line.replace(/"/g, '""')}"`);
-  const csv = ['Index,Content', ...rows].join('\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  triggerDownload(blob, `${safeFilename(title)}.csv`);
+  return input
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }

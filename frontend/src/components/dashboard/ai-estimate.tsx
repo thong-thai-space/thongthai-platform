@@ -13,7 +13,9 @@ import { useState } from 'react';
 import { formatCurrency } from '@/lib/utils';
 import type { EstimateResponse } from '@/hooks/use-ai';
 import {
-  exportDocument,
+  exportJsonAsExcel,
+  exportJsonAsPdf,
+  exportJsonAsWord,
   importTextFile,
 } from '@/lib/file-export';
 
@@ -106,21 +108,21 @@ export function AiEstimate() {
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
-                onClick={() => exportDocument('estimate', 'pdf', result)}
+                onClick={() => exportJsonAsPdf('ai-estimate', result)}
                 className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-muted"
               >
                 <FileDown className="h-3.5 w-3.5" /> PDF
               </button>
               <button
                 type="button"
-                onClick={() => exportDocument('estimate', 'docx', result)}
+                onClick={() => exportJsonAsWord('ai-estimate', result)}
                 className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-muted"
               >
                 <FileType className="h-3.5 w-3.5" /> Word
               </button>
               <button
                 type="button"
-                onClick={() => exportDocument('estimate', 'xlsx', result)}
+                onClick={() => exportJsonAsExcel('ai-estimate', result)}
                 className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-muted"
               >
                 <FileSpreadsheet className="h-3.5 w-3.5" /> Excel
