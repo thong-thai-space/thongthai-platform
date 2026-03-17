@@ -16,8 +16,6 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { UserAvatar } from '@/components/user-avatar';
-import { useUnreadMessageCount } from '@/hooks/use-messages';
-
 const navItems = [
   { href: '/member', icon: LayoutDashboard, label: 'Overview' },
   { href: '/member/tasks', icon: CheckSquare, label: 'My Tasks' },
@@ -29,7 +27,6 @@ export function MemberSidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
-  const { data: unreadCount } = useUnreadMessageCount();
 
   return (
     <aside
@@ -62,7 +59,6 @@ export function MemberSidebar() {
               item.href === '/member'
                 ? pathname === '/member'
                 : pathname.startsWith(item.href);
-            const showBadge = item.href === '/member/projects' && typeof unreadCount === 'number' && unreadCount > 0;
 
             return (
               <li key={item.href}>
@@ -77,20 +73,8 @@ export function MemberSidebar() {
                   )}
                   title={collapsed ? item.label : undefined}
                 >
-                  <div className="relative shrink-0">
-                    <item.icon className="h-5 w-5" />
-                    {showBadge && collapsed && (
-                      <span className="absolute -right-1 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-destructive px-0.5 text-[8px] font-bold text-white">
-                        {unreadCount > 99 ? '99+' : unreadCount}
-                      </span>
-                    )}
-                  </div>
+                  <item.icon className="h-5 w-5 shrink-0" />
                   {!collapsed && <span className="flex-1">{item.label}</span>}
-                  {showBadge && !collapsed && (
-                    <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-white">
-                      {unreadCount > 99 ? '99+' : unreadCount}
-                    </span>
-                  )}
                 </Link>
               </li>
             );
