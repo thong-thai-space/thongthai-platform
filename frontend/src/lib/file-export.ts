@@ -121,7 +121,7 @@ function renderStyledHtml(title: string, content: string) {
       return `<p>${escapeHtml(block.text)}</p>`;
     })
     .join('\n')
-    .replace(/(?:<li>.*?<\/li>\n?)+/gs, (listItems) => `<ul>${listItems}</ul>`);
+    .replace(/(?:<li>[\s\S]*?<\/li>\n?)+/g, (listItems) => `<ul>${listItems}</ul>`);
 
   return `<!DOCTYPE html>
 <html>
@@ -290,7 +290,8 @@ export function exportTextAsPdf(title: string, content: string) {
     if (block.type === 'table') {
       const headers = block.headers.join(' | ');
       const rows = block.rows.map((r) => `- ${r.join(' | ')}`);
-      const tableLines = doc.splitTextToSize([headers, ...rows], maxWidth);
+      const tableText = [headers, ...rows].join('\n');
+      const tableLines = doc.splitTextToSize(tableText, maxWidth);
       for (const line of tableLines) {
         addPageIfNeeded(6);
         doc.text(line, margin, y);
