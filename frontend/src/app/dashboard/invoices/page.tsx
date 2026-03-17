@@ -1,14 +1,19 @@
 'use client';
 
 import { DashboardHeader } from '@/components/dashboard/header';
-import { useInvoices, useCreateInvoice, useUpdateInvoice } from '@/hooks/use-invoices';
+import {
+  useInvoices,
+  useCreateInvoice,
+  useUpdateInvoice,
+  useDeleteInvoice,
+} from '@/hooks/use-invoices';
 import { useClients } from '@/hooks/use-clients';
 import { useProjects } from '@/hooks/use-projects';
 import { useAuth } from '@/lib/auth';
 import api from '@/lib/api';
 import { useState } from 'react';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { Plus, Search, X, FileDown, Loader2 } from 'lucide-react';
+import { Plus, Search, X, FileDown, Loader2, Pencil, Trash2 } from 'lucide-react';
 import type { Invoice, InvoiceStatus, User } from '@/types';
 
 const statusLabels: Record<InvoiceStatus, string> = {
@@ -33,11 +38,18 @@ export default function InvoicesPage() {
   const { data: projects = [] } = useProjects();
   const createInvoice = useCreateInvoice();
   const updateInvoice = useUpdateInvoice();
+  const deleteInvoice = useDeleteInvoice();
   const { isOwnerOrAdmin } = useAuth();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [showForm, setShowForm] = useState(false);
   const [exportingId, setExportingId] = useState<string | null>(null);
+  const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
+  const [editForm, setEditForm] = useState({
+    status: 'DRAFT' as InvoiceStatus,
+    dueDate: '',
+    notes: '',
+  });
   const [form, setForm] = useState({
     clientId: '',
     projectId: '',
@@ -96,6 +108,39 @@ export default function InvoicesPage() {
 
   const handleStatusChange = (id: string, status: InvoiceStatus) => {
     updateInvoice.mutate({ id, status });
+  };
+
+  const openEditInvoice = (invoice: Invoice) => {
+    setEditingInvoice(invoice);
+    setEditForm({
+      status: invoice.status,
+      dueDate: invoice.dueDate ? new Date(invoice.dueDate).toISOString().slice(0, 10) : '',
+      notes: invoice.notes || '',
+    });
+  };
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingInvoice) return;
+
+    updateInvoice.mutate(
+      {
+        id: editingInvoice.id,
+        status: editForm.status,
+        dueDate: editForm.dueDate || undefined,
+        notes: editForm.notes || undefined,
+      },
+      {
+        onSuccess: () => {
+          setEditingInvoice(null);
+        },
+      },
+    );
+  };
+
+  const handleDeleteInvoice = (invoiceId: string, invoiceNumber: string) => {
+    if (!confirm(`Delete invoice ${invoiceNumber}? This action cannot be undone.`)) return;
+    deleteInvoice.mutate(invoiceId);
   };
 
   const handleExportPdf = async (invoiceId: string) => {
@@ -310,24 +355,111 @@ export default function InvoicesPage() {
                     <td className="px-4 py-3 text-muted-foreground">{formatDate(inv.createdAt)}</td>
                     <td className="px-4 py-3 text-muted-foreground">{formatDate(inv.dueDate)}</td>
                     <td className="px-4 py-3">
-                      <button
-                        type="button"
-                        onClick={() => handleExportPdf(inv.id)}
-                        disabled={exportingId === inv.id}
-                        className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50"
-                      >
-                        {exportingId === inv.id ? (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        ) : (
-                          <FileDown className="h-3.5 w-3.5" />
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleExportPdf(inv.id)}
+                          disabled={exportingId === inv.id}
+                          className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50"
+                        >
+                          {exportingId === inv.id ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <FileDown className="h-3.5 w-3.5" />
+                          )}
+                          PDF
+                        </button>
+
+                        {isOwnerOrAdmin && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => openEditInvoice(inv)}
+                              className="inline-flex items-center gap-1 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium hover:bg-muted"
+                            >
+                              <Pencil className="h-3.5 w-3.5" /> Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteInvoice(inv.id, inv.invoiceNumber)}
+                              disabled={deleteInvoice.isPending}
+                              className="inline-flex items-center gap-1 rounded-md border border-destructive/40 px-2.5 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10 disabled:opacity-50"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" /> Delete
+                            </button>
+                          </>
                         )}
-                        PDF
-                      </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {editingInvoice && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <form onSubmit={handleEditSubmit} className="w-full max-w-md rounded-xl bg-background p-6 shadow-lg">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-lg font-semibold">Update Invoice</h2>
+                <button
+                  type="button"
+                  onClick={() => setEditingInvoice(null)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                <div className="text-sm text-muted-foreground">
+                  {editingInvoice.invoiceNumber}
+                </div>
+
+                <select
+                  value={editForm.status}
+                  onChange={(e) => setEditForm((prev) => ({ ...prev, status: e.target.value as InvoiceStatus }))}
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+                >
+                  {Object.entries(statusLabels).map(([k, v]) => (
+                    <option key={k} value={k}>{v}</option>
+                  ))}
+                </select>
+
+                <input
+                  type="date"
+                  value={editForm.dueDate}
+                  onChange={(e) => setEditForm((prev) => ({ ...prev, dueDate: e.target.value }))}
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+                />
+
+                <textarea
+                  rows={3}
+                  value={editForm.notes}
+                  onChange={(e) => setEditForm((prev) => ({ ...prev, notes: e.target.value }))}
+                  placeholder="Notes"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+                />
+              </div>
+
+              <div className="mt-5 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setEditingInvoice(null)}
+                  className="rounded-lg border border-border px-4 py-2 text-sm hover:bg-muted"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={updateInvoice.isPending}
+                  className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                >
+                  {updateInvoice.isPending ? 'Updating...' : 'Save changes'}
+                </button>
+              </div>
+            </form>
           </div>
         )}
       </main>
