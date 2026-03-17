@@ -14,9 +14,7 @@ import {
 import { useState } from 'react';
 import type { TaskBreakdownResponse } from '@/hooks/use-ai';
 import {
-  exportJsonAsExcel,
-  exportJsonAsPdf,
-  exportJsonAsWord,
+  exportDocument,
   importTextFile,
 } from '@/lib/file-export';
 
@@ -133,21 +131,21 @@ export function AiTaskBreakdown() {
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
-                onClick={() => exportJsonAsPdf('ai-task-breakdown', result)}
+                onClick={() => exportDocument('task-breakdown', 'pdf', result)}
                 className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-muted"
               >
                 <FileDown className="h-3.5 w-3.5" /> PDF
               </button>
               <button
                 type="button"
-                onClick={() => exportJsonAsWord('ai-task-breakdown', result)}
+                onClick={() => exportDocument('task-breakdown', 'docx', result)}
                 className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-muted"
               >
                 <FileType className="h-3.5 w-3.5" /> Word
               </button>
               <button
                 type="button"
-                onClick={() => exportJsonAsExcel('ai-task-breakdown', result)}
+                onClick={() => exportDocument('task-breakdown', 'xlsx', result)}
                 className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-muted"
               >
                 <FileSpreadsheet className="h-3.5 w-3.5" /> Excel

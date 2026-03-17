@@ -13,9 +13,7 @@ import {
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import {
-  exportJsonAsExcel,
-  exportJsonAsPdf,
-  exportJsonAsWord,
+  exportDocument,
   importTextFile,
 } from '@/lib/file-export';
 
@@ -235,21 +233,30 @@ export function AiStrategicPlan() {
               </button>
               <button
                 type="button"
-                onClick={() => exportJsonAsPdf('ai-strategic-plan', mutation.data.data)}
+                onClick={() => {
+                  const projectName = projects?.find((p) => p.id === projectId)?.name;
+                  exportDocument('strategic-plan', 'pdf', mutation.data.data, { projectName, locale });
+                }}
                 className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-muted"
               >
                 <FileDown className="h-3.5 w-3.5" /> PDF
               </button>
               <button
                 type="button"
-                onClick={() => exportJsonAsWord('ai-strategic-plan', mutation.data.data)}
+                onClick={() => {
+                  const projectName = projects?.find((p) => p.id === projectId)?.name;
+                  exportDocument('strategic-plan', 'docx', mutation.data.data, { projectName, locale });
+                }}
                 className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-muted"
               >
                 <FileType className="h-3.5 w-3.5" /> Word
               </button>
               <button
                 type="button"
-                onClick={() => exportJsonAsExcel('ai-strategic-plan', mutation.data.data)}
+                onClick={() => {
+                  const projectName = projects?.find((p) => p.id === projectId)?.name;
+                  exportDocument('strategic-plan', 'xlsx', mutation.data.data, { projectName, locale });
+                }}
                 className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-muted"
               >
                 <FileSpreadsheet className="h-3.5 w-3.5" /> Excel

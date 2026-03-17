@@ -14,9 +14,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import {
-  exportTextAsExcel,
-  exportTextAsPdf,
-  exportTextAsWord,
+  exportDocument,
   importTextFile,
 } from '@/lib/file-export';
 
@@ -138,21 +136,21 @@ export function AiProposal() {
             <div className="mt-3 flex flex-wrap gap-2">
               <button
                 type="button"
-                onClick={() => exportTextAsPdf('ai-proposal', result)}
+                onClick={() => exportDocument('proposal', 'pdf', { raw: result })}
                 className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-muted"
               >
                 <FileDown className="h-3.5 w-3.5" /> PDF
               </button>
               <button
                 type="button"
-                onClick={() => exportTextAsWord('ai-proposal', result)}
+                onClick={() => exportDocument('proposal', 'docx', { raw: result })}
                 className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-muted"
               >
                 <FileType className="h-3.5 w-3.5" /> Word
               </button>
               <button
                 type="button"
-                onClick={() => exportTextAsExcel('ai-proposal', result)}
+                onClick={() => exportDocument('proposal', 'xlsx', { raw: result })}
                 className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-muted"
               >
                 <FileSpreadsheet className="h-3.5 w-3.5" /> Excel

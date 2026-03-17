@@ -131,6 +131,21 @@ export class PurgeAuditDto {
   retentionDays?: number;
 }
 
+export class ExportDocumentDto {
+  @IsString()
+  format: string;
+
+  content: unknown;
+
+  @IsOptional()
+  @IsString()
+  projectName?: string;
+
+  @IsOptional()
+  @IsEnum(Language)
+  locale?: Language;
+}
+
 export class AiAuditFeedbackDto {
   @IsInt()
   @Min(1)

@@ -7,10 +7,12 @@ import {
   Query,
   Body,
   Param,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { AiService } from './ai.service';
 import {
   ChatDto,
@@ -24,18 +26,23 @@ import {
   ReviewApplyRequestDto,
   AuditQueryDto,
   PurgeAuditDto,
+  ExportDocumentDto,
 } from './dto/ai.dto';
 import { Roles } from '../../shared/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { CurrentUser } from '../../shared/decorators/current-user.decorator';
 import { UserRole } from '@prisma/client';
+import { DocumentService, type ExportFeature, type ExportFormat } from './document/document.service';
 
 @ApiTags('AI')
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('ai')
 export class AiController {
-  constructor(private aiService: AiService) {}
+  constructor(
+    private aiService: AiService,
+    private documentService: DocumentService,
+  ) {}
 
   @Post('chat')
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.MEMBER, UserRole.CLIENT)
@@ -212,5 +219,33 @@ export class AiController {
     @CurrentUser('role') role: UserRole,
   ) {
     return this.aiService.purgeAiAuditLogs(role, dto.retentionDays);
+  }
+
+  @Post('export/:feature')
+  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.MEMBER)
+  async exportDocument(
+    @Param('feature') feature: string,
+    @Body() dto: ExportDocumentDto,
+    @CurrentUser('name') userName: string,
+    @CurrentUser('locale') locale: string,
+    @Res() res: Response,
+  ) {
+    const result = await this.documentService.generate(
+      feature as ExportFeature,
+      (dto.format || 'pdf') as ExportFormat,
+      dto.content,
+      {
+        locale: (dto.locale as string) || locale || 'VI',
+        projectName: dto.projectName,
+        userName,
+      },
+    );
+
+    res.set({
+      'Content-Type': result.mimeType,
+      'Content-Disposition': `attachment; filename="${encodeURIComponent(result.filename)}"`,
+      'Content-Length': result.buffer.length,
+    });
+    res.end(result.buffer);
   }
 }
