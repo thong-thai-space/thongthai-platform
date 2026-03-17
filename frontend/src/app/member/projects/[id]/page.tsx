@@ -3,7 +3,11 @@
 import { MemberHeader } from '@/components/member/header';
 import { useProject } from '@/hooks/use-projects';
 import { useTasks, useUpdateTask } from '@/hooks/use-tasks';
-import { useProjectConversation, useSendMessage } from '@/hooks/use-messages';
+import {
+  useProjectConversation,
+  useSendMessage,
+  useMarkProjectConversationRead,
+} from '@/hooks/use-messages';
 import { useAuth } from '@/lib/auth';
 import { useSocket } from '@/lib/socket';
 import { formatDate } from '@/lib/utils';
@@ -213,6 +217,11 @@ export default function MemberProjectDetailPage() {
                     >
                       {task.title}
                     </div>
+                    {task.description && (
+                      <p className="line-clamp-2 text-xs text-muted-foreground">
+                        {task.description}
+                      </p>
+                    )}
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <span>{taskStatusLabels[task.status]}</span>
                       {task.dueDate && (
@@ -285,6 +294,7 @@ function ProjectChat({ projectId }: { projectId: string }) {
   const { data: project } = useProject(projectId);
   const { data: messages } = useProjectConversation(projectId);
   const sendMessage = useSendMessage();
+  const markProjectRead = useMarkProjectConversationRead();
   const [input, setInput] = useState('');
   const [open, setOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -303,6 +313,12 @@ function ProjectChat({ projectId }: { projectId: string }) {
   useEffect(() => {
     if (open) messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, open]);
+
+  useEffect(() => {
+    if (open) {
+      markProjectRead.mutate(projectId);
+    }
+  }, [open, projectId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Determine who to send messages to (project owner)
   const receiverId = project?.owner?.id !== user?.id

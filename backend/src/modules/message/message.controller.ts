@@ -74,4 +74,12 @@ export class MessageController {
   ) {
     return this.messageService.markConversationRead(currentUserId, otherUserId);
   }
+
+  @Patch('project/:projectId/read')
+  markProjectConversationRead(
+    @CurrentUser('id') userId: string,
+    @Param('projectId') projectId: string,
+  ) {
+    return this.messageService.markProjectConversationRead(userId, projectId);
+  }
 }

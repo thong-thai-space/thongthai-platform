@@ -1,8 +1,12 @@
 'use client';
 
 import { DashboardHeader } from '@/components/dashboard/header';
-import { useProject, useAcceptProjectRequest } from '@/hooks/use-projects';
-import { useProjectConversation, useSendMessage } from '@/hooks/use-messages';
+import { useProject, useAcceptProjectRequest, useUpdateProject } from '@/hooks/use-projects';
+import {
+  useProjectConversation,
+  useSendMessage,
+  useMarkProjectConversationRead,
+} from '@/hooks/use-messages';
 import { useAuth } from '@/lib/auth';
 import { useSocket } from '@/lib/socket';
 import { useTasks, useCreateTask } from '@/hooks/use-tasks';
@@ -24,7 +28,17 @@ import {
   Plus,
   X,
 } from 'lucide-react';
-import type { TaskStatus, TaskPriority, Message } from '@/types';
+import type { TaskStatus, TaskPriority, ProjectStatus, Message } from '@/types';
+
+const projectStatusConfig: Record<ProjectStatus, { label: string; color: string }> = {
+  DRAFT: { label: 'Draft', color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' },
+  PROPOSAL_SENT: { label: 'Proposal Sent', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' },
+  IN_PROGRESS: { label: 'In Progress', color: 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300' },
+  ON_HOLD: { label: 'On Hold', color: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300' },
+  REVIEW: { label: 'Review', color: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' },
+  COMPLETED: { label: 'Completed', color: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' },
+  CANCELLED: { label: 'Cancelled', color: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' },
+};
 
 const columns: { status: TaskStatus; label: string; color: string }[] = [
   { status: 'TODO', label: 'To Do', color: 'border-t-gray-400' },
@@ -45,6 +59,7 @@ export default function ProjectDetailPage() {
   const { data: project, isLoading: loadingProject } = useProject(id);
   const { data: tasks = [] } = useTasks(id);
   const acceptRequest = useAcceptProjectRequest();
+  const updateProject = useUpdateProject();
 
   if (loadingProject) {
     return (
@@ -72,6 +87,28 @@ export default function ProjectDetailPage() {
     <>
       <DashboardHeader title={project.name} />
       <main className="flex-1 overflow-y-auto p-6">
+        {/* Project status */}
+        <div className="mb-6 flex items-center gap-3">
+          <span className="text-sm font-medium text-muted-foreground">Status:</span>
+          <select
+            value={project.status}
+            onChange={(e) =>
+              updateProject.mutate({ id: project.id, status: e.target.value as ProjectStatus })
+            }
+            disabled={updateProject.isPending}
+            className={`rounded-lg border border-border px-3 py-1.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50 ${projectStatusConfig[project.status as ProjectStatus]?.color || ''}`}
+          >
+            {Object.entries(projectStatusConfig).map(([value, { label }]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+          {updateProject.isPending && (
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          )}
+        </div>
+
         {/* Client request banner */}
         {project.status === 'DRAFT' && project.clientId && (
           <div className="mb-6 flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950">
@@ -169,6 +206,11 @@ export default function ProjectDetailPage() {
                       className="rounded-lg border border-border bg-background p-3 transition-shadow hover:shadow-sm"
                     >
                       <div className="text-sm font-medium">{task.title}</div>
+                      {task.description && (
+                        <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                          {task.description}
+                        </p>
+                      )}
                       <div className="mt-2 flex items-center justify-between">
                         <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${priorityColors[task.priority]}`}>
                           {task.priority}
@@ -199,6 +241,7 @@ export default function ProjectDetailPage() {
 function AddTaskButton({ projectId }: { projectId: string }) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<TaskPriority>('MEDIUM');
   const [assigneeId, setAssigneeId] = useState('');
   const [dueDate, setDueDate] = useState('');
@@ -210,12 +253,14 @@ function AddTaskButton({ projectId }: { projectId: string }) {
     if (!title.trim()) return;
     await createTask.mutateAsync({
       title: title.trim(),
+      description: description.trim() || undefined,
       projectId,
       priority,
       assigneeId: assigneeId || undefined,
       dueDate: dueDate || undefined,
     });
     setTitle('');
+    setDescription('');
     setPriority('MEDIUM');
     setAssigneeId('');
     setDueDate('');
@@ -235,21 +280,30 @@ function AddTaskButton({ projectId }: { projectId: string }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2">
-      <div>
+    <form onSubmit={handleSubmit} className="grid w-full gap-2 rounded-lg border border-border bg-background p-3 sm:grid-cols-2 lg:grid-cols-6">
+      <div className="sm:col-span-2 lg:col-span-2">
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Task name"
           required
           autoFocus
-          className="rounded-lg border border-border bg-background px-3 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+        />
+      </div>
+      <div className="sm:col-span-2 lg:col-span-2">
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={2}
+          placeholder="Detailed task description for assignee"
+          className="w-full resize-y rounded-lg border border-border bg-background px-3 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </div>
       <select
         value={priority}
         onChange={(e) => setPriority(e.target.value as TaskPriority)}
-        className="rounded-lg border border-border bg-background px-2 py-1.5 text-sm"
+        className="rounded-lg border border-border bg-background px-2 py-1.5 text-sm lg:col-span-1"
       >
         <option value="LOW">Low</option>
         <option value="MEDIUM">Medium</option>
@@ -259,7 +313,7 @@ function AddTaskButton({ projectId }: { projectId: string }) {
       <select
         value={assigneeId}
         onChange={(e) => setAssigneeId(e.target.value)}
-        className="rounded-lg border border-border bg-background px-2 py-1.5 text-sm"
+        className="rounded-lg border border-border bg-background px-2 py-1.5 text-sm lg:col-span-1"
       >
         <option value="">Unassigned</option>
         {team
@@ -272,22 +326,24 @@ function AddTaskButton({ projectId }: { projectId: string }) {
         type="date"
         value={dueDate}
         onChange={(e) => setDueDate(e.target.value)}
-        className="rounded-lg border border-border bg-background px-2 py-1.5 text-sm"
+        className="rounded-lg border border-border bg-background px-2 py-1.5 text-sm lg:col-span-1"
       />
-      <button
-        type="submit"
-        disabled={!title.trim() || createTask.isPending}
-        className="rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-      >
-        {createTask.isPending ? 'Creating...' : 'Create'}
-      </button>
-      <button
-        type="button"
-        onClick={() => setOpen(false)}
-        className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted"
-      >
-        <X className="h-4 w-4" />
-      </button>
+      <div className="flex items-center gap-2 lg:col-span-1">
+        <button
+          type="submit"
+          disabled={!title.trim() || createTask.isPending}
+          className="rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+        >
+          {createTask.isPending ? 'Creating...' : 'Create'}
+        </button>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
     </form>
   );
 }
@@ -298,6 +354,7 @@ function DashboardProjectChat({ projectId, clientId }: { projectId: string; clie
   const qc = useQueryClient();
   const { data: messages } = useProjectConversation(projectId);
   const sendMessage = useSendMessage();
+  const markProjectRead = useMarkProjectConversationRead();
   const [input, setInput] = useState('');
   const [open, setOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -316,6 +373,12 @@ function DashboardProjectChat({ projectId, clientId }: { projectId: string; clie
   useEffect(() => {
     if (open) messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, open]);
+
+  useEffect(() => {
+    if (open) {
+      markProjectRead.mutate(projectId);
+    }
+  }, [open, projectId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();

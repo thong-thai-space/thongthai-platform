@@ -2,7 +2,7 @@ import { Injectable, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationService } from '../notification/notification.service';
 import { NotificationGateway } from '../notification/notification.gateway';
-import { NotificationType } from '@prisma/client';
+import { NotificationType, UserRole } from '@prisma/client';
 import { CreateMessageDto } from './dto/message.dto';
 
 @Injectable()
@@ -29,7 +29,7 @@ export class MessageService {
     // Push real-time message via WebSocket
     this.gateway.sendToUser(dto.receiverId, 'new-message', message);
 
-    // Create notification for receiver
+    // Create notification for receiver(s)
     const sender = await this.prisma.user.findUnique({
       where: { id: senderId },
       select: { name: true },
@@ -44,15 +44,53 @@ export class MessageService {
       projectName = proj?.name || '';
     }
 
-    await this.notificationService.create({
-      type: NotificationType.CLIENT_MESSAGE,
-      title: 'New message',
-      message: projectName
-        ? `${sender?.name || 'Someone'} sent a message in project "${projectName}".`
-        : `${sender?.name || 'Someone'} sent you a message.`,
-      userId: dto.receiverId,
-      data: { senderId, messageId: message.id, projectId: dto.projectId },
-    });
+    const receivers = new Set<string>();
+
+    // Direct receiver always gets the notification (except self-message).
+    if (dto.receiverId && dto.receiverId !== senderId) {
+      receivers.add(dto.receiverId);
+    }
+
+    // For project chat, also notify internal participants so admin/member can see badge updates.
+    if (dto.projectId) {
+      const project = await this.prisma.project.findUnique({
+        where: { id: dto.projectId },
+        select: {
+          ownerId: true,
+          clientId: true,
+          tasks: { select: { assigneeId: true } },
+        },
+      });
+
+      if (project?.ownerId) receivers.add(project.ownerId);
+      if (project?.clientId) receivers.add(project.clientId);
+      for (const task of project?.tasks || []) {
+        if (task.assigneeId) receivers.add(task.assigneeId);
+      }
+
+      const admins = await this.prisma.user.findMany({
+        where: {
+          role: { in: [UserRole.OWNER, UserRole.ADMIN] },
+          isActive: true,
+        },
+        select: { id: true },
+      });
+      for (const admin of admins) receivers.add(admin.id);
+    }
+
+    receivers.delete(senderId);
+
+    for (const receiverId of receivers) {
+      await this.notificationService.create({
+        type: NotificationType.CLIENT_MESSAGE,
+        title: 'New message',
+        message: projectName
+          ? `${sender?.name || 'Someone'} sent a message in project "${projectName}".`
+          : `${sender?.name || 'Someone'} sent you a message.`,
+        userId: receiverId,
+        data: { senderId, messageId: message.id, projectId: dto.projectId },
+      });
+    }
 
     return message;
   }
@@ -165,14 +203,30 @@ export class MessageService {
   }
 
   async markAsRead(messageId: string, userId: string) {
-    return this.prisma.message.updateMany({
+    const result = await this.prisma.message.updateMany({
       where: { id: messageId, receiverId: userId },
       data: { isRead: true },
     });
+
+    // Keep message-related notifications in sync with message read state.
+    await this.prisma.notification.updateMany({
+      where: {
+        userId,
+        isRead: false,
+        type: NotificationType.CLIENT_MESSAGE,
+        data: {
+          path: ['messageId'],
+          equals: messageId,
+        },
+      },
+      data: { isRead: true },
+    });
+
+    return result;
   }
 
   async markConversationRead(userId: string, otherUserId: string) {
-    return this.prisma.message.updateMany({
+    const result = await this.prisma.message.updateMany({
       where: {
         senderId: otherUserId,
         receiverId: userId,
@@ -180,6 +234,48 @@ export class MessageService {
       },
       data: { isRead: true },
     });
+
+    await this.prisma.notification.updateMany({
+      where: {
+        userId,
+        isRead: false,
+        type: NotificationType.CLIENT_MESSAGE,
+        data: {
+          path: ['senderId'],
+          equals: otherUserId,
+        },
+      },
+      data: { isRead: true },
+    });
+
+    return result;
+  }
+
+  async markProjectConversationRead(userId: string, projectId: string) {
+    const [messageResult] = await this.prisma.$transaction([
+      this.prisma.message.updateMany({
+        where: {
+          projectId,
+          receiverId: userId,
+          isRead: false,
+        },
+        data: { isRead: true },
+      }),
+      this.prisma.notification.updateMany({
+        where: {
+          userId,
+          isRead: false,
+          type: NotificationType.CLIENT_MESSAGE,
+          data: {
+            path: ['projectId'],
+            equals: projectId,
+          },
+        },
+        data: { isRead: true },
+      }),
+    ]);
+
+    return messageResult;
   }
 
   async getUnreadCount(userId: string) {
@@ -189,21 +285,26 @@ export class MessageService {
   }
 
   async getUnreadByProject(userId: string) {
-    const unread = await this.prisma.message.groupBy({
-      by: ['projectId'],
+    const unreadNotifications = await this.prisma.notification.findMany({
       where: {
-        receiverId: userId,
+        userId,
+        type: NotificationType.CLIENT_MESSAGE,
         isRead: false,
-        projectId: { not: null },
       },
-      _count: { id: true },
+      select: { data: true },
     });
 
-    if (unread.length === 0) return [];
+    const counter = new Map<string, number>();
+    for (const item of unreadNotifications) {
+      const data = (item.data || {}) as Record<string, unknown>;
+      const projectId = typeof data.projectId === 'string' ? data.projectId : '';
+      if (!projectId) continue;
+      counter.set(projectId, (counter.get(projectId) || 0) + 1);
+    }
 
-    const projectIds = unread
-      .map((u) => u.projectId)
-      .filter((id): id is string => id !== null);
+    if (counter.size === 0) return [];
+
+    const projectIds = Array.from(counter.keys());
 
     const projects = await this.prisma.project.findMany({
       where: { id: { in: projectIds } },
@@ -212,12 +313,10 @@ export class MessageService {
 
     const projectMap = new Map(projects.map((p) => [p.id, p.name]));
 
-    return unread
-      .filter((u) => u.projectId !== null)
-      .map((u) => ({
-        projectId: u.projectId!,
-        projectName: projectMap.get(u.projectId!) || '',
-        count: u._count.id,
-      }));
+    return projectIds.map((projectId) => ({
+      projectId,
+      projectName: projectMap.get(projectId) || '',
+      count: counter.get(projectId) || 0,
+    }));
   }
 }

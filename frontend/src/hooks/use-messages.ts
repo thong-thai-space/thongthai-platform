@@ -39,6 +39,8 @@ export function useSendMessage() {
     }) => api.post('/messages', data).then((r) => r.data),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ['conversations'] });
+      qc.invalidateQueries({ queryKey: ['unread-message-count'] });
+      qc.invalidateQueries({ queryKey: ['unread-by-project'] });
       qc.invalidateQueries({
         queryKey: ['conversation', variables.receiverId],
       });
@@ -58,6 +60,24 @@ export function useMarkConversationRead() {
       api.patch(`/messages/read-all/${otherUserId}`).then((r) => r.data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['conversations'] });
+      qc.invalidateQueries({ queryKey: ['unread-message-count'] });
+      qc.invalidateQueries({ queryKey: ['unread-by-project'] });
+    },
+  });
+}
+
+export function useMarkProjectConversationRead() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (projectId: string) =>
+      api.patch(`/messages/project/${projectId}/read`).then((r) => r.data),
+    onSuccess: (_data, projectId) => {
+      qc.invalidateQueries({ queryKey: ['project-conversation', projectId] });
+      qc.invalidateQueries({ queryKey: ['conversations'] });
+      qc.invalidateQueries({ queryKey: ['unread-message-count'] });
+      qc.invalidateQueries({ queryKey: ['unread-by-project'] });
+      qc.invalidateQueries({ queryKey: ['notifications'] });
+      qc.invalidateQueries({ queryKey: ['unread-count'] });
     },
   });
 }

@@ -7,6 +7,7 @@ import {
   IsNumber,
   IsBoolean,
 } from 'class-validator';
+import { PartialType } from '@nestjs/swagger';
 import { ProjectStatus, Currency } from '@prisma/client';
 
 export class CreateProjectDto {
@@ -67,7 +68,7 @@ export class CreateProjectDto {
   clientId?: string;
 }
 
-export class UpdateProjectDto extends CreateProjectDto {
+export class UpdateProjectDto extends PartialType(CreateProjectDto) {
   @IsOptional()
   @IsBoolean()
   isShowcase?: boolean;

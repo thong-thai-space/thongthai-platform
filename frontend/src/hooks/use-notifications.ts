@@ -49,6 +49,9 @@ export function useMarkAsRead() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['notifications'] });
       qc.invalidateQueries({ queryKey: ['unread-count'] });
+      qc.invalidateQueries({ queryKey: ['unread-by-project'] });
+      qc.invalidateQueries({ queryKey: ['unread-message-count'] });
+      qc.invalidateQueries({ queryKey: ['conversations'] });
     },
   });
 }
@@ -60,6 +63,9 @@ export function useMarkAllAsRead() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['notifications'] });
       qc.invalidateQueries({ queryKey: ['unread-count'] });
+      qc.invalidateQueries({ queryKey: ['unread-by-project'] });
+      qc.invalidateQueries({ queryKey: ['unread-message-count'] });
+      qc.invalidateQueries({ queryKey: ['conversations'] });
     },
   });
 }
@@ -72,6 +78,9 @@ export function useDeleteNotification() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['notifications'] });
       qc.invalidateQueries({ queryKey: ['unread-count'] });
+      qc.invalidateQueries({ queryKey: ['unread-by-project'] });
+      qc.invalidateQueries({ queryKey: ['unread-message-count'] });
+      qc.invalidateQueries({ queryKey: ['conversations'] });
     },
   });
 }

@@ -174,9 +174,16 @@ export class ProjectService {
   }
 
   async update(id: string, dto: UpdateProjectDto) {
+    const { startDate, endDate, deadline, ...rest } = dto;
+
     return this.prisma.project.update({
       where: { id },
-      data: dto,
+      data: {
+        ...rest,
+        startDate: startDate ? new Date(startDate) : undefined,
+        endDate: endDate ? new Date(endDate) : undefined,
+        deadline: deadline ? new Date(deadline) : undefined,
+      },
     });
   }
 

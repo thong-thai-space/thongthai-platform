@@ -258,8 +258,9 @@ export default function DashboardPage() {
                 </p>
               ) : (
                 pendingTasks.slice(0, 5).map((task) => (
-                  <div
+                  <Link
                     key={task.id}
+                    href={`/dashboard/projects/${task.projectId}?task=${task.id}`}
                     className="flex items-center justify-between rounded-lg px-3 py-2 transition-colors hover:bg-muted"
                   >
                     <div className="min-w-0 flex-1">
@@ -277,7 +278,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <StatusBadge status={task.status} />
-                  </div>
+                  </Link>
                 ))
               )}
             </div>
