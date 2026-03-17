@@ -36,7 +36,20 @@ export class InvoiceService {
   }
 
   async create(dto: CreateInvoiceDto, creatorId: string) {
-    const { items, ...invoiceData } = dto;
+    const { items, taxRate, subtotal: _sub, tax: _tax, total: _total, ...invoiceData } = dto;
+
+    // Compute item amounts
+    const computedItems = items.map((item) => {
+      const qty = item.quantity ?? 1;
+      const amount = qty * item.unitPrice;
+      return { description: item.description, quantity: qty, unitPrice: item.unitPrice, amount };
+    });
+
+    const subtotal = computedItems.reduce((sum, it) => sum + Number(it.amount), 0);
+    const rate = taxRate ?? 0;
+    const tax = Math.round(subtotal * rate) / 100;
+    const discount = dto.discount ?? 0;
+    const total = subtotal + tax - discount;
 
     const invoiceNumber = await this.generateInvoiceNumber();
 
@@ -45,8 +58,12 @@ export class InvoiceService {
         ...invoiceData,
         invoiceNumber,
         creatorId,
+        subtotal,
+        tax,
+        discount,
+        total,
         items: {
-          create: items,
+          create: computedItems,
         },
       },
       include: { items: true },

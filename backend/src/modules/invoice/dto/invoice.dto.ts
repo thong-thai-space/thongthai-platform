@@ -21,8 +21,10 @@ export class InvoiceItemDto {
   @IsNumber()
   unitPrice: number;
 
+  // amount is computed server-side; optional when sent from client
+  @IsOptional()
   @IsNumber()
-  amount: number;
+  amount?: number;
 }
 
 export class CreateInvoiceDto {
@@ -36,8 +38,15 @@ export class CreateInvoiceDto {
   @IsDateString()
   dueDate: string;
 
+  // taxRate in percent (e.g. 10 = 10%). Server computes tax/subtotal/total.
+  @IsOptional()
   @IsNumber()
-  subtotal: number;
+  taxRate?: number;
+
+  // If not provided they are computed from items + taxRate
+  @IsOptional()
+  @IsNumber()
+  subtotal?: number;
 
   @IsOptional()
   @IsNumber()
@@ -47,8 +56,9 @@ export class CreateInvoiceDto {
   @IsNumber()
   discount?: number;
 
+  @IsOptional()
   @IsNumber()
-  total: number;
+  total?: number;
 
   @IsOptional()
   @IsNumber()
