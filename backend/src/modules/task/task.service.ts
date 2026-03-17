@@ -206,7 +206,7 @@ export class TaskService {
       throw new ForbiddenException('You can only comment on your project tasks');
     }
 
-    return this.prisma.comment.create({
+    const comment = await this.prisma.comment.create({
       data: {
         content,
         authorId: userId,
@@ -216,5 +216,44 @@ export class TaskService {
         author: { select: { id: true, name: true, avatar: true } },
       },
     });
+
+    // Notify admins and other relevant users about the new task comment.
+    const recipients = new Set<string>();
+
+    const admins = await this.prisma.user.findMany({
+      where: {
+        role: { in: [UserRole.OWNER, UserRole.ADMIN] },
+        isActive: true,
+      },
+      select: { id: true },
+    });
+
+    for (const admin of admins) recipients.add(admin.id);
+    if (task.project?.ownerId) recipients.add(task.project.ownerId);
+    if (task.assigneeId) recipients.add(task.assigneeId);
+
+    const creator = await this.prisma.task.findUnique({
+      where: { id: taskId },
+      select: { creatorId: true },
+    });
+    if (creator?.creatorId) recipients.add(creator.creatorId);
+
+    recipients.delete(userId);
+
+    for (const recipientId of recipients) {
+      await this.notificationService.create({
+        type: NotificationType.TASK_UPDATED,
+        title: 'New task comment',
+        message: `${comment.author?.name || 'A user'} commented on task "${task.title}".`,
+        userId: recipientId,
+        data: {
+          taskId: task.id,
+          projectId: task.projectId,
+          commentId: comment.id,
+        },
+      });
+    }
+
+    return comment;
   }
 }

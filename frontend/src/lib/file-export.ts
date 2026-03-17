@@ -245,73 +245,42 @@ function buildExcelHtml(title: string, content: string) {
 </html>`;
 }
 
-export function exportTextAsPdf(title: string, content: string) {
-  const doc = new jsPDF();
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const margin = 14;
-  const maxWidth = pageWidth - margin * 2;
-  let y = 18;
+export async function exportTextAsPdf(title: string, content: string) {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return;
 
-  const addPageIfNeeded = (requiredHeight = 8) => {
-    if (y + requiredHeight > pageHeight - 12) {
-      doc.addPage();
-      y = 18;
-    }
-  };
+  const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+  const html = renderStyledHtml(title, content || '-');
+  const parser = new DOMParser();
+  const parsed = parser.parseFromString(html, 'text/html');
 
-  const blocks = parseContentBlocks(content);
+  const container = document.createElement('div');
+  container.style.position = 'fixed';
+  container.style.left = '-10000px';
+  container.style.top = '0';
+  container.style.width = '794px';
+  container.style.background = '#ffffff';
+  container.innerHTML = parsed.body.innerHTML;
+  document.body.appendChild(container);
 
-  doc.setFontSize(16);
-  doc.setFont('helvetica', 'bold');
-  doc.text(title, margin, y);
-  y += 7;
+  try {
+    await doc.html(container, {
+      x: 0,
+      y: 0,
+      margin: [28, 24, 28, 24],
+      width: 547,
+      windowWidth: 794,
+      autoPaging: 'text',
+      html2canvas: {
+        scale: 0.75,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+      },
+    });
 
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(107, 114, 128);
-  doc.text(`Generated at ${new Date().toLocaleString('en-US')}`, margin, y);
-  y += 8;
-  doc.setTextColor(31, 41, 55);
-
-  for (const block of blocks) {
-    if (block.type === 'h1' || block.type === 'h2' || block.type === 'h3') {
-      addPageIfNeeded(10);
-      const size = block.type === 'h1' ? 14 : block.type === 'h2' ? 12 : 11;
-      doc.setFontSize(size);
-      doc.setFont('helvetica', 'bold');
-      doc.text(block.text, margin, y);
-      y += 7;
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      continue;
-    }
-
-    if (block.type === 'table') {
-      const headers = block.headers.join(' | ');
-      const rows = block.rows.map((r) => `- ${r.join(' | ')}`);
-      const tableText = [headers, ...rows].join('\n');
-      const tableLines = doc.splitTextToSize(tableText, maxWidth);
-      for (const line of tableLines) {
-        addPageIfNeeded(6);
-        doc.text(line, margin, y);
-        y += 5;
-      }
-      y += 2;
-      continue;
-    }
-
-    const text = block.type === 'bullet' ? `• ${block.text}` : block.text;
-    const lines = doc.splitTextToSize(text || '-', maxWidth);
-    for (const line of lines) {
-      addPageIfNeeded(6);
-      doc.text(line, margin, y);
-      y += 5;
-    }
-    y += 1;
+    doc.save(`${safeFilename(title)}.pdf`);
+  } finally {
+    document.body.removeChild(container);
   }
-
-  doc.save(`${safeFilename(title)}.pdf`);
 }
 
 export function exportTextAsWord(title: string, content: string) {
