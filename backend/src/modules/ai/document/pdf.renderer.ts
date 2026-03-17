@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import * as path from 'path';
 import type { TDocumentDefinitions, Content, TableCell } from 'pdfmake/interfaces';
 
 const COLORS = {
@@ -23,20 +24,31 @@ export interface PdfMeta {
 export async function buildPdfBuffer(
   docDefinition: TDocumentDefinitions,
 ): Promise<Buffer> {
-  // pdfmake server-side requires dynamic import for CJS compatibility
-  const PdfPrinter = (await import('pdfmake')).default;
+  // pdfmake v0.3 server-side: use CJS builds directly (not the browser bundle)
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const PdfPrinter = require('pdfmake/js/Printer').default;
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const vfs = require('pdfmake/js/virtual-fs').default; // singleton instance
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const URLResolver = require('pdfmake/js/URLResolver').default;
+
+  const fontDir = path.join(
+    path.dirname(require.resolve('pdfmake/package.json')),
+    'build/fonts/Roboto',
+  );
 
   const fonts = {
     Roboto: {
-      normal: 'node_modules/pdfmake/build/vfs_fonts/Roboto-Regular.ttf',
-      bold: 'node_modules/pdfmake/build/vfs_fonts/Roboto-Medium.ttf',
-      italics: 'node_modules/pdfmake/build/vfs_fonts/Roboto-Italic.ttf',
-      bolditalics: 'node_modules/pdfmake/build/vfs_fonts/Roboto-MediumItalic.ttf',
+      normal: `${fontDir}/Roboto-Regular.ttf`,
+      bold: `${fontDir}/Roboto-Medium.ttf`,
+      italics: `${fontDir}/Roboto-Italic.ttf`,
+      bolditalics: `${fontDir}/Roboto-MediumItalic.ttf`,
     },
   };
 
-  const printer = new (PdfPrinter as any)(fonts);
-  const pdfDoc = printer.createPdfKitDocument(docDefinition);
+  const urlResolver = new (URLResolver as any)(vfs);
+  const printer = new (PdfPrinter as any)(fonts, vfs, urlResolver);
+  const pdfDoc = await printer.createPdfKitDocument(docDefinition);
 
   return new Promise((resolve, reject) => {
     const chunks: Uint8Array[] = [];

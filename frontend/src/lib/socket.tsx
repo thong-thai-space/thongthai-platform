@@ -2,29 +2,26 @@
 
 import {
   createContext,
-  useCallback,
   useContext,
   useEffect,
-  useRef,
   useState,
   type ReactNode,
 } from 'react';
 import { io, type Socket } from 'socket.io-client';
 
 interface SocketContextType {
-  getSocket: () => Socket | null;
+  socket: Socket | null;
   isConnected: boolean;
 }
 
 const SocketContext = createContext<SocketContextType>({
-  getSocket: () => null,
+  socket: null,
   isConnected: false,
 });
 
 export function SocketProvider({ children }: { children: ReactNode }) {
+  const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const socketRef = useRef<Socket | null>(null);
-  const getSocket = useCallback(() => socketRef.current, []);
 
   useEffect(() => {
     const socketUrl =
@@ -41,23 +38,22 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     s.on('connect', () => setIsConnected(true));
     s.on('disconnect', () => setIsConnected(false));
 
-    socketRef.current = s;
+    setSocket(s);
 
     return () => {
       s.disconnect();
-      socketRef.current = null;
+      setSocket(null);
       setIsConnected(false);
     };
   }, []);
 
   return (
-    <SocketContext.Provider value={{ getSocket, isConnected }}>
+    <SocketContext.Provider value={{ socket, isConnected }}>
       {children}
     </SocketContext.Provider>
   );
 }
 
 export function useSocket() {
-  const { getSocket, isConnected } = useContext(SocketContext);
-  return { socket: getSocket(), isConnected };
+  return useContext(SocketContext);
 }
