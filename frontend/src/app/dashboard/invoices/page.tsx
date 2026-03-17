@@ -79,6 +79,17 @@ export default function InvoicesPage() {
           setShowForm(false);
           setForm({ clientId: '', projectId: '', dueDate: '', currency: 'VND', taxRate: '10', notes: '', items: [{ description: '', quantity: 1, unitPrice: 0 }] });
         },
+        onError: (error: unknown) => {
+          const err = error as {
+            response?: { data?: { message?: string | string[] } };
+            message?: string;
+          };
+          const message =
+            err?.response?.data?.message ||
+            err?.message ||
+            'Failed to create invoice';
+          alert(Array.isArray(message) ? message.join('\n') : String(message));
+        },
       },
     );
   };

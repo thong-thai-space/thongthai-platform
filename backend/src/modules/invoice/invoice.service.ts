@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { UserRole } from '@prisma/client';
+import { Prisma, UserRole } from '@prisma/client';
 import { CreateInvoiceDto, UpdateInvoiceDto } from './dto/invoice.dto';
 
 @Injectable()
@@ -38,9 +38,45 @@ export class InvoiceService {
   async create(dto: CreateInvoiceDto, creatorId: string) {
     const { items, taxRate, subtotal: _sub, tax: _tax, total: _total, ...invoiceData } = dto;
 
+    if (!items?.length) {
+      throw new BadRequestException('Invoice must contain at least one line item');
+    }
+
+    const client = await this.prisma.user.findUnique({
+      where: { id: dto.clientId },
+      select: { id: true, role: true, isActive: true },
+    });
+    if (!client || !client.isActive || client.role !== UserRole.CLIENT) {
+      throw new BadRequestException('Invalid client selected');
+    }
+
+    if (dto.projectId) {
+      const project = await this.prisma.project.findUnique({
+        where: { id: dto.projectId },
+        select: { id: true, clientId: true },
+      });
+      if (!project) {
+        throw new BadRequestException('Selected project does not exist');
+      }
+      if (project.clientId && project.clientId !== dto.clientId) {
+        throw new BadRequestException('Selected project does not belong to this client');
+      }
+    }
+
+    const dueDate = new Date(dto.dueDate);
+    if (Number.isNaN(dueDate.getTime())) {
+      throw new BadRequestException('Invalid due date');
+    }
+
     // Compute item amounts
     const computedItems = items.map((item) => {
       const qty = item.quantity ?? 1;
+      if (qty <= 0) {
+        throw new BadRequestException('Item quantity must be greater than 0');
+      }
+      if (item.unitPrice < 0) {
+        throw new BadRequestException('Item unit price cannot be negative');
+      }
       const amount = qty * item.unitPrice;
       return { description: item.description, quantity: qty, unitPrice: item.unitPrice, amount };
     });
@@ -53,21 +89,34 @@ export class InvoiceService {
 
     const invoiceNumber = await this.generateInvoiceNumber();
 
-    return this.prisma.invoice.create({
-      data: {
-        ...invoiceData,
-        invoiceNumber,
-        creatorId,
-        subtotal,
-        tax,
-        discount,
-        total,
-        items: {
-          create: computedItems,
+    try {
+      return await this.prisma.invoice.create({
+        data: {
+          ...invoiceData,
+          dueDate,
+          invoiceNumber,
+          creatorId,
+          subtotal,
+          tax,
+          discount,
+          total,
+          items: {
+            create: computedItems,
+          },
         },
-      },
-      include: { items: true },
-    });
+        include: { items: true },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2003') {
+          throw new BadRequestException('Invalid relation data (client/project)');
+        }
+        if (error.code === 'P2002') {
+          throw new BadRequestException('Invoice number conflict, please retry');
+        }
+      }
+      throw error;
+    }
   }
 
   async update(id: string, dto: UpdateInvoiceDto) {
