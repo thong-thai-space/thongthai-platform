@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 
 type MeResponse = {
@@ -16,13 +16,14 @@ function resolveRedirectByRole(role?: MeResponse['role']) {
 
 export default function GoogleAuthCallbackPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const state = searchParams.get('state');
-  const isInvalidState = Boolean(state && state !== 'success');
   const [error, setError] = useState('');
+  const [isInvalidState, setIsInvalidState] = useState(false);
 
   useEffect(() => {
-    if (isInvalidState) return;
+    const state = new URLSearchParams(window.location.search).get('state');
+    const invalidState = Boolean(state && state !== 'success');
+    setIsInvalidState(invalidState);
+    if (invalidState) return;
 
     const handleAuth = async () => {
       try {
@@ -34,7 +35,7 @@ export default function GoogleAuthCallbackPage() {
     };
 
     handleAuth();
-  }, [isInvalidState, router]);
+  }, [router]);
 
   const displayError = isInvalidState
     ? 'Google login failed. Please try again.'
