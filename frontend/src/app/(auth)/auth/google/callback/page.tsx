@@ -20,10 +20,22 @@ export default function GoogleAuthCallbackPage() {
   const [isInvalidState, setIsInvalidState] = useState(false);
 
   useEffect(() => {
-    const state = new URLSearchParams(window.location.search).get('state');
+    const params = new URLSearchParams(window.location.search);
+    const state = params.get('state');
+    const accessToken = params.get('accessToken');
+    const refreshToken = params.get('refreshToken');
+
     const invalidState = Boolean(state && state !== 'success');
     setIsInvalidState(invalidState);
     if (invalidState) return;
+
+    // Store tokens in localStorage if provided by backend
+    if (accessToken) {
+      localStorage.setItem('accessToken', accessToken);
+    }
+    if (refreshToken) {
+      localStorage.setItem('refreshToken', refreshToken);
+    }
 
     const handleAuth = async () => {
       try {

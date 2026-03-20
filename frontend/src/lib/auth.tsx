@@ -72,6 +72,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       // ignore errors during logout
     }
+    // Clear tokens from localStorage
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     setUser(null);
     window.location.href = '/';
   }, []);

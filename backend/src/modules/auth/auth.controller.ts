@@ -28,14 +28,21 @@ export class AuthController {
 
   private cookieOptions(maxAgeMs: number): CookieOptions {
     const isProduction = this.configService.get('NODE_ENV') === 'production';
-    return {
+    const options: CookieOptions = {
       httpOnly: true,
       secure: isProduction,
       sameSite: isProduction ? 'none' : 'lax',
       path: '/',
       maxAge: maxAgeMs,
-      ...(isProduction && { domain: '.thongthaispace.com' }),
     };
+
+    // For production, set domain to root domain so cookies work across subdomains
+    // e.g., thongthaispace.com and api.thongthaispace.com
+    if (isProduction) {
+      options.domain = '.thongthaispace.com';
+    }
+
+    return options;
   }
 
   private setAuthCookies(
@@ -94,11 +101,15 @@ export class AuthController {
     const googleUser = req.user;
     const { accessToken, refreshToken } =
       await this.authService.loginWithGoogle(googleUser);
+    
+    // Set cookies AND pass tokens in URL for client-side storage as backup
     this.setAuthCookies(res, accessToken, refreshToken);
 
     const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
     const callbackUrl = new URL('/auth/google/callback', frontendUrl);
     callbackUrl.searchParams.set('state', 'success');
+    callbackUrl.searchParams.set('accessToken', accessToken);
+    callbackUrl.searchParams.set('refreshToken', refreshToken);
 
     return res.redirect(callbackUrl.toString());
   }
