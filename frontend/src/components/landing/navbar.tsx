@@ -67,14 +67,6 @@ export function Navbar() {
             </Link>
           ) : (
             <>
-              <button
-                type="button"
-                onClick={loginWithGoogle}
-                className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-muted"
-              >
-                <span className="text-base leading-none">G</span>
-                Continue with Google
-              </button>
               <Link
                 href="/login"
                 className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
