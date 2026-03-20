@@ -4,6 +4,8 @@ import {
   MinLength,
   IsEnum,
   IsOptional,
+  IsBoolean,
+  Equals,
 } from 'class-validator';
 import { UserRole, Language } from '@prisma/client';
 
@@ -30,4 +32,8 @@ export class RegisterDto {
   @IsOptional()
   @IsEnum(Language)
   locale?: Language;
+
+  @IsBoolean()
+  @Equals(true, { message: 'You must accept Terms and Privacy Policy' })
+  acceptTerms: boolean;
 }

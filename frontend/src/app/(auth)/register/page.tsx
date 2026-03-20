@@ -12,10 +12,11 @@ interface RegisterForm {
   email: string;
   password: string;
   confirmPassword: string;
+  acceptTerms: boolean;
 }
 
 export default function RegisterPage() {
-  const { register: authRegister } = useAuth();
+  const { register: authRegister, loginWithGoogle } = useAuth();
   const router = useRouter();
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -29,7 +30,7 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterForm) => {
     try {
       setError('');
-      await authRegister(data.name, data.email, data.password);
+      await authRegister(data.name, data.email, data.password, data.acceptTerms);
       router.push('/dashboard');
     } catch (err: any) {
       const msg = err.response?.data?.message;
@@ -52,6 +53,21 @@ export default function RegisterPage() {
         </div>
 
         <div className="rounded-xl border border-border bg-background p-6 shadow-sm">
+          <button
+            type="button"
+            onClick={loginWithGoogle}
+            className="mb-4 flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-background py-2.5 text-sm font-medium transition-colors hover:bg-muted"
+          >
+            <span className="text-base leading-none">G</span>
+            Continue with Google
+          </button>
+
+          <div className="mb-4 flex items-center gap-3">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">or</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <label className="text-sm font-medium">Full name</label>
@@ -125,6 +141,32 @@ export default function RegisterPage() {
               />
               {errors.confirmPassword && (
                 <p className="mt-1 text-xs text-destructive">{errors.confirmPassword.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="inline-flex items-start gap-2 text-sm text-muted-foreground">
+                <input
+                  type="checkbox"
+                  className="mt-0.5"
+                  {...register('acceptTerms', {
+                    required: 'You must agree to Terms and Privacy Policy before creating an account.',
+                  })}
+                />
+                <span>
+                  I agree to the{' '}
+                  <Link href="/terms-and-conditions" className="underline hover:text-foreground">
+                    Terms and Conditions
+                  </Link>{' '}
+                  and{' '}
+                  <Link href="/privacy-policy" className="underline hover:text-foreground">
+                    Privacy Policy
+                  </Link>
+                  .
+                </span>
+              </label>
+              {errors.acceptTerms && (
+                <p className="mt-1 text-xs text-destructive">{errors.acceptTerms.message}</p>
               )}
             </div>
 

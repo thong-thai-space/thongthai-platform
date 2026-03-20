@@ -30,6 +30,18 @@ function ensureUrl(env: EnvRecord, key: string) {
   }
 }
 
+function ensureOptionalUrl(env: EnvRecord, key: string) {
+  const value = env[key];
+  if (!value || value.trim() === '') return undefined;
+
+  try {
+    new URL(value);
+    return value;
+  } catch {
+    throw new Error(`Environment variable ${key} must be a valid URL`);
+  }
+}
+
 export function validateEnv(env: EnvRecord) {
   const nodeEnv = env.NODE_ENV ?? 'development';
   if (!['development', 'test', 'production'].includes(nodeEnv)) {
@@ -47,6 +59,7 @@ export function validateEnv(env: EnvRecord) {
   ensure(env, 'ANTHROPIC_API_KEY');
   ensure(env, 'REDIS_URL');
   ensureUrl(env, 'FRONTEND_URL');
+  ensureOptionalUrl(env, 'GOOGLE_CALLBACK_URL');
 
   // VAPID keys are optional — push notifications are disabled without them.
   // Generate with: npx web-push generate-vapid-keys

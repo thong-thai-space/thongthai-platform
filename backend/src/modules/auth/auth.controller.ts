@@ -16,6 +16,7 @@ import type { Request, Response, CookieOptions } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import type { GoogleAuthUser } from './strategies/google.strategy';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -37,9 +38,17 @@ export class AuthController {
     };
   }
 
-  private setAuthCookies(res: Response, accessToken: string, refreshToken: string) {
+  private setAuthCookies(
+    res: Response,
+    accessToken: string,
+    refreshToken: string,
+  ) {
     res.cookie('accessToken', accessToken, this.cookieOptions(15 * 60 * 1000));
-    res.cookie('refreshToken', refreshToken, this.cookieOptions(7 * 24 * 60 * 60 * 1000));
+    res.cookie(
+      'refreshToken',
+      refreshToken,
+      this.cookieOptions(7 * 24 * 60 * 60 * 1000),
+    );
   }
 
   private clearAuthCookies(res: Response) {
@@ -48,18 +57,50 @@ export class AuthController {
   }
 
   @Post('register')
-  async register(@Body() dto: RegisterDto, @Res({ passthrough: true }) res: Response) {
-    const { user, accessToken, refreshToken } = await this.authService.register(dto);
+  async register(
+    @Body() dto: RegisterDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { user, accessToken, refreshToken } =
+      await this.authService.register(dto);
     this.setAuthCookies(res, accessToken, refreshToken);
     return { user };
   }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
-    const { user, accessToken, refreshToken } = await this.authService.login(dto);
+  async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { user, accessToken, refreshToken } =
+      await this.authService.login(dto);
     this.setAuthCookies(res, accessToken, refreshToken);
     return { user };
+  }
+
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  googleAuth() {
+    // Guard handles redirect to Google consent screen.
+  }
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthCallback(
+    @Req() req: Request & { user: GoogleAuthUser },
+    @Res() res: Response,
+  ) {
+    const googleUser = req.user;
+    const { accessToken, refreshToken } =
+      await this.authService.loginWithGoogle(googleUser);
+    this.setAuthCookies(res, accessToken, refreshToken);
+
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+    const callbackUrl = new URL('/auth/google/callback', frontendUrl);
+    callbackUrl.searchParams.set('state', 'success');
+
+    return res.redirect(callbackUrl.toString());
   }
 
   @Get('me')
@@ -77,7 +118,9 @@ export class AuthController {
     @Req() req: Request & { user: { id: string } },
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { accessToken, refreshToken } = await this.authService.refreshToken(req.user.id);
+    const { accessToken, refreshToken } = await this.authService.refreshToken(
+      req.user.id,
+    );
     this.setAuthCookies(res, accessToken, refreshToken);
     return { success: true };
   }

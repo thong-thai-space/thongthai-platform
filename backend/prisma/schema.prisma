@@ -93,6 +93,12 @@ enum AiApplyRequestStatus {
 model User {
   id               String    @id @default(cuid())
   email            String    @unique
+  googleId         String?   @unique
+  emailVerified    Boolean   @default(false)
+  emailVerifyToken String?   @unique
+  emailVerifyTokenExpiry DateTime?
+  termsAcceptedAt  DateTime?
+  privacyAcceptedAt DateTime?
   password         String
   name             String
   avatar           String?

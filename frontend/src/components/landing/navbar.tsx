@@ -27,7 +27,7 @@ const defaultHeader: HeaderContent = {
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, loginWithGoogle } = useAuth();
   const { data } = useSectionContent('header');
   const c = (data?.data as HeaderContent) || defaultHeader;
   const navLinks = c.navLinks?.length ? c.navLinks : defaultHeader.navLinks;
@@ -67,6 +67,14 @@ export function Navbar() {
             </Link>
           ) : (
             <>
+              <button
+                type="button"
+                onClick={loginWithGoogle}
+                className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-muted"
+              >
+                <span className="text-base leading-none">G</span>
+                Continue with Google
+              </button>
               <Link
                 href="/login"
                 className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -121,6 +129,17 @@ export function Navbar() {
               </Link>
             ) : (
               <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    loginWithGoogle();
+                  }}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-center text-sm font-medium"
+                >
+                  <span className="text-base leading-none">G</span>
+                  Continue with Google
+                </button>
                 <Link
                   href="/login"
                   className="block rounded-lg border border-border px-4 py-2 text-center text-sm font-medium"

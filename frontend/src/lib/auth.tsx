@@ -15,7 +15,13 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  loginWithGoogle: () => void;
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    acceptTerms: boolean,
+  ) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
   isOwnerOrAdmin: boolean;
@@ -42,12 +48,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(data.user);
   }, []);
 
+  const loginWithGoogle = useCallback(() => {
+    const baseUrl = String(api.defaults.baseURL || 'http://localhost:4000/api');
+    window.location.href = `${baseUrl}/auth/google`;
+  }, []);
+
   const register = useCallback(
-    async (name: string, email: string, password: string) => {
+    async (name: string, email: string, password: string, acceptTerms: boolean) => {
       const { data } = await api.post('/auth/register', {
         name,
         email,
         password,
+        acceptTerms,
       });
       setUser(data.user);
     },
@@ -79,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         loading,
         login,
+        loginWithGoogle,
         register,
         logout,
         refreshUser,

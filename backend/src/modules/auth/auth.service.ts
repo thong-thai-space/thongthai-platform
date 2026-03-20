@@ -6,9 +6,11 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
+import { randomBytes } from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import type { GoogleAuthUser } from './strategies/google.strategy';
 
 @Injectable()
 export class AuthService {
@@ -28,8 +30,14 @@ export class AuthService {
 
     const user = await this.prisma.user.create({
       data: {
-        ...dto,
+        email: dto.email,
+        name: dto.name,
+        phone: dto.phone,
+        role: dto.role,
+        locale: dto.locale,
         password: hashedPassword,
+        termsAcceptedAt: new Date(),
+        privacyAcceptedAt: new Date(),
       },
       select: { id: true, email: true, name: true, role: true, locale: true },
     });
@@ -52,6 +60,51 @@ export class AuthService {
       where: { id: user.id },
       data: { lastLoginAt: new Date() },
     });
+
+    const tokens = await this.generateTokens(user.id, user.role);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _, ...userWithoutPassword } = user;
+    return { user: userWithoutPassword, ...tokens };
+  }
+
+  async loginWithGoogle(googleUser: GoogleAuthUser) {
+    const existing = await this.prisma.user.findUnique({
+      where: { email: googleUser.email },
+    });
+
+    let user = existing;
+
+    if (!user) {
+      const placeholderPassword = await bcrypt.hash(
+        randomBytes(24).toString('hex'),
+        12,
+      );
+      user = await this.prisma.user.create({
+        data: {
+          email: googleUser.email,
+          name: googleUser.name,
+          password: placeholderPassword,
+          googleId: googleUser.googleId,
+          avatar: googleUser.avatar,
+          emailVerified: true,
+          termsAcceptedAt: new Date(),
+          privacyAcceptedAt: new Date(),
+          isActive: true,
+        },
+      });
+    } else {
+      user = await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          googleId: user.googleId || googleUser.googleId,
+          name: user.name || googleUser.name,
+          avatar: user.avatar || googleUser.avatar,
+          emailVerified: true,
+          isActive: true,
+          lastLoginAt: new Date(),
+        },
+      });
+    }
 
     const tokens = await this.generateTokens(user.id, user.role);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
