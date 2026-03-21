@@ -144,8 +144,8 @@ export class AuthController {
   }
 
   @Post('logout')
-  @UseGuards(AuthGuard('jwt'))
-  @ApiBearerAuth()
+  // @UseGuards(AuthGuard('jwt'))
+  // @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   async logout(
     @Req() req: Request & { user: { id: string } },
