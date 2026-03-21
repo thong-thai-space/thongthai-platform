@@ -2,12 +2,14 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
+import { EmailService } from '../email/email.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import type { GoogleAuthUser } from './strategies/google.strategy';
@@ -18,6 +20,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private emailService: EmailService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -27,8 +30,10 @@ export class AuthService {
     if (existing) throw new ConflictException('Email already registered');
 
     const hashedPassword = await bcrypt.hash(dto.password, 12);
+    const verifyToken = randomBytes(32).toString('hex');
+    const verifyExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
 
-    const user = await this.prisma.user.create({
+    await this.prisma.user.create({
       data: {
         email: dto.email,
         name: dto.name,
@@ -38,12 +43,66 @@ export class AuthService {
         password: hashedPassword,
         termsAcceptedAt: new Date(),
         privacyAcceptedAt: new Date(),
+        emailVerified: false,
+        emailVerifyToken: verifyToken,
+        emailVerifyTokenExpiry: verifyExpiry,
       },
-      select: { id: true, email: true, name: true, role: true, locale: true },
     });
 
-    const tokens = await this.generateTokens(user.id, user.role);
-    return { user, ...tokens };
+    await this.emailService.sendVerificationEmail(dto.email, dto.name, verifyToken);
+
+    return { message: 'Registration successful. Please check your email to verify your account.' };
+  }
+
+  async verifyEmail(token: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { emailVerifyToken: token },
+    });
+
+    if (!user) throw new BadRequestException('Invalid verification link');
+    if (user.emailVerified) throw new BadRequestException('Email already verified');
+    if (!user.emailVerifyTokenExpiry || user.emailVerifyTokenExpiry < new Date()) {
+      throw new BadRequestException('Verification link has expired. Please request a new one.');
+    }
+
+    const updated = await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        emailVerified: true,
+        emailVerifyToken: null,
+        emailVerifyTokenExpiry: null,
+        lastLoginAt: new Date(),
+      },
+    });
+
+    const tokens = await this.generateTokens(updated.id, updated.role);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _, ...userWithoutPassword } = updated;
+    return { user: userWithoutPassword, ...tokens };
+  }
+
+  async resendVerification(email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+
+    if (!user || user.emailVerified) {
+      // Return generic message to avoid exposing whether email exists
+      return { message: 'If that email is registered and unverified, a new link has been sent.' };
+    }
+
+    const verifyToken = randomBytes(32).toString('hex');
+    const verifyExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        emailVerifyToken: verifyToken,
+        emailVerifyTokenExpiry: verifyExpiry,
+      },
+    });
+
+    await this.emailService.sendVerificationEmail(user.email, user.name, verifyToken);
+
+    return { message: 'If that email is registered and unverified, a new link has been sent.' };
   }
 
   async login(dto: LoginDto) {
@@ -55,6 +114,11 @@ export class AuthService {
 
     const isMatch = await bcrypt.compare(dto.password, user.password);
     if (!isMatch) throw new UnauthorizedException('Invalid credentials');
+
+    // Block login for email/password users who haven't verified
+    if (!user.emailVerified && !user.googleId) {
+      throw new UnauthorizedException('Please verify your email before signing in.');
+    }
 
     await this.prisma.user.update({
       where: { id: user.id },

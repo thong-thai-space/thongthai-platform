@@ -3,9 +3,8 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
-import { Zap, Eye, EyeOff } from 'lucide-react';
+import { Zap, Eye, EyeOff, Mail } from 'lucide-react';
 
 interface RegisterForm {
   name: string;
@@ -17,8 +16,8 @@ interface RegisterForm {
 
 export default function RegisterPage() {
   const { register: authRegister, loginWithGoogle } = useAuth();
-  const router = useRouter();
   const [error, setError] = useState('');
+  const [registeredEmail, setRegisteredEmail] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const {
     register,
@@ -31,12 +30,50 @@ export default function RegisterPage() {
     try {
       setError('');
       await authRegister(data.name, data.email, data.password, data.acceptTerms);
-      router.push('/dashboard');
+      setRegisteredEmail(data.email);
     } catch (err: any) {
       const msg = err.response?.data?.message;
       setError(Array.isArray(msg) ? msg[0] : msg || 'Sign up failed. Please try again.');
     }
   };
+
+  if (registeredEmail) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
+        <div className="w-full max-w-md">
+          <div className="mb-8 text-center">
+            <Link href="/" className="inline-flex items-center gap-2">
+              <Zap className="h-8 w-8 text-primary" />
+              <span className="text-2xl font-bold">
+                Thong Thai<span className="text-primary"> Space</span>
+              </span>
+            </Link>
+          </div>
+          <div className="rounded-xl border border-border bg-background p-8 shadow-sm text-center">
+            <div className="mb-4 flex justify-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                <Mail className="h-7 w-7 text-primary" />
+              </div>
+            </div>
+            <h2 className="mb-2 text-xl font-semibold">Check your email</h2>
+            <p className="mb-1 text-sm text-muted-foreground">
+              We sent a verification link to
+            </p>
+            <p className="mb-6 text-sm font-medium">{registeredEmail}</p>
+            <p className="text-xs text-muted-foreground">
+              Click the link in the email to activate your account. The link expires in 24 hours.
+            </p>
+            <div className="mt-6 text-center text-sm text-muted-foreground">
+              Already verified?{' '}
+              <Link href="/login" className="font-medium text-primary hover:text-primary/80">
+                Sign in
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4">

@@ -121,17 +121,7 @@ export function Navbar() {
               </Link>
             ) : (
               <div className="flex flex-col gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileOpen(false);
-                    loginWithGoogle();
-                  }}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-center text-sm font-medium"
-                >
-                  <span className="text-base leading-none">G</span>
-                  Continue with Google
-                </button>
+                
                 <Link
                   href="/login"
                   className="block rounded-lg border border-border px-4 py-2 text-center text-sm font-medium"

@@ -55,13 +55,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = useCallback(
     async (name: string, email: string, password: string, acceptTerms: boolean) => {
-      const { data } = await api.post('/auth/register', {
+      await api.post('/auth/register', {
         name,
         email,
         password,
         acceptTerms,
       });
-      setUser(data.user);
+      // No login after register — user must verify email first
     },
     [],
   );
@@ -72,9 +72,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       // ignore errors during logout
     }
-    // Clear tokens from localStorage
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
     setUser(null);
     window.location.href = '/';
   }, []);

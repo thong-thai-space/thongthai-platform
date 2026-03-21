@@ -5,17 +5,6 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// Add Bearer token from localStorage if available
-api.interceptors.request.use((config) => {
-  if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-  }
-  return config;
-});
-
 // Refresh token mutex to prevent concurrent refresh attempts
 let isRefreshing = false;
 let failedQueue: Array<{
@@ -55,14 +44,10 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const refreshToken = localStorage.getItem('refreshToken');
         await axios.post(
           `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'}/auth/refresh`,
           {},
-          { 
-            withCredentials: true,
-            headers: refreshToken ? { Authorization: `Bearer ${refreshToken}` } : {},
-          },
+          { withCredentials: true },
         );
         processQueue(null);
         return api(originalRequest);
@@ -78,9 +63,6 @@ api.interceptors.response.use(
 
           // Redirect to login only from protected areas; keep public pages stable.
           if (!isAuthPage && isProtectedPage) {
-            // Clear tokens before redirecting
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
             window.location.href = '/login';
           }
         }

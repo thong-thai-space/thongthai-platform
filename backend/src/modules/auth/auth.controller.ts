@@ -3,6 +3,7 @@ import {
   Post,
   Get,
   Body,
+  Query,
   UseGuards,
   Req,
   Res,
@@ -36,8 +37,6 @@ export class AuthController {
       maxAge: maxAgeMs,
     };
 
-    // For production, set domain to root domain so cookies work across subdomains
-    // e.g., thongthaispace.com and api.thongthaispace.com
     if (isProduction) {
       options.domain = '.thongthaispace.com';
     }
@@ -64,14 +63,8 @@ export class AuthController {
   }
 
   @Post('register')
-  async register(
-    @Body() dto: RegisterDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const { user, accessToken, refreshToken } =
-      await this.authService.register(dto);
-    this.setAuthCookies(res, accessToken, refreshToken);
-    return { user };
+  async register(@Body() dto: RegisterDto) {
+    return this.authService.register(dto);
   }
 
   @Post('login')
@@ -84,6 +77,23 @@ export class AuthController {
       await this.authService.login(dto);
     this.setAuthCookies(res, accessToken, refreshToken);
     return { user };
+  }
+
+  @Get('verify-email')
+  async verifyEmail(
+    @Query('token') token: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { user, accessToken, refreshToken } =
+      await this.authService.verifyEmail(token);
+    this.setAuthCookies(res, accessToken, refreshToken);
+    return { user };
+  }
+
+  @Post('resend-verification')
+  @HttpCode(HttpStatus.OK)
+  async resendVerification(@Body('email') email: string) {
+    return this.authService.resendVerification(email);
   }
 
   @Get('google')
@@ -101,15 +111,12 @@ export class AuthController {
     const googleUser = req.user;
     const { accessToken, refreshToken } =
       await this.authService.loginWithGoogle(googleUser);
-    
-    // Set cookies AND pass tokens in URL for client-side storage as backup
+
     this.setAuthCookies(res, accessToken, refreshToken);
 
     const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
     const callbackUrl = new URL('/auth/google/callback', frontendUrl);
     callbackUrl.searchParams.set('state', 'success');
-    callbackUrl.searchParams.set('accessToken', accessToken);
-    callbackUrl.searchParams.set('refreshToken', refreshToken);
 
     return res.redirect(callbackUrl.toString());
   }
