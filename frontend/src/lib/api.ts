@@ -26,7 +26,7 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     const requestUrl = String(originalRequest?.url || '');
-    const isAuthEndpoint = ['/auth/login', '/auth/register', '/auth/refresh', '/auth/me'].some((path) =>
+    const isAuthEndpoint = ['/auth/login', '/auth/register', '/auth/refresh', '/auth/me', '/auth/logout'].some((path) =>
       requestUrl.includes(path),
     );
 

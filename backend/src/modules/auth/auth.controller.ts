@@ -58,8 +58,14 @@ export class AuthController {
   }
 
   private clearAuthCookies(res: Response) {
-    res.clearCookie('accessToken', { path: '/' });
-    res.clearCookie('refreshToken', { path: '/' });
+    const clearOptions: CookieOptions = {
+      ...this.cookieOptions(0),
+      maxAge: 0,
+      expires: new Date(0),
+    };
+
+    res.clearCookie('accessToken', clearOptions);
+    res.clearCookie('refreshToken', clearOptions);
   }
 
   @Post('register')
@@ -144,11 +150,11 @@ export class AuthController {
   }
 
   @Post('logout')
-  // @UseGuards(AuthGuard('jwt'))
-  // @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt-refresh'))
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   async logout(
-    @Req() req: Request & { user: { id: string } },
+    @Req() req: Request & { user: { id: string; role: string } },
     @Res({ passthrough: true }) res: Response,
   ) {
     this.clearAuthCookies(res);
