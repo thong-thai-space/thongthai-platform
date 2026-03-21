@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
+import api from "@/lib/api";
 import { Zap, Eye, EyeOff } from "lucide-react";
 
 interface LoginForm {
@@ -16,24 +17,61 @@ export default function LoginPage() {
   const { login, loginWithGoogle } = useAuth();
   const router = useRouter();
   const [error, setError] = useState("");
+  const [resendMessage, setResendMessage] = useState("");
+  const [isResending, setIsResending] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<LoginForm>();
+  const emailValue = watch("email");
+  const canResendVerification = error
+    .toLowerCase()
+    .includes("verify your email");
 
   const onSubmit = async (data: LoginForm) => {
     try {
       setError("");
+      setResendMessage("");
       await login(data.email, data.password);
       // Role-based redirect happens via layout guards
       // Default to dashboard; layouts will redirect MEMBER→/member, CLIENT→/portal
       router.push("/dashboard");
-    } catch (err: any) {
-      setError(
-        err.response?.data?.message || "Sign in failed. Please try again.",
+    } catch (err: unknown) {
+      const message =
+        typeof err === "object" &&
+        err !== null &&
+        "response" in err &&
+        typeof (err as { response?: { data?: { message?: string } } }).response
+          ?.data?.message === "string"
+          ? (err as { response?: { data?: { message?: string } } }).response
+              ?.data?.message
+          : "Sign in failed. Please try again.";
+      setError(message || "Sign in failed. Please try again.");
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!emailValue) {
+      setResendMessage("Please enter your email first.");
+      return;
+    }
+
+    try {
+      setIsResending(true);
+      setResendMessage("");
+      const { data } = await api.post("/auth/resend-verification", {
+        email: emailValue,
+      });
+      setResendMessage(
+        data?.message || "If eligible, a new verification email has been sent.",
       );
+    } catch {
+      setResendMessage("Could not resend verification email. Please try again.");
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -152,6 +190,25 @@ export default function LoginPage() {
               </div>
             )}
 
+            {canResendVerification && (
+              <button
+                type="button"
+                onClick={handleResendVerification}
+                disabled={isResending}
+                className="w-full rounded-lg border border-border py-2.5 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-50"
+              >
+                {isResending
+                  ? "Sending verification email..."
+                  : "Resend verification email"}
+              </button>
+            )}
+
+            {resendMessage && (
+              <div className="rounded-lg bg-muted px-4 py-3 text-sm text-muted-foreground">
+                {resendMessage}
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={isSubmitting}
@@ -162,7 +219,7 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link
               href="/register"
               className="font-medium text-primary hover:text-primary/80"
