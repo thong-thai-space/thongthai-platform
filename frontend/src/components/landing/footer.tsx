@@ -1,9 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { Mail, Phone, MapPin } from 'lucide-react';
+import { Zap, Mail, Phone, MapPin } from 'lucide-react';
 import { useSectionContent } from '@/hooks/use-content';
-import { BrandLogo } from '@/components/shared/brand-logo';
 
 const defaults = {
   brand: {
@@ -43,12 +42,12 @@ export function Footer() {
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div>
-            <BrandLogo
-              href="/"
-              imageClassName="h-7 max-w-32"
-              labelClassName="text-lg font-bold"
-              label={c.brand.name}
-            />
+            <Link href="/" className="flex items-center gap-2">
+              <Zap className="h-6 w-6 text-primary" />
+              <span className="text-lg font-bold">
+                {c.brand.name.replace(' Space', '')}<span className="text-primary"> Space</span>
+              </span>
+            </Link>
             <p className="mt-3 text-sm text-muted-foreground">
               {c.brand.description}
             </p>

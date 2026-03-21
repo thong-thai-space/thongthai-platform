@@ -15,12 +15,12 @@ import {
   Bot,
   Settings,
   LogOut,
+  Zap,
   ChevronLeft,
   ChevronRight,
   PanelTop,
 } from 'lucide-react';
 import { useState } from 'react';
-import { BrandLogo } from '@/components/shared/brand-logo';
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Overview' },
   { href: '/dashboard/projects', icon: FolderKanban, label: 'Projects' },
@@ -48,7 +48,10 @@ export function Sidebar() {
       {/* Logo */}
       <div className="flex h-14 items-center justify-between border-b border-white/10 px-4">
         {!collapsed && (
-          <BrandLogo href="/dashboard" imageClassName="h-6 max-w-24" labelClassName="text-sm font-bold" />
+          <Link href="/dashboard" className="flex items-center gap-2">
+            <Zap className="h-6 w-6 text-primary" />
+            <span className="text-sm font-bold">Thông Thái Space</span>
+          </Link>
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}

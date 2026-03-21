@@ -3,10 +3,9 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth } from '@/lib/auth';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSectionContent } from '@/hooks/use-content';
-import { BrandLogo } from '@/components/shared/brand-logo';
 
 type HeaderContent = {
   navLinks: Array<{ href: string; label: string }>;
@@ -28,7 +27,7 @@ const defaultHeader: HeaderContent = {
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, loginWithGoogle } = useAuth();
   const { data } = useSectionContent('header');
   const c = (data?.data as HeaderContent) || defaultHeader;
   const navLinks = c.navLinks?.length ? c.navLinks : defaultHeader.navLinks;
@@ -37,12 +36,12 @@ export function Navbar() {
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         {/* Logo */}
-        <BrandLogo
-          href="/"
-          className="gap-2"
-          imageClassName="h-8 max-w-36"
-          labelClassName="text-xl font-bold tracking-tight"
-        />
+        <Link href="/" className="flex items-center gap-2">
+          <Zap className="h-7 w-7 text-primary" />
+          <span className="text-xl font-bold tracking-tight">
+            Thông Thái<span className="text-primary"> Space</span>
+          </span>
+        </Link>
 
         {/* Desktop nav */}
         <div className="hidden items-center gap-8 md:flex">
