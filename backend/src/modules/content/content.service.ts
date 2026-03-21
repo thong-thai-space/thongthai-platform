@@ -48,6 +48,11 @@ export class ContentService {
 }
 
 const defaultContent: Record<string, object> = {
+  branding: {
+    name: 'Thong Thai Space',
+    logoUrl: '',
+    logoAlt: 'Thong Thai Space logo',
+  },
   hero: {
     badge: 'Smart technology solutions',
     title: 'Turn ideas into',

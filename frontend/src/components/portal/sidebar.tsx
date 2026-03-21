@@ -10,12 +10,12 @@ import {
   FileText,
   Settings,
   LogOut,
-  Zap,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
 import { useState } from 'react';
 import { UserAvatar } from '@/components/user-avatar';
+import { BrandLogo } from '@/components/shared/brand-logo';
 const navItems = [
   { href: '/portal', icon: LayoutDashboard, label: 'Overview' },
   { href: '/portal/projects', icon: FolderKanban, label: 'Projects' },
@@ -38,10 +38,13 @@ export function PortalSidebar() {
       {/* Logo */}
       <div className="flex h-14 items-center justify-between border-b border-white/10 px-4">
         {!collapsed && (
-          <Link href="/portal" className="flex items-center gap-2">
-            <Zap className="h-6 w-6 text-accent" />
-            <span className="text-sm font-bold">Client Portal</span>
-          </Link>
+          <BrandLogo
+            href="/portal"
+            label="Client Portal"
+            imageClassName="h-6 max-w-24"
+            iconClassName="text-accent"
+            labelClassName="text-sm font-bold"
+          />
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}

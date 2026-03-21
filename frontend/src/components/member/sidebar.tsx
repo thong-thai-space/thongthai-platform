@@ -10,12 +10,12 @@ import {
   CheckSquare,
   Settings,
   LogOut,
-  Zap,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
 import { useState } from 'react';
 import { UserAvatar } from '@/components/user-avatar';
+import { BrandLogo } from '@/components/shared/brand-logo';
 const navItems = [
   { href: '/member', icon: LayoutDashboard, label: 'Overview' },
   { href: '/member/tasks', icon: CheckSquare, label: 'My Tasks' },
@@ -38,10 +38,7 @@ export function MemberSidebar() {
       {/* Logo */}
       <div className="flex h-14 items-center justify-between border-b border-white/10 px-4">
         {!collapsed && (
-          <Link href="/member" className="flex items-center gap-2">
-            <Zap className="h-6 w-6 text-primary" />
-            <span className="text-sm font-bold">Member Portal</span>
-          </Link>
+          <BrandLogo href="/member" label="Member Portal" imageClassName="h-6 max-w-24" labelClassName="text-sm font-bold" />
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}

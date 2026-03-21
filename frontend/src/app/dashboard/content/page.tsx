@@ -20,6 +20,7 @@ import { Save, RefreshCw, Check, Trash2, Plus, Upload } from 'lucide-react';
 import type { Project } from '@/types';
 
 const SECTIONS = [
+  { key: 'branding', label: 'Branding' },
   { key: 'hero', label: 'Hero' },
   { key: 'about', label: 'About' },
   { key: 'services', label: 'Services' },
@@ -85,6 +86,12 @@ const HERO_DEFAULTS = {
     { value: '5+', label: 'Years of experience' },
     { value: '99%', label: 'Client satisfaction' },
   ],
+};
+
+const BRANDING_DEFAULTS = {
+  name: 'Thong Thai Space',
+  logoUrl: '',
+  logoAlt: 'Thong Thai Space logo',
 };
 
 const SERVICES_DEFAULTS = {
@@ -153,6 +160,7 @@ const FOOTER_DEFAULTS = {
 };
 
 const SECTION_DEFAULTS: Record<string, unknown> = {
+  branding: BRANDING_DEFAULTS,
   hero: HERO_DEFAULTS,
   about: ABOUT_DEFAULTS,
   services: SERVICES_DEFAULTS,
@@ -168,6 +176,12 @@ type AboutSectionData = {
   teamTitle: string;
   teamSubtitle: string;
   team: Array<{ name: string; role: string; bio: string; avatar?: string }>;
+};
+
+type BrandingSectionData = {
+  name: string;
+  logoUrl: string;
+  logoAlt: string;
 };
 
 type JsonPrimitive = string | number | boolean | null;
@@ -505,6 +519,94 @@ function toAboutSectionData(value: unknown): AboutSectionData {
         : base.teamSubtitle,
     team,
   };
+}
+
+function toBrandingSectionData(value: unknown): BrandingSectionData {
+  const base = BRANDING_DEFAULTS;
+  if (!isObjectValue(value)) return base;
+
+  return {
+    name: typeof value.name === 'string' ? value.name : base.name,
+    logoUrl: typeof value.logoUrl === 'string' ? value.logoUrl : base.logoUrl,
+    logoAlt: typeof value.logoAlt === 'string' ? value.logoAlt : base.logoAlt,
+  };
+}
+
+function BrandingVisualEditor({
+  value,
+  onChange,
+  onUploadLogo,
+  isUploading,
+}: {
+  value: unknown;
+  onChange: (v: BrandingSectionData) => void;
+  onUploadLogo: (file: File) => Promise<string | undefined>;
+  isUploading: boolean;
+}) {
+  const data = toBrandingSectionData(value);
+
+  return (
+    <div className="space-y-4 rounded-lg border border-border p-4">
+      <div className="grid gap-3 md:grid-cols-2">
+        <label className="space-y-1.5">
+          <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Brand Name</span>
+          <input
+            value={data.name}
+            onChange={(e) => onChange({ ...data, name: e.target.value })}
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+        </label>
+        <label className="space-y-1.5">
+          <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Logo Alt Text</span>
+          <input
+            value={data.logoAlt}
+            onChange={(e) => onChange({ ...data, logoAlt: e.target.value })}
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+        </label>
+      </div>
+
+      <div className="space-y-2">
+        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Logo</span>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+          {data.logoUrl ? (
+            <img
+              src={resolveAssetUrl(data.logoUrl)}
+              alt={data.logoAlt || data.name}
+              className="h-16 w-40 rounded-lg border border-border bg-background object-contain p-2"
+            />
+          ) : (
+            <div className="flex h-16 w-40 items-center justify-center rounded-lg border border-dashed border-border text-xs text-muted-foreground">
+              No logo yet
+            </div>
+          )}
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm hover:bg-muted">
+              <Upload className="h-4 w-4" />
+              {isUploading ? 'Uploading...' : 'Upload logo'}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                className="hidden"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const url = await onUploadLogo(file);
+                  if (url) onChange({ ...data, logoUrl: url });
+                }}
+              />
+            </label>
+            <input
+              value={data.logoUrl}
+              onChange={(e) => onChange({ ...data, logoUrl: e.target.value })}
+              placeholder="Paste logo URL"
+              className="min-w-72 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function AboutVisualEditor({
@@ -917,7 +1019,7 @@ function PortfolioDatabaseManager({ contentValue }: { contentValue: unknown }) {
         <div className="space-y-3">
           {showcaseProjects.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border bg-background p-6 text-sm text-muted-foreground">
-              No projects found yet. Create projects first in Dashboard → Projects, then enable "Show on Portfolio" here.
+              No projects found yet. Create projects first in Dashboard → Projects, then enable &quot;Show on Portfolio&quot; here.
             </div>
           ) : (
             showcaseProjects.map((project) => (
@@ -1122,6 +1224,7 @@ export default function ContentPage() {
   const [editorModeBySection, setEditorModeBySection] = useState<Record<string, EditorMode>>({});
   const [saved, setSaved] = useState('');
   const [uploadingAboutKey, setUploadingAboutKey] = useState('');
+  const [uploadingBranding, setUploadingBranding] = useState(false);
 
   const contentMap = useMemo(() => {
     const map: Record<string, unknown> = {};
@@ -1172,6 +1275,16 @@ export default function ContentPage() {
       return result.url;
     } finally {
       setUploadingAboutKey('');
+    }
+  };
+
+  const handleUploadBrandingLogo = async (file: File) => {
+    setUploadingBranding(true);
+    try {
+      const result = await uploadContentImage.mutateAsync(file);
+      return result.url;
+    } finally {
+      setUploadingBranding(false);
     }
   };
 
@@ -1308,6 +1421,18 @@ export default function ContentPage() {
                         uploadingKey={uploadingAboutKey}
                         onUploadAvatar={handleUploadAboutAvatar}
                       />
+                    ) : activeTab === 'branding' ? (
+                      <BrandingVisualEditor
+                        value={draftData[activeTab] ?? SECTION_DEFAULTS[activeTab] ?? BRANDING_DEFAULTS}
+                        onChange={(v) =>
+                          setDraftData((prev) => ({
+                            ...prev,
+                            [activeTab]: v,
+                          }))
+                        }
+                        isUploading={uploadingBranding}
+                        onUploadLogo={handleUploadBrandingLogo}
+                      />
                     ) : (
                       <VisualEditorNode
                         label={toDisplayLabel(activeTab)}
@@ -1365,6 +1490,18 @@ export default function ContentPage() {
                     }
                     uploadingKey={uploadingAboutKey}
                     onUploadAvatar={handleUploadAboutAvatar}
+                  />
+                ) : activeMode === 'visual' && activeTab === 'branding' ? (
+                  <BrandingVisualEditor
+                    value={currentValue}
+                    onChange={(v) =>
+                      setDraftData((prev) => ({
+                        ...prev,
+                        [activeTab]: v,
+                      }))
+                    }
+                    isUploading={uploadingBranding}
+                    onUploadLogo={handleUploadBrandingLogo}
                   />
                 ) : activeMode === 'visual' ? (
                   <VisualEditorNode
