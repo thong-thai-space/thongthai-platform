@@ -160,12 +160,18 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="text-sm font-medium">Password</label>
+              <label className="text-sm font-medium">Password (8+ characters, including uppercase, lowercase, number, and special character)</label>
+              
               <div className="relative mt-1">
                 <input
                   {...register('password', {
                     required: 'Please enter your password',
                     minLength: { value: 8, message: 'Password must be at least 8 characters' },
+                    pattern: {
+                      value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                      message:
+                        'Password must include uppercase, lowercase, number, and special character',
+                    },
                   })}
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="new-password"
