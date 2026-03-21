@@ -1,19 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Zap, CheckCircle, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import api from '@/lib/api';
 
 export default function VerifyEmailPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
   const [message, setMessage] = useState('Verifying your email...');
 
   useEffect(() => {
-    const token = searchParams.get('token');
+    const token = new URLSearchParams(window.location.search).get('token');
     if (!token) {
       setStatus('error');
       setMessage('No verification token provided.');
@@ -38,7 +37,7 @@ export default function VerifyEmailPage() {
     };
 
     verify();
-  }, [searchParams, router]);
+  }, [router]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
