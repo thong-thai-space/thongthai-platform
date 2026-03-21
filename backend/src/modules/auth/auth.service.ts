@@ -27,11 +27,45 @@ export class AuthService {
     const existing = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
-    if (existing) throw new ConflictException('Email already registered');
-
-    const hashedPassword = await bcrypt.hash(dto.password, 12);
     const verifyToken = randomBytes(32).toString('hex');
     const verifyExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
+
+    if (existing) {
+      // Keep verified users and Google users protected from account overwrite.
+      if (existing.emailVerified || existing.googleId) {
+        throw new ConflictException('Email already registered');
+      }
+
+      const hashedPassword = await bcrypt.hash(dto.password, 12);
+      await this.prisma.user.update({
+        where: { id: existing.id },
+        data: {
+          name: dto.name,
+          phone: dto.phone,
+          role: dto.role,
+          locale: dto.locale,
+          password: hashedPassword,
+          termsAcceptedAt: new Date(),
+          privacyAcceptedAt: new Date(),
+          emailVerifyToken: verifyToken,
+          emailVerifyTokenExpiry: verifyExpiry,
+          isActive: true,
+        },
+      });
+
+      await this.emailService.sendVerificationEmail(
+        dto.email,
+        dto.name,
+        verifyToken,
+      );
+
+      return {
+        message:
+          'Your account is pending verification. We sent a new verification email.',
+      };
+    }
+
+    const hashedPassword = await bcrypt.hash(dto.password, 12);
 
     await this.prisma.user.create({
       data: {
