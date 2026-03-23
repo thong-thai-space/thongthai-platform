@@ -69,18 +69,19 @@ export class AuthController {
   }
 
   @Post('register')
-  async register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto);
+  async register(@Body() dto: RegisterDto, @Req() req: Request) {
+    return this.authService.register(dto, req.ip);
   }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(
     @Body() dto: LoginDto,
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
     const { user, accessToken, refreshToken } =
-      await this.authService.login(dto);
+      await this.authService.login(dto, req.ip);
     this.setAuthCookies(res, accessToken, refreshToken);
     return { user };
   }

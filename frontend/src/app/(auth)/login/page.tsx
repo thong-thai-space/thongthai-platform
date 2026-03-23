@@ -7,10 +7,12 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import api from "@/lib/api";
 import { Zap, Eye, EyeOff } from "lucide-react";
+import { TurnstileWidget } from "@/components/common/Turnstile";
 
 interface LoginForm {
   email: string;
   password: string;
+  turnstileToken: string;
 }
 
 export default function LoginPage() {
@@ -24,8 +26,13 @@ export default function LoginPage() {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors, isSubmitting },
-  } = useForm<LoginForm>();
+  } = useForm<LoginForm>({
+    defaultValues: {
+      turnstileToken: "",
+    },
+  });
   const emailValue = watch("email");
   const canResendVerification = error
     .toLowerCase()
@@ -35,7 +42,7 @@ export default function LoginPage() {
     try {
       setError("");
       setResendMessage("");
-      await login(data.email, data.password);
+      await login(data.email, data.password, data.turnstileToken);
       // Role-based redirect happens via layout guards
       // Default to dashboard; layouts will redirect MEMBER→/member, CLIENT→/portal
       router.push("/dashboard");
@@ -207,6 +214,29 @@ export default function LoginPage() {
               <div className="rounded-lg bg-muted px-4 py-3 text-sm text-muted-foreground">
                 {resendMessage}
               </div>
+            )}
+
+            <input
+              type="hidden"
+              {...register("turnstileToken", {
+                required: "Please complete Turnstile verification.",
+              })}
+            />
+            <TurnstileWidget
+              onVerify={(token) => {
+                setValue("turnstileToken", token, { shouldValidate: true });
+              }}
+              onExpire={() => {
+                setValue("turnstileToken", "", { shouldValidate: true });
+              }}
+              onError={() => {
+                setValue("turnstileToken", "", { shouldValidate: true });
+              }}
+            />
+            {errors.turnstileToken && (
+              <p className="text-xs text-destructive">
+                {errors.turnstileToken.message}
+              </p>
             )}
 
             <button

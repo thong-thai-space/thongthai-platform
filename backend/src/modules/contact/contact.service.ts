@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationService } from '../notification/notification.service';
+import { TurnstileService } from '../../common/turnstile/turnstile.service';
 import { UserRole, NotificationType } from '@prisma/client';
 import { CreateContactRequestDto } from './dto/create-contact-request.dto';
 
@@ -9,11 +10,21 @@ export class ContactService {
   constructor(
     private prisma: PrismaService,
     private notificationService: NotificationService,
+    private turnstileService: TurnstileService,
   ) {}
 
-  async create(dto: CreateContactRequestDto) {
+  async create(dto: CreateContactRequestDto, remoteIp?: string) {
+    const isTurnstileValid = await this.turnstileService.verify(
+      dto.turnstileToken,
+      remoteIp,
+    );
+    if (!isTurnstileValid) {
+      throw new BadRequestException('Turnstile verification failed');
+    }
+
+    const { turnstileToken: _, ...contactPayload } = dto;
     const contactRequest = await this.prisma.contactRequest.create({
-      data: dto,
+      data: contactPayload,
     });
 
     // Notify all OWNER and ADMIN users

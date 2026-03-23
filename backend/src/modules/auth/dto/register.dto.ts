@@ -41,4 +41,8 @@ export class RegisterDto {
   @IsBoolean()
   @Equals(true, { message: 'You must accept Terms and Privacy Policy' })
   acceptTerms: boolean;
+
+  @IsString()
+  @MinLength(1)
+  turnstileToken: string;
 }

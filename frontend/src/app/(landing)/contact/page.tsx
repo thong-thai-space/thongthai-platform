@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { Mail, Phone, MapPin, Send, CheckCircle } from 'lucide-react';
 import api from '@/lib/api';
 import { useSectionContent } from '@/hooks/use-content';
+import { TurnstileWidget } from '@/components/common/Turnstile';
 
 interface ContactForm {
   name: string;
@@ -14,6 +15,7 @@ interface ContactForm {
   service: string;
   budget: string;
   message: string;
+  turnstileToken: string;
 }
 
 type ContactContent = {
@@ -89,8 +91,13 @@ export default function ContactPage() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
-  } = useForm<ContactForm>();
+  } = useForm<ContactForm>({
+    defaultValues: {
+      turnstileToken: '',
+    },
+  });
 
   const onSubmit = async (data: ContactForm) => {
     try {
@@ -275,6 +282,27 @@ export default function ContactPage() {
                   <div className="rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
                     {error}
                   </div>
+                )}
+
+                <input
+                  type="hidden"
+                  {...register('turnstileToken', {
+                    required: 'Please complete Turnstile verification.',
+                  })}
+                />
+                <TurnstileWidget
+                  onVerify={(token) => {
+                    setValue('turnstileToken', token, { shouldValidate: true });
+                  }}
+                  onExpire={() => {
+                    setValue('turnstileToken', '', { shouldValidate: true });
+                  }}
+                  onError={() => {
+                    setValue('turnstileToken', '', { shouldValidate: true });
+                  }}
+                />
+                {errors.turnstileToken && (
+                  <p className="text-xs text-destructive">{errors.turnstileToken.message}</p>
                 )}
 
                 <button

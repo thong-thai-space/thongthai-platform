@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { Zap, Eye, EyeOff, Mail } from 'lucide-react';
+import { TurnstileWidget } from '@/components/common/Turnstile';
 
 interface RegisterForm {
   name: string;
@@ -12,6 +13,7 @@ interface RegisterForm {
   password: string;
   confirmPassword: string;
   acceptTerms: boolean;
+  turnstileToken: string;
 }
 
 export default function RegisterPage() {
@@ -23,13 +25,24 @@ export default function RegisterPage() {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors, isSubmitting },
-  } = useForm<RegisterForm>();
+  } = useForm<RegisterForm>({
+    defaultValues: {
+      turnstileToken: '',
+    },
+  });
 
   const onSubmit = async (data: RegisterForm) => {
     try {
       setError('');
-      await authRegister(data.name, data.email, data.password, data.acceptTerms);
+      await authRegister(
+        data.name,
+        data.email,
+        data.password,
+        data.acceptTerms,
+        data.turnstileToken,
+      );
       setRegisteredEmail(data.email);
     } catch (err: any) {
       const msg = err.response?.data?.message;
@@ -232,6 +245,27 @@ export default function RegisterPage() {
               <div className="rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
                 {error}
               </div>
+            )}
+
+            <input
+              type="hidden"
+              {...register('turnstileToken', {
+                required: 'Please complete Turnstile verification.',
+              })}
+            />
+            <TurnstileWidget
+              onVerify={(token) => {
+                setValue('turnstileToken', token, { shouldValidate: true });
+              }}
+              onExpire={() => {
+                setValue('turnstileToken', '', { shouldValidate: true });
+              }}
+              onError={() => {
+                setValue('turnstileToken', '', { shouldValidate: true });
+              }}
+            />
+            {errors.turnstileToken && (
+              <p className="text-xs text-destructive">{errors.turnstileToken.message}</p>
             )}
 
             <button

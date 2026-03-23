@@ -28,4 +28,8 @@ export class CreateContactRequestDto {
   @IsNotEmpty()
   @IsString()
   message: string;
+
+  @IsNotEmpty()
+  @IsString()
+  turnstileToken: string;
 }
