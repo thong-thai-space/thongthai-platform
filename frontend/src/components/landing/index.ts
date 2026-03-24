@@ -1,6 +1,5 @@
 export { Navbar } from './navbar';
 export { Footer } from './footer';
-export { PlanetHero } from './planet-hero';
 export { HeroSection } from './hero-section';
 export { ServicesSection } from './services-section';
 export { PortfolioSection } from './portfolio-section';
