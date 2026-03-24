@@ -74,9 +74,6 @@ export const chatStore = {
 
   reset: () => {
     state = { messages: [], conversationId: undefined };
-    if (typeof window !== 'undefined') {
-      window.localStorage.removeItem(STORAGE_KEY);
-    }
     notify();
   },
 

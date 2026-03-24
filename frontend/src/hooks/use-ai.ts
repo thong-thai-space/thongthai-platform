@@ -145,63 +145,38 @@ export interface AiAuditLog {
 // ==================== MUTATIONS ====================
 
 export function useAiChat() {
-  return useMutation<
-    ChatResponse,
-    Error,
-    { message: string; conversationId?: string; model?: string }
-  >({
+  return useMutation<ChatResponse, Error, { message: string; conversationId?: string }>({
     mutationFn: (data) => api.post('/ai/chat', data).then((r) => r.data),
   });
 }
 
 export function useGenerateProposal() {
-  return useMutation<
-    ProposalResponse,
-    Error,
-    { requirements: string; budget?: string; locale?: Language; model?: string }
-  >({
+  return useMutation<ProposalResponse, Error, { requirements: string; budget?: string; locale?: Language }>({
     mutationFn: (data) => api.post('/ai/generate-proposal', data).then((r) => r.data),
   });
 }
 
 export function useBreakdownTasks() {
-  return useMutation<
-    TaskBreakdownResponse,
-    Error,
-    { description: string; techStack: string[]; model?: string }
-  >({
+  return useMutation<TaskBreakdownResponse, Error, { description: string; techStack: string[] }>({
     mutationFn: (data) => api.post('/ai/breakdown-tasks', data).then((r) => r.data),
   });
 }
 
 export function useReviewCode() {
-  return useMutation<
-    CodeReviewResponse,
-    Error,
-    { code: string; language: string; context?: string; model?: string }
-  >({
+  return useMutation<CodeReviewResponse, Error, { code: string; language: string; context?: string }>({
     mutationFn: (data) => api.post('/ai/review-code', data).then((r) => r.data),
   });
 }
 
 export function useEstimateProject() {
-  return useMutation<
-    EstimateResponse,
-    Error,
-    { requirements: string; locale?: Language; model?: string }
-  >({
+  return useMutation<EstimateResponse, Error, { requirements: string; locale?: Language }>({
     mutationFn: (data) => api.post('/ai/estimate', data).then((r) => r.data),
   });
 }
 
 export function useProgressReport() {
-  return useMutation<
-    ProgressReportResponse,
-    Error,
-    { projectId: string; model?: string; locale?: Language }
-  >({
-    mutationFn: ({ projectId, ...payload }) =>
-      api.post(`/ai/progress-report/${projectId}`, payload).then((r) => r.data),
+  return useMutation<ProgressReportResponse, Error, { projectId: string }>({
+    mutationFn: ({ projectId }) => api.post(`/ai/progress-report/${projectId}`).then((r) => r.data),
   });
 }
 
@@ -215,7 +190,6 @@ export function useStrategicPlan() {
       projectId?: string;
       locale?: Language;
       includeRiskMatrix?: boolean;
-      model?: string;
     }
   >({
     mutationFn: (data) => api.post('/ai/strategic-plan', data).then((r) => r.data),

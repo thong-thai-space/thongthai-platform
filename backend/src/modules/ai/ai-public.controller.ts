@@ -12,6 +12,6 @@ export class AiPublicController {
   @Post('chat-public')
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   async chatPublic(@Body() dto: ChatDto) {
-    return this.aiService.chatPublic(dto.message, dto.model);
+    return this.aiService.chatPublic(dto.message);
   }
 }

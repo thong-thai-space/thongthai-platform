@@ -21,13 +21,7 @@ import {
   importTextFile,
 } from '@/lib/file-export';
 
-export function AiProgressReport({
-  model,
-  modelLabel,
-}: {
-  model?: string;
-  modelLabel?: string;
-}) {
+export function AiProgressReport() {
   const { data: projects, isLoading: loadingProjects } = useProjects();
   const [selectedProjectId, setSelectedProjectId] = useState('');
   const [result, setResult] = useState('');
@@ -37,7 +31,7 @@ export function AiProgressReport({
   const handleGenerate = () => {
     if (!selectedProjectId || mutation.isPending) return;
     mutation.mutate(
-      { projectId: selectedProjectId, model },
+      { projectId: selectedProjectId },
       {
         onSuccess: (data) => setResult(data.report),
         onError: () => setResult('An error occurred. Please try again.'),
@@ -65,11 +59,6 @@ export function AiProgressReport({
       <div className="flex items-center gap-2 border-b border-border px-4 py-3">
         <BarChart3 className="h-5 w-5 text-rose-500" />
         <span className="text-sm font-medium">Progress Report</span>
-        {modelLabel && (
-          <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
-            Model: {modelLabel}
-          </span>
-        )}
       </div>
 
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">

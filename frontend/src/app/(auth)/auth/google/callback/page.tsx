@@ -11,7 +11,7 @@ type MeResponse = {
 function resolveRedirectByRole(role?: MeResponse['role']) {
   if (role === 'CLIENT') return '/portal';
   if (role === 'MEMBER') return '/member';
-  return '/dashboard/ai-assistant';
+  return '/dashboard';
 }
 
 export default function GoogleAuthCallbackPage() {
