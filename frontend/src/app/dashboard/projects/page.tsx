@@ -11,6 +11,7 @@ import {
   Search,
   Trash2,
   MessageSquare,
+  Sparkles,
 } from 'lucide-react';
 import { useUnreadByProject } from '@/hooks/use-messages';
 
@@ -76,14 +77,22 @@ export default function ProjectsPage() {
               ))}
             </select>
           </div>
-          {isOwnerOrAdmin && (
+          <div className="flex items-center gap-2">
             <Link
-              href="/dashboard/projects/new"
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+              href="/dashboard/ai-assistant?tool=proposal&module=projects"
+              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-muted"
             >
-              <Plus className="h-4 w-4" /> Create Project
+              <Sparkles className="h-4 w-4" /> AI for Projects
             </Link>
-          )}
+            {isOwnerOrAdmin && (
+              <Link
+                href="/dashboard/projects/new"
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+              >
+                <Plus className="h-4 w-4" /> Create Project
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Grid */}
@@ -166,6 +175,15 @@ export default function ProjectsPage() {
                     )}
                   </div>
                 )}
+
+                <div className="mt-4 flex items-center justify-end border-t border-border pt-3">
+                  <Link
+                    href={`/dashboard/ai-assistant?tool=proposal&projectId=${project.id}`}
+                    className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium hover:bg-muted"
+                  >
+                    <Sparkles className="h-3.5 w-3.5" /> AI Proposal
+                  </Link>
+                </div>
               </div>
             ))}
           </div>

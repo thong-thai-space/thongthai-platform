@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import api from "@/lib/api";
-import { Zap, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { TurnstileWidget } from "@/components/common/Turnstile";
 
 interface LoginForm {
@@ -43,9 +43,9 @@ export default function LoginPage() {
       setError("");
       setResendMessage("");
       await login(data.email, data.password, data.turnstileToken);
-      // Role-based redirect happens via layout guards
-      // Default to dashboard; layouts will redirect MEMBER→/member, CLIENT→/portal
-      router.push("/dashboard");
+      // Role-based redirects still happen in layout guards.
+      // For OWNER/ADMIN, open Projects first.
+      router.push("/dashboard/projects");
     } catch (err: unknown) {
       const message =
         typeof err === "object" &&
@@ -87,8 +87,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 text-center">
-          <Link href="/" className="inline-flex items-center gap-2">
-            <Zap className="h-8 w-8 text-primary" />
+          <Link href="/" className="inline-flex items-center">
             <span className="text-2xl font-bold">
               Thong Thai<span className="text-primary"> Space</span>
             </span>

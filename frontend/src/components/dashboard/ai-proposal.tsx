@@ -12,21 +12,30 @@ import {
   FileType,
   FileDown,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   exportTextAsExcel,
   exportTextAsPdf,
   exportTextAsWord,
   importTextFile,
 } from '@/lib/file-export';
+import { useProjects } from '@/hooks/use-projects';
+import { buildProjectAiContext } from '@/lib/ai-project-context';
 
-export function AiProposal() {
+export function AiProposal({ initialProjectId }: { initialProjectId?: string }) {
   const [requirements, setRequirements] = useState('');
   const [budget, setBudget] = useState('');
   const [locale, setLocale] = useState<'VI' | 'EN'>('EN');
+  const [projectId, setProjectId] = useState(initialProjectId || '');
   const [result, setResult] = useState('');
   const [copied, setCopied] = useState(false);
+  const { data: projects = [] } = useProjects();
   const mutation = useGenerateProposal();
+
+  const selectedProject = useMemo(
+    () => projects.find((project) => project.id === projectId),
+    [projectId, projects],
+  );
 
   const handleGenerate = () => {
     if (!requirements.trim() || mutation.isPending) return;
@@ -54,6 +63,23 @@ export function AiProposal() {
     }
   };
 
+  const handleUseProjectContext = () => {
+    const context = buildProjectAiContext(selectedProject);
+    if (!context) return;
+    setRequirements(context);
+  };
+
+  const handleProjectChange = (nextProjectId: string) => {
+    setProjectId(nextProjectId);
+    if (requirements.trim()) return;
+
+    const project = projects.find((item) => item.id === nextProjectId);
+    const context = buildProjectAiContext(project);
+    if (context) {
+      setRequirements(context);
+    }
+  };
+
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-2 border-b border-border px-4 py-3">
@@ -64,6 +90,31 @@ export function AiProposal() {
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
         {/* Form */}
         <div className="space-y-3">
+          <div>
+            <label className="mb-1 block text-sm font-medium">Project</label>
+            <div className="flex flex-wrap items-center gap-2">
+              <select
+                value={projectId}
+                onChange={(e) => handleProjectChange(e.target.value)}
+                className="min-w-60 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              >
+                <option value="">Select project (optional)</option>
+                {projects.map((project) => (
+                  <option key={project.id} value={project.id}>
+                    {project.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={handleUseProjectContext}
+                disabled={!projectId}
+                className="rounded-lg border border-border px-3 py-2 text-xs font-medium hover:bg-muted disabled:opacity-50"
+              >
+                Use project context
+              </button>
+            </div>
+          </div>
           <div>
             <label className="mb-1 block text-sm font-medium">Project requirements *</label>
             <textarea

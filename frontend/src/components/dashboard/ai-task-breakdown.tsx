@@ -11,7 +11,7 @@ import {
   FileType,
   FileSpreadsheet,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { TaskBreakdownResponse } from '@/hooks/use-ai';
 import {
   exportJsonAsExcel,
@@ -19,6 +19,8 @@ import {
   exportJsonAsWord,
   importTextFile,
 } from '@/lib/file-export';
+import { useProjects } from '@/hooks/use-projects';
+import { buildProjectAiContext, buildProjectTechStack } from '@/lib/ai-project-context';
 
 const priorityColors: Record<string, string> = {
   LOW: 'bg-gray-100 text-gray-600',
@@ -27,12 +29,19 @@ const priorityColors: Record<string, string> = {
   URGENT: 'bg-red-100 text-red-600',
 };
 
-export function AiTaskBreakdown() {
+export function AiTaskBreakdown({ initialProjectId }: { initialProjectId?: string }) {
   const [description, setDescription] = useState('');
   const [techStackInput, setTechStackInput] = useState('');
+  const [projectId, setProjectId] = useState(initialProjectId || '');
   const [result, setResult] = useState<TaskBreakdownResponse | null>(null);
   const [expandedMilestones, setExpandedMilestones] = useState<Set<number>>(new Set());
+  const { data: projects = [] } = useProjects();
   const mutation = useBreakdownTasks();
+
+  const selectedProject = useMemo(
+    () => projects.find((project) => project.id === projectId),
+    [projectId, projects],
+  );
 
   const handleGenerate = () => {
     if (!description.trim() || mutation.isPending) return;
@@ -71,6 +80,39 @@ export function AiTaskBreakdown() {
     }
   };
 
+  const handleUseProjectContext = () => {
+    const context = buildProjectAiContext(selectedProject);
+    if (context) {
+      setDescription(context);
+    }
+
+    const nextStack = buildProjectTechStack(selectedProject);
+    if (nextStack) {
+      setTechStackInput(nextStack);
+    }
+  };
+
+  const handleProjectChange = (nextProjectId: string) => {
+    setProjectId(nextProjectId);
+
+    const project = projects.find((item) => item.id === nextProjectId);
+    if (!project) return;
+
+    if (!description.trim()) {
+      const context = buildProjectAiContext(project);
+      if (context) {
+        setDescription(context);
+      }
+    }
+
+    if (!techStackInput.trim()) {
+      const nextStack = buildProjectTechStack(project);
+      if (nextStack) {
+        setTechStackInput(nextStack);
+      }
+    }
+  };
+
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-2 border-b border-border px-4 py-3">
@@ -80,6 +122,31 @@ export function AiTaskBreakdown() {
 
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
         <div className="space-y-3">
+          <div>
+            <label className="mb-1 block text-sm font-medium">Project</label>
+            <div className="flex flex-wrap items-center gap-2">
+              <select
+                value={projectId}
+                onChange={(e) => handleProjectChange(e.target.value)}
+                className="min-w-60 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              >
+                <option value="">Select project (optional)</option>
+                {projects.map((project) => (
+                  <option key={project.id} value={project.id}>
+                    {project.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={handleUseProjectContext}
+                disabled={!projectId}
+                className="rounded-lg border border-border px-3 py-2 text-xs font-medium hover:bg-muted disabled:opacity-50"
+              >
+                Use project context
+              </button>
+            </div>
+          </div>
           <div>
             <label className="mb-1 block text-sm font-medium">Project description *</label>
             <textarea

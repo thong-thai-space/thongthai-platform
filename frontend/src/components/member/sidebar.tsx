@@ -10,7 +10,6 @@ import {
   CheckSquare,
   Settings,
   LogOut,
-  Zap,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
@@ -38,8 +37,7 @@ export function MemberSidebar() {
       {/* Logo */}
       <div className="flex h-14 items-center justify-between border-b border-white/10 px-4">
         {!collapsed && (
-          <Link href="/member" className="flex items-center gap-2">
-            <Zap className="h-6 w-6 text-primary" />
+          <Link href="/member" className="flex items-center">
             <span className="text-sm font-bold">Member Portal</span>
           </Link>
         )}

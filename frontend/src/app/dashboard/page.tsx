@@ -5,6 +5,7 @@ import { useProjects } from '@/hooks/use-projects';
 import { useTasks } from '@/hooks/use-tasks';
 import { useInvoices } from '@/hooks/use-invoices';
 import { useClients } from '@/hooks/use-clients';
+import { useTeam } from '@/hooks/use-team';
 import { useUnreadCount } from '@/hooks/use-notifications';
 import { useAuth } from '@/lib/auth';
 import { formatCurrency } from '@/lib/utils';
@@ -27,6 +28,7 @@ export default function DashboardPage() {
   const { data: tasks = [] } = useTasks();
   const { data: invoices = [] } = useInvoices();
   const { data: clients = [] } = useClients();
+  const { data: team = [] } = useTeam();
   const { data: unreadNotifications = 0 } = useUnreadCount();
 
   const activeProjects = projects.filter(
@@ -164,11 +166,11 @@ export default function DashboardPage() {
       href: '/dashboard/tasks',
     },
     {
-      label: 'Clients',
-      value: clients.length,
+      label: 'Users',
+      value: clients.length + team.length,
       icon: Users,
       color: 'text-green-500 bg-green-500/10',
-      href: '/dashboard/clients',
+      href: '/dashboard/users',
     },
     {
       label: 'Revenue (Collected)',

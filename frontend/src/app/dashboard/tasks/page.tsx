@@ -11,8 +11,9 @@ import {
 } from '@/hooks/use-tasks';
 import { useProjects } from '@/hooks/use-projects';
 import { useTeam } from '@/hooks/use-team';
+import Link from 'next/link';
 import { useState } from 'react';
-import { Search, LayoutGrid, List, Plus, X, Trash2 } from 'lucide-react';
+import { Search, LayoutGrid, List, Plus, X, Trash2, Sparkles } from 'lucide-react';
 import type { TaskStatus, TaskPriority } from '@/types';
 
 const statusLabels: Record<TaskStatus, string> = {
@@ -158,26 +159,34 @@ export default function TasksPage() {
               ))}
             </select>
           </div>
-          <div className="flex items-center gap-1 rounded-lg border border-border p-0.5">
-            <button
-              onClick={() => setView('list')}
-              className={`rounded-md p-1.5 ${view === 'list' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/dashboard/ai-assistant?tool=breakdown&module=tasks"
+              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-muted"
             >
-              <List className="h-4 w-4" />
-            </button>
+              <Sparkles className="h-4 w-4" /> AI for Tasks
+            </Link>
+            <div className="flex items-center gap-1 rounded-lg border border-border p-0.5">
+              <button
+                onClick={() => setView('list')}
+                className={`rounded-md p-1.5 ${view === 'list' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                <List className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setView('board')}
+                className={`rounded-md p-1.5 ${view === 'board' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+            </div>
             <button
-              onClick={() => setView('board')}
-              className={`rounded-md p-1.5 ${view === 'board' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+              onClick={() => setShowCreate(true)}
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
             >
-              <LayoutGrid className="h-4 w-4" />
+              <Plus className="h-4 w-4" /> Create Task
             </button>
           </div>
-          <button
-            onClick={() => setShowCreate(true)}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-          >
-            <Plus className="h-4 w-4" /> Create Task
-          </button>
         </div>
 
         {isLoading ? (
@@ -483,7 +492,15 @@ export default function TasksPage() {
                 >
                   <Trash2 className="h-4 w-4" /> Delete Task
                 </button>
-                <button onClick={() => setSelectedTaskId('')} className="rounded-lg border border-border px-4 py-2 text-sm hover:bg-muted">Close</button>
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/dashboard/ai-assistant?tool=breakdown&projectId=${selectedTask.projectId}`}
+                    className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm hover:bg-muted"
+                  >
+                    <Sparkles className="h-4 w-4" /> AI Breakdown
+                  </Link>
+                  <button onClick={() => setSelectedTaskId('')} className="rounded-lg border border-border px-4 py-2 text-sm hover:bg-muted">Close</button>
+                </div>
               </div>
             </div>
           </div>

@@ -11,7 +11,7 @@ export function useTeam() {
 
 export function useCreateMember() {
   const qc = useQueryClient();
-  return useMutation({
+  return useMutation<User, Error, { name: string; email: string; password: string; phone?: string }>({
     mutationFn: (data: { name: string; email: string; password: string; phone?: string }) =>
       api.post('/users/members', data).then((r) => r.data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['team'] }),
@@ -23,7 +23,10 @@ export function useUpdateMember() {
   return useMutation({
     mutationFn: ({ id, ...data }: { id: string; name?: string; phone?: string; role?: string; isActive?: boolean }) =>
       api.patch(`/users/${id}`, data).then((r) => r.data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['team'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['team'] });
+      qc.invalidateQueries({ queryKey: ['clients'] });
+    },
   });
 }
 
@@ -31,7 +34,10 @@ export function useDeleteMember() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => api.delete(`/users/${id}`).then((r) => r.data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['team'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['team'] });
+      qc.invalidateQueries({ queryKey: ['clients'] });
+    },
   });
 }
 

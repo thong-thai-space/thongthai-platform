@@ -22,6 +22,7 @@ function TypingIndicator() {
 
 export function PublicAiChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showWelcomeNudge, setShowWelcomeNudge] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<
     Array<{ role: 'user' | 'assistant'; content: string }>
@@ -32,6 +33,23 @@ export function PublicAiChatWidget() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, chatMutation.isPending]);
+
+  useEffect(() => {
+    if (isOpen) return;
+
+    const showTimer = window.setTimeout(() => {
+      setShowWelcomeNudge(true);
+    }, 1000);
+
+    const hideTimer = window.setTimeout(() => {
+      setShowWelcomeNudge(false);
+    }, 9000);
+
+    return () => {
+      window.clearTimeout(showTimer);
+      window.clearTimeout(hideTimer);
+    };
+  }, [isOpen]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,17 +80,44 @@ export function PublicAiChatWidget() {
     <>
       <AnimatePresence>
         {!isOpen && (
-          <motion.button
-            key="chat-trigger"
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-            onClick={() => setIsOpen(true)}
-            className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 hover:bg-primary/90"
-          >
-            <Bot className="h-7 w-7" />
-          </motion.button>
+          <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
+            <AnimatePresence>
+              {showWelcomeNudge && (
+                <motion.button
+                  type="button"
+                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                  onClick={() => {
+                    setIsOpen(true);
+                    setShowWelcomeNudge(false);
+                  }}
+                  className="max-w-60 rounded-2xl border border-primary/20 bg-background px-3 py-2 text-left text-xs shadow-lg"
+                >
+                  <p className="font-medium text-foreground">AI Assistant is online</p>
+                  <p className="mt-0.5 text-muted-foreground">Need help? Ask me anything about our services.</p>
+                </motion.button>
+              )}
+            </AnimatePresence>
+
+            <motion.button
+              key="chat-trigger"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+              onClick={() => {
+                setIsOpen(true);
+                setShowWelcomeNudge(false);
+              }}
+              className="relative flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 hover:bg-primary/90"
+            >
+              {showWelcomeNudge && (
+                <span className="absolute -inset-1 -z-10 rounded-full bg-primary/30 animate-ping" />
+              )}
+              <Bot className="h-7 w-7" />
+            </motion.button>
+          </div>
         )}
       </AnimatePresence>
 

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
-import { Zap, Eye, EyeOff, Mail } from 'lucide-react';
+import { Eye, EyeOff, Mail } from 'lucide-react';
 import { TurnstileWidget } from '@/components/common/Turnstile';
 
 interface RegisterForm {
@@ -55,8 +55,7 @@ export default function RegisterPage() {
       <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
         <div className="w-full max-w-md">
           <div className="mb-8 text-center">
-            <Link href="/" className="inline-flex items-center gap-2">
-              <Zap className="h-8 w-8 text-primary" />
+            <Link href="/" className="inline-flex items-center">
               <span className="text-2xl font-bold">
                 Thong Thai<span className="text-primary"> Space</span>
               </span>
@@ -93,8 +92,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 text-center">
-          <Link href="/" className="inline-flex items-center gap-2">
-            <Zap className="h-8 w-8 text-primary" />
+          <Link href="/" className="inline-flex items-center">
             <span className="text-2xl font-bold">
               Thong Thai<span className="text-primary"> Space</span>
             </span>

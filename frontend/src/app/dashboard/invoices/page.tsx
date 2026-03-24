@@ -11,9 +11,10 @@ import { useClients } from '@/hooks/use-clients';
 import { useProjects } from '@/hooks/use-projects';
 import { useAuth } from '@/lib/auth';
 import api from '@/lib/api';
+import Link from 'next/link';
 import { useState } from 'react';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { Plus, Search, X, FileDown, Loader2, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Search, X, FileDown, Loader2, Pencil, Trash2, Sparkles } from 'lucide-react';
 import type { Invoice, InvoiceStatus, User } from '@/types';
 
 const statusLabels: Record<InvoiceStatus, string> = {
@@ -179,14 +180,22 @@ export default function InvoicesPage() {
               ))}
             </select>
           </div>
-          {isOwnerOrAdmin && (
-            <button
-              onClick={() => setShowForm(true)}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          <div className="flex items-center gap-2">
+            <Link
+              href="/dashboard/ai-assistant?tool=estimate&module=invoices"
+              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-muted"
             >
-              <Plus className="h-4 w-4" /> Create Invoice
-            </button>
-          )}
+              <Sparkles className="h-4 w-4" /> AI for Invoices
+            </Link>
+            {isOwnerOrAdmin && (
+              <button
+                onClick={() => setShowForm(true)}
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+              >
+                <Plus className="h-4 w-4" /> Create Invoice
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Create form modal */}

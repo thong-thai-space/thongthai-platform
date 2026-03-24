@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Zap, CheckCircle, AlertCircle } from 'lucide-react';
+import { CheckCircle, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import api from '@/lib/api';
 
@@ -43,8 +43,7 @@ export default function VerifyEmailPage() {
     <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <Link href="/" className="inline-flex items-center gap-2">
-            <Zap className="h-8 w-8 text-primary" />
+          <Link href="/" className="inline-flex items-center">
             <span className="text-2xl font-bold">
               Thong Thai<span className="text-primary"> Space</span>
             </span>

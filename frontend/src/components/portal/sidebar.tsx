@@ -10,7 +10,6 @@ import {
   FileText,
   Settings,
   LogOut,
-  Zap,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
@@ -38,8 +37,7 @@ export function PortalSidebar() {
       {/* Logo */}
       <div className="flex h-14 items-center justify-between border-b border-white/10 px-4">
         {!collapsed && (
-          <Link href="/portal" className="flex items-center gap-2">
-            <Zap className="h-6 w-6 text-accent" />
+          <Link href="/portal" className="flex items-center">
             <span className="text-sm font-bold">Client Portal</span>
           </Link>
         )}

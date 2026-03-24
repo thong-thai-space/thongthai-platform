@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Zap, Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, Phone, MapPin } from 'lucide-react';
 import { useSectionContent } from '@/hooks/use-content';
 
 const defaults = {
@@ -42,8 +42,7 @@ export function Footer() {
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div>
-            <Link href="/" className="flex items-center gap-2">
-              <Zap className="h-6 w-6 text-primary" />
+            <Link href="/" className="flex items-center">
               <span className="text-lg font-bold">
                 {c.brand.name.replace(' Space', '')}<span className="text-primary"> Space</span>
               </span>
@@ -86,7 +85,6 @@ export function Footer() {
             </div>
           ))}
         </div>
-
         <div className="mt-10 border-t border-border pt-6 text-center text-sm text-muted-foreground">
           &copy; {new Date().getFullYear()} {c.brand.name}. All rights reserved.
         </div>

@@ -15,8 +15,9 @@ import {
   useUploadPortfolioThumbnail,
 } from '@/hooks/use-projects';
 import { getApiOrigin } from '@/lib/asset-url';
+import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import { Save, RefreshCw, Check, Trash2, Plus, Upload } from 'lucide-react';
+import { Save, RefreshCw, Check, Trash2, Plus, Upload, Sparkles } from 'lucide-react';
 import type { Project } from '@/types';
 
 const SECTIONS = [
@@ -1183,14 +1184,22 @@ export default function ContentPage() {
           <p className="text-sm text-muted-foreground">
             Manage all homepage content sections. Changes are reflected on the landing page immediately.
           </p>
-          <button
-            onClick={handleSeed}
-            disabled={seedContent.isPending}
-            className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm hover:bg-muted disabled:opacity-50"
-          >
-            <RefreshCw className={`h-4 w-4 ${seedContent.isPending ? 'animate-spin' : ''}`} />
-            {seedContent.isPending ? 'Seeding...' : 'Seed Defaults'}
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/dashboard/ai-assistant?tool=strategy&module=content"
+              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-muted"
+            >
+              <Sparkles className="h-4 w-4" /> AI for Content
+            </Link>
+            <button
+              onClick={handleSeed}
+              disabled={seedContent.isPending}
+              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm hover:bg-muted disabled:opacity-50"
+            >
+              <RefreshCw className={`h-4 w-4 ${seedContent.isPending ? 'animate-spin' : ''}`} />
+              {seedContent.isPending ? 'Seeding...' : 'Seed Defaults'}
+            </button>
+          </div>
         </div>
 
         {/* Tabs */}

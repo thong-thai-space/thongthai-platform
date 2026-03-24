@@ -20,9 +20,12 @@ export function useClient(id: string) {
 export function useCreateClient() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { name: string; email: string; phone?: string }) =>
+    mutationFn: (data: { name: string; email: string; phone?: string; password?: string }) =>
       api.post('/clients', data).then((r) => r.data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['clients'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['clients'] });
+      qc.invalidateQueries({ queryKey: ['team'] });
+    },
   });
 }
 
@@ -30,6 +33,9 @@ export function useDeleteClient() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => api.delete(`/clients/${id}`).then((r) => r.data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['clients'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['clients'] });
+      qc.invalidateQueries({ queryKey: ['team'] });
+    },
   });
 }

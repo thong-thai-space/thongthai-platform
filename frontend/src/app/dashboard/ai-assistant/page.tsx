@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useSearchParams } from 'next/navigation';
 
 type AiTool =
   | 'chat'
@@ -44,7 +45,13 @@ const tools: { key: AiTool; icon: typeof Bot; label: string; color: string }[] =
 ];
 
 export default function AiAssistantPage() {
-  const [activeTool, setActiveTool] = useState<AiTool>('chat');
+  const searchParams = useSearchParams();
+  const initialTool = searchParams.get('tool') as AiTool | null;
+  const initialProjectId = searchParams.get('projectId') ?? undefined;
+
+  const [activeTool, setActiveTool] = useState<AiTool>(
+    initialTool && tools.some((tool) => tool.key === initialTool) ? initialTool : 'chat',
+  );
 
   return (
     <>
@@ -73,10 +80,10 @@ export default function AiAssistantPage() {
         {/* Content — keep all mounted, hide inactive to preserve state */}
         <div className="flex-1 overflow-hidden">
           <div className={activeTool === 'chat' ? 'h-full' : 'hidden'}><AiChat /></div>
-          <div className={activeTool === 'proposal' ? 'h-full' : 'hidden'}><AiProposal /></div>
-          <div className={activeTool === 'breakdown' ? 'h-full' : 'hidden'}><AiTaskBreakdown /></div>
+          <div className={activeTool === 'proposal' ? 'h-full' : 'hidden'}><AiProposal initialProjectId={initialProjectId} /></div>
+          <div className={activeTool === 'breakdown' ? 'h-full' : 'hidden'}><AiTaskBreakdown initialProjectId={initialProjectId} /></div>
           <div className={activeTool === 'review' ? 'h-full' : 'hidden'}><AiCodeReview /></div>
-          <div className={activeTool === 'estimate' ? 'h-full' : 'hidden'}><AiEstimate /></div>
+          <div className={activeTool === 'estimate' ? 'h-full' : 'hidden'}><AiEstimate initialProjectId={initialProjectId} /></div>
           <div className={activeTool === 'report' ? 'h-full' : 'hidden'}><AiProgressReport /></div>
           <div className={activeTool === 'strategy' ? 'h-full' : 'hidden'}><AiStrategicPlan /></div>
           <div className={activeTool === 'governance' ? 'h-full' : 'hidden'}><AiGovernance /></div>
