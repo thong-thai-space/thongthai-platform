@@ -19,7 +19,13 @@ import {
   importTextFile,
 } from '@/lib/file-export';
 
-export function AiStrategicPlan() {
+export function AiStrategicPlan({
+  model,
+  modelLabel,
+}: {
+  model?: string;
+  modelLabel?: string;
+}) {
   const { data: projects, isLoading: loadingProjects } = useProjects();
   const mutation = useStrategicPlan();
   const applyMutation = useApplyStrategicPlan();
@@ -87,6 +93,7 @@ export function AiStrategicPlan() {
       projectId: projectId || undefined,
       locale,
       includeRiskMatrix,
+      model,
     });
   };
 
@@ -115,6 +122,11 @@ export function AiStrategicPlan() {
       <div className="flex items-center gap-2 border-b border-border px-4 py-3">
         <Sparkles className="h-5 w-5 text-indigo-500" />
         <span className="text-sm font-medium">Strategic AI Brief</span>
+        {modelLabel && (
+          <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
+            Model: {modelLabel}
+          </span>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">

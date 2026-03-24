@@ -19,7 +19,13 @@ import {
   importTextFile,
 } from '@/lib/file-export';
 
-export function AiEstimate() {
+export function AiEstimate({
+  model,
+  modelLabel,
+}: {
+  model?: string;
+  modelLabel?: string;
+}) {
   const [requirements, setRequirements] = useState('');
   const [locale, setLocale] = useState<'VI' | 'EN'>('EN');
   const [result, setResult] = useState<EstimateResponse | null>(null);
@@ -28,7 +34,7 @@ export function AiEstimate() {
   const handleEstimate = () => {
     if (!requirements.trim() || mutation.isPending) return;
     mutation.mutate(
-      { requirements: requirements.trim(), locale },
+      { requirements: requirements.trim(), locale, model },
       {
         onSuccess: (data) => setResult(data),
         onError: () => setResult(null),
@@ -50,6 +56,11 @@ export function AiEstimate() {
       <div className="flex items-center gap-2 border-b border-border px-4 py-3">
         <Calculator className="h-5 w-5 text-blue-500" />
         <span className="text-sm font-medium">Project Estimate</span>
+        {modelLabel && (
+          <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
+            Model: {modelLabel}
+          </span>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">

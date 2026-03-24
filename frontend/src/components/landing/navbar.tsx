@@ -60,7 +60,13 @@ export function Navbar() {
         <div className="hidden items-center gap-3 md:flex">
           {user ? (
             <Link
-              href={user.role === 'CLIENT' ? '/portal' : user.role === 'MEMBER' ? '/member' : '/dashboard'}
+              href={
+                user.role === 'CLIENT'
+                  ? '/portal'
+                  : user.role === 'MEMBER'
+                    ? '/member'
+                    : '/dashboard/ai-assistant'
+              }
               className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
             >
               {user.role === 'CLIENT' ? 'Portal' : user.role === 'MEMBER' ? 'My Portal' : 'Dashboard'}
@@ -114,7 +120,13 @@ export function Navbar() {
           <div className="border-t border-border pt-3">
             {user ? (
               <Link
-                href={user.role === 'CLIENT' ? '/portal' : user.role === 'MEMBER' ? '/member' : '/dashboard'}
+                href={
+                  user.role === 'CLIENT'
+                    ? '/portal'
+                    : user.role === 'MEMBER'
+                      ? '/member'
+                      : '/dashboard/ai-assistant'
+                }
                 className="block rounded-lg bg-primary px-4 py-2 text-center text-sm font-medium text-primary-foreground"
               >
                 {user.role === 'CLIENT' ? 'Portal' : user.role === 'MEMBER' ? 'My Portal' : 'Dashboard'}

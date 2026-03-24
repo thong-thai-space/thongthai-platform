@@ -24,6 +24,7 @@ import {
   ReviewApplyRequestDto,
   AuditQueryDto,
   PurgeAuditDto,
+  ProgressReportDto,
 } from './dto/ai.dto';
 import { Roles } from '../../shared/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -44,7 +45,7 @@ export class AiController {
     @CurrentUser('id') userId: string,
     @CurrentUser('role') role: UserRole,
   ) {
-    return this.aiService.chat(userId, dto.message, dto.conversationId, role);
+    return this.aiService.chat(userId, dto.message, dto.conversationId, role, dto.model);
   }
 
   @Post('generate-proposal')
@@ -60,6 +61,7 @@ export class AiController {
       dto.requirements,
       dto.locale,
       dto.budget,
+      dto.model,
     );
     return { proposal };
   }
@@ -76,6 +78,7 @@ export class AiController {
       role,
       dto.description,
       dto.techStack,
+      dto.model,
     );
   }
 
@@ -92,6 +95,7 @@ export class AiController {
       dto.code,
       dto.language,
       dto.context,
+      dto.model,
     );
     return { review };
   }
@@ -103,13 +107,20 @@ export class AiController {
     @CurrentUser('id') userId: string,
     @CurrentUser('role') role: UserRole,
   ) {
-    return this.aiService.estimateProject(userId, role, dto.requirements, dto.locale);
+    return this.aiService.estimateProject(
+      userId,
+      role,
+      dto.requirements,
+      dto.locale,
+      dto.model,
+    );
   }
 
   @Post('progress-report/:projectId')
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async progressReport(
     @Param('projectId') projectId: string,
+    @Body() dto: ProgressReportDto,
     @CurrentUser('id') userId: string,
     @CurrentUser('role') role: UserRole,
     @CurrentUser('locale') locale: string,
@@ -118,7 +129,8 @@ export class AiController {
       userId,
       role,
       projectId,
-      locale as any,
+      (dto.locale || (locale as any)) as any,
+      dto.model,
     );
     return { report };
   }

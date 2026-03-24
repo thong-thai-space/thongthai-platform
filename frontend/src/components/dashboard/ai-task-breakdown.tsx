@@ -27,7 +27,13 @@ const priorityColors: Record<string, string> = {
   URGENT: 'bg-red-100 text-red-600',
 };
 
-export function AiTaskBreakdown() {
+export function AiTaskBreakdown({
+  model,
+  modelLabel,
+}: {
+  model?: string;
+  modelLabel?: string;
+}) {
   const [description, setDescription] = useState('');
   const [techStackInput, setTechStackInput] = useState('');
   const [result, setResult] = useState<TaskBreakdownResponse | null>(null);
@@ -42,7 +48,7 @@ export function AiTaskBreakdown() {
       .filter(Boolean);
 
     mutation.mutate(
-      { description: description.trim(), techStack },
+      { description: description.trim(), techStack, model },
       {
         onSuccess: (data) => {
           setResult(data);
@@ -76,6 +82,11 @@ export function AiTaskBreakdown() {
       <div className="flex items-center gap-2 border-b border-border px-4 py-3">
         <GitBranch className="h-5 w-5 text-purple-500" />
         <span className="text-sm font-medium">Task Breakdown</span>
+        {modelLabel && (
+          <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
+            Model: {modelLabel}
+          </span>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">

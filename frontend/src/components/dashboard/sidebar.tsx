@@ -6,13 +6,12 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/auth';
 import { UserAvatar } from '@/components/user-avatar';
 import {
-  LayoutDashboard,
+  Bot,
   FolderKanban,
   CheckSquare,
   Users,
   FileText,
   UsersRound,
-  Bot,
   Settings,
   LogOut,
   Zap,
@@ -22,14 +21,13 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 const navItems = [
-  { href: '/dashboard', icon: LayoutDashboard, label: 'Overview' },
+  { href: '/dashboard/ai-assistant', icon: Bot, label: 'AI Assistant' },
   { href: '/dashboard/projects', icon: FolderKanban, label: 'Projects' },
   { href: '/dashboard/tasks', icon: CheckSquare, label: 'Tasks' },
   { href: '/dashboard/clients', icon: Users, label: 'Clients' },
   { href: '/dashboard/invoices', icon: FileText, label: 'Invoices' },
   { href: '/dashboard/team', icon: UsersRound, label: 'Team' },
   { href: '/dashboard/content', icon: PanelTop, label: 'Content' },
-  { href: '/dashboard/ai-assistant', icon: Bot, label: 'AI Assistant' },
   { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
 ];
 
@@ -48,7 +46,7 @@ export function Sidebar() {
       {/* Logo */}
       <div className="flex h-14 items-center justify-between border-b border-white/10 px-4">
         {!collapsed && (
-          <Link href="/dashboard" className="flex items-center gap-2">
+          <Link href="/dashboard/ai-assistant" className="flex items-center gap-2">
             <Zap className="h-6 w-6 text-primary" />
             <span className="text-sm font-bold">Thông Thái Space</span>
           </Link>

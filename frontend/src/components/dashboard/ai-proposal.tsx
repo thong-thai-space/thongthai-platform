@@ -20,7 +20,13 @@ import {
   importTextFile,
 } from '@/lib/file-export';
 
-export function AiProposal() {
+export function AiProposal({
+  model,
+  modelLabel,
+}: {
+  model?: string;
+  modelLabel?: string;
+}) {
   const [requirements, setRequirements] = useState('');
   const [budget, setBudget] = useState('');
   const [locale, setLocale] = useState<'VI' | 'EN'>('EN');
@@ -31,7 +37,12 @@ export function AiProposal() {
   const handleGenerate = () => {
     if (!requirements.trim() || mutation.isPending) return;
     mutation.mutate(
-      { requirements: requirements.trim(), budget: budget || undefined, locale },
+      {
+        requirements: requirements.trim(),
+        budget: budget || undefined,
+        locale,
+        model,
+      },
       {
         onSuccess: (data) => setResult(data.proposal),
         onError: () => setResult('An error occurred. Please try again.'),
@@ -59,6 +70,11 @@ export function AiProposal() {
       <div className="flex items-center gap-2 border-b border-border px-4 py-3">
         <FileText className="h-5 w-5 text-amber-500" />
         <span className="text-sm font-medium">Generate Proposal</span>
+        {modelLabel && (
+          <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
+            Model: {modelLabel}
+          </span>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">

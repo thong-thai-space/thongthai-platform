@@ -10,7 +10,13 @@ const commonLanguages = [
   'PHP', 'Ruby', 'SQL', 'HTML/CSS', 'Dart',
 ];
 
-export function AiCodeReview() {
+export function AiCodeReview({
+  model,
+  modelLabel,
+}: {
+  model?: string;
+  modelLabel?: string;
+}) {
   const [code, setCode] = useState('');
   const [language, setLanguage] = useState('TypeScript');
   const [context, setContext] = useState('');
@@ -21,7 +27,7 @@ export function AiCodeReview() {
   const handleReview = () => {
     if (!code.trim() || mutation.isPending) return;
     mutation.mutate(
-      { code: code.trim(), language, context: context || undefined },
+      { code: code.trim(), language, context: context || undefined, model },
       {
         onSuccess: (data) => setResult(data.review),
         onError: () => setResult('An error occurred. Please try again.'),
@@ -40,6 +46,11 @@ export function AiCodeReview() {
       <div className="flex items-center gap-2 border-b border-border px-4 py-3">
         <Code className="h-5 w-5 text-green-500" />
         <span className="text-sm font-medium">Review Code</span>
+        {modelLabel && (
+          <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
+            Model: {modelLabel}
+          </span>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">

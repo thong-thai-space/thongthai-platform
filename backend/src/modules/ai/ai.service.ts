@@ -22,6 +22,8 @@ import { NotificationService } from '../notification/notification.service';
 import { NotificationType } from '@prisma/client';
 import {
   AiAuditFeedbackDto,
+  AI_MODEL_OPTIONS,
+  AiModel,
   ApplyStrategicPlanDto,
   StrategicPlanDto,
 } from './dto/ai.dto';
@@ -43,6 +45,7 @@ import {
 export class AiService {
   private client: Anthropic;
   private readonly logger = new Logger(AiService.name);
+  private readonly defaultModel: AiModel = 'claude-sonnet-4-20250514';
 
   constructor(
     private configService: ConfigService,
@@ -117,6 +120,13 @@ export class AiService {
   private roleDirective(role?: UserRole) {
     if (!role) return '';
     return ROLE_PROMPT_MAP[role] || '';
+  }
+
+  private resolveModel(model?: string): AiModel {
+    if (model && AI_MODEL_OPTIONS.includes(model as AiModel)) {
+      return model as AiModel;
+    }
+    return this.defaultModel;
   }
 
   private toTaskPriority(impact?: string): TaskPriority {
@@ -226,8 +236,15 @@ export class AiService {
 
   // ==================== CHAT ====================
 
-  async chat(userId: string, message: string, conversationId?: string, userRole?: UserRole) {
+  async chat(
+    userId: string,
+    message: string,
+    conversationId?: string,
+    userRole?: UserRole,
+    model?: string,
+  ) {
     const sanitizedMessage = this.maskSensitiveData(message);
+    const selectedModel = this.resolveModel(model);
 
     let conversation = null;
 
@@ -316,7 +333,7 @@ export class AiService {
 
     try {
       const response = await this.client.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: selectedModel,
         max_tokens: 4096,
         system: systemPrompt,
         messages,
@@ -337,7 +354,7 @@ export class AiService {
       await this.logAiAudit({
         feature: AiFeature.CHAT,
         userId,
-        model: 'claude-sonnet-4-20250514',
+        model: selectedModel,
         success: true,
         inputTokens: response.usage.input_tokens,
         outputTokens: response.usage.output_tokens,
@@ -362,7 +379,7 @@ export class AiService {
       await this.logAiAudit({
         feature: AiFeature.CHAT,
         userId,
-        model: 'claude-sonnet-4-20250514',
+        model: selectedModel,
         success: false,
         errorMessage: error instanceof Error ? error.message : 'Unknown AI error',
         durationMs: Date.now() - startedAt,
@@ -383,7 +400,9 @@ export class AiService {
     clientRequirements: string,
     locale: Language = Language.VI,
     budget?: string,
+    model?: string,
   ) {
+    const selectedModel = this.resolveModel(model);
     const langNote =
       locale === Language.EN
         ? '\n\nPlease write the proposal in English.'
@@ -393,7 +412,7 @@ export class AiService {
 
     try {
       const response = await this.client.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: selectedModel,
         max_tokens: 4096,
         system:
           PROPOSAL_PROMPT + PROFESSIONAL_OUTPUT_RULES + this.roleDirective(role) + langNote,
@@ -408,7 +427,7 @@ export class AiService {
       await this.logAiAudit({
         feature: AiFeature.PROPOSAL,
         userId,
-        model: 'claude-sonnet-4-20250514',
+        model: selectedModel,
         success: true,
         inputTokens: response.usage.input_tokens,
         outputTokens: response.usage.output_tokens,
@@ -426,7 +445,7 @@ export class AiService {
       await this.logAiAudit({
         feature: AiFeature.PROPOSAL,
         userId,
-        model: 'claude-sonnet-4-20250514',
+        model: selectedModel,
         success: false,
         errorMessage: error instanceof Error ? error.message : 'Unknown AI error',
         durationMs: Date.now() - startedAt,
@@ -441,12 +460,14 @@ export class AiService {
     role: UserRole,
     projectDescription: string,
     techStack: string[],
+    model?: string,
   ) {
+    const selectedModel = this.resolveModel(model);
     const startedAt = Date.now();
 
     try {
       const response = await this.client.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: selectedModel,
         max_tokens: 4096,
         system: TASK_BREAKDOWN_PROMPT + PROFESSIONAL_OUTPUT_RULES + this.roleDirective(role),
         messages: [
@@ -460,7 +481,7 @@ export class AiService {
       await this.logAiAudit({
         feature: AiFeature.TASK_BREAKDOWN,
         userId,
-        model: 'claude-sonnet-4-20250514',
+        model: selectedModel,
         success: true,
         inputTokens: response.usage.input_tokens,
         outputTokens: response.usage.output_tokens,
@@ -478,7 +499,7 @@ export class AiService {
       await this.logAiAudit({
         feature: AiFeature.TASK_BREAKDOWN,
         userId,
-        model: 'claude-sonnet-4-20250514',
+        model: selectedModel,
         success: false,
         errorMessage: error instanceof Error ? error.message : 'Unknown AI error',
         durationMs: Date.now() - startedAt,
@@ -493,12 +514,14 @@ export class AiService {
     code: string,
     language: string,
     context?: string,
+    model?: string,
   ) {
+    const selectedModel = this.resolveModel(model);
     const startedAt = Date.now();
 
     try {
       const response = await this.client.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: selectedModel,
         max_tokens: 4096,
         system: CODE_REVIEW_PROMPT + PROFESSIONAL_OUTPUT_RULES + this.roleDirective(role),
         messages: [
@@ -512,7 +535,7 @@ export class AiService {
       await this.logAiAudit({
         feature: AiFeature.CODE_REVIEW,
         userId,
-        model: 'claude-sonnet-4-20250514',
+        model: selectedModel,
         success: true,
         inputTokens: response.usage.input_tokens,
         outputTokens: response.usage.output_tokens,
@@ -530,7 +553,7 @@ export class AiService {
       await this.logAiAudit({
         feature: AiFeature.CODE_REVIEW,
         userId,
-        model: 'claude-sonnet-4-20250514',
+        model: selectedModel,
         success: false,
         errorMessage: error instanceof Error ? error.message : 'Unknown AI error',
         durationMs: Date.now() - startedAt,
@@ -545,7 +568,9 @@ export class AiService {
     role: UserRole,
     requirements: string,
     locale: Language = Language.VI,
+    model?: string,
   ) {
+    const selectedModel = this.resolveModel(model);
     const langNote =
       locale === Language.EN
         ? '\n\nRespond in English.'
@@ -555,7 +580,7 @@ export class AiService {
 
     try {
       const response = await this.client.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: selectedModel,
         max_tokens: 2048,
         system: ESTIMATE_PROMPT + PROFESSIONAL_OUTPUT_RULES + this.roleDirective(role) + langNote,
         messages: [{ role: 'user', content: this.maskSensitiveData(requirements) }],
@@ -564,7 +589,7 @@ export class AiService {
       await this.logAiAudit({
         feature: AiFeature.ESTIMATE,
         userId,
-        model: 'claude-sonnet-4-20250514',
+        model: selectedModel,
         success: true,
         inputTokens: response.usage.input_tokens,
         outputTokens: response.usage.output_tokens,
@@ -583,7 +608,7 @@ export class AiService {
       await this.logAiAudit({
         feature: AiFeature.ESTIMATE,
         userId,
-        model: 'claude-sonnet-4-20250514',
+        model: selectedModel,
         success: false,
         errorMessage: error instanceof Error ? error.message : 'Unknown AI error',
         durationMs: Date.now() - startedAt,
@@ -598,7 +623,9 @@ export class AiService {
     role: UserRole,
     projectId: string,
     locale: Language = Language.VI,
+    model?: string,
   ) {
+    const selectedModel = this.resolveModel(model);
     const project = await this.prisma.project.findUnique({
       where: { id: projectId },
       include: {
@@ -625,7 +652,7 @@ export class AiService {
 
     try {
       const response = await this.client.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: selectedModel,
         max_tokens: 2048,
         system:
           PROGRESS_REPORT_PROMPT +
@@ -644,7 +671,7 @@ export class AiService {
         feature: AiFeature.PROGRESS_REPORT,
         userId,
         projectId,
-        model: 'claude-sonnet-4-20250514',
+        model: selectedModel,
         success: true,
         inputTokens: response.usage.input_tokens,
         outputTokens: response.usage.output_tokens,
@@ -663,7 +690,7 @@ export class AiService {
         feature: AiFeature.PROGRESS_REPORT,
         userId,
         projectId,
-        model: 'claude-sonnet-4-20250514',
+        model: selectedModel,
         success: false,
         errorMessage: error instanceof Error ? error.message : 'Unknown AI error',
         durationMs: Date.now() - startedAt,
@@ -678,6 +705,7 @@ export class AiService {
     role: UserRole,
     dto: StrategicPlanDto,
   ) {
+    const selectedModel = this.resolveModel(dto.model);
     const locale = dto.locale ?? Language.VI;
 
     const project = dto.projectId
@@ -759,7 +787,7 @@ export class AiService {
 
     try {
       const response = await this.client.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: selectedModel,
         max_tokens: 4096,
         system:
           STRATEGIC_PLAN_PROMPT + PROFESSIONAL_OUTPUT_RULES + this.roleDirective(role),
@@ -809,7 +837,7 @@ export class AiService {
         feature: AiFeature.STRATEGIC_PLAN,
         userId,
         projectId: project?.id,
-        model: 'claude-sonnet-4-20250514',
+        model: selectedModel,
         success: true,
         inputTokens: response.usage.input_tokens,
         outputTokens: response.usage.output_tokens,
@@ -838,7 +866,7 @@ export class AiService {
         feature: AiFeature.STRATEGIC_PLAN,
         userId,
         projectId: project?.id,
-        model: 'claude-sonnet-4-20250514',
+        model: selectedModel,
         success: false,
         errorMessage: error instanceof Error ? error.message : 'Unknown AI error',
         durationMs: Date.now() - startedAt,
@@ -1423,13 +1451,14 @@ export class AiService {
 
   // ==================== PUBLIC CHAT ====================
 
-  async chatPublic(message: string) {
+  async chatPublic(message: string, model?: string) {
     const startedAt = Date.now();
     const sanitizedMessage = this.maskSensitiveData(message);
+    const selectedModel = this.resolveModel(model);
 
     try {
       const response = await this.client.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: selectedModel,
         max_tokens: 1024,
         system: PUBLIC_FAQ_PROMPT + PROFESSIONAL_OUTPUT_RULES,
         messages: [{ role: 'user', content: sanitizedMessage }],
@@ -1437,7 +1466,7 @@ export class AiService {
 
       await this.logAiAudit({
         feature: AiFeature.PUBLIC_CHAT,
-        model: 'claude-sonnet-4-20250514',
+        model: selectedModel,
         success: true,
         inputTokens: response.usage.input_tokens,
         outputTokens: response.usage.output_tokens,
@@ -1455,7 +1484,7 @@ export class AiService {
     } catch (error) {
       await this.logAiAudit({
         feature: AiFeature.PUBLIC_CHAT,
-        model: 'claude-sonnet-4-20250514',
+        model: selectedModel,
         success: false,
         errorMessage: error instanceof Error ? error.message : 'Unknown AI error',
         durationMs: Date.now() - startedAt,

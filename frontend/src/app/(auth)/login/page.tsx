@@ -44,8 +44,8 @@ export default function LoginPage() {
       setResendMessage("");
       await login(data.email, data.password, data.turnstileToken);
       // Role-based redirect happens via layout guards
-      // Default to dashboard; layouts will redirect MEMBER→/member, CLIENT→/portal
-      router.push("/dashboard");
+      // Default to AI assistant; layouts still redirect MEMBER→/member, CLIENT→/portal
+      router.push("/dashboard/ai-assistant");
     } catch (err: unknown) {
       const message =
         typeof err === "object" &&

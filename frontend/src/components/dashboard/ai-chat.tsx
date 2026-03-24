@@ -6,7 +6,7 @@ import { MarkdownContent } from '@/components/ui/markdown-content';
 import { Bot, Send, User, Loader2 } from 'lucide-react';
 import { useRef, useEffect, useSyncExternalStore, useState } from 'react';
 
-export function AiChat() {
+export function AiChat({ model, modelLabel }: { model?: string; modelLabel?: string }) {
   const state = useSyncExternalStore(
     chatStore.subscribe,
     chatStore.getState,
@@ -29,7 +29,7 @@ export function AiChat() {
     setInput('');
 
     chatMutation.mutate(
-      { message: trimmed, conversationId: state.conversationId },
+      { message: trimmed, conversationId: state.conversationId, model },
       {
         onSuccess: (data) => {
           chatStore.setConversationId(data.conversationId);
@@ -64,6 +64,11 @@ export function AiChat() {
         <div className="flex items-center gap-2">
           <Bot className="h-5 w-5 text-primary" />
           <span className="text-sm font-medium">AI Chat</span>
+          {modelLabel && (
+            <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
+              Model: {modelLabel}
+            </span>
+          )}
           {state.conversationId && (
             <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
               {state.conversationId.slice(0, 8)}...
