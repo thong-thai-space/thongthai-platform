@@ -129,39 +129,38 @@ export default function AiAssistantPage() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: 'easeOut' }}
-          className="rounded-3xl border border-zinc-700/60 bg-linear-to-br from-zinc-900 via-zinc-800 to-zinc-900 p-6 text-zinc-100 shadow-xl"
+          className="rounded-2xl border border-border bg-muted/30 p-5 shadow-sm"
         >
           <div className="mx-auto max-w-5xl">
-            <h1 className="text-3xl font-semibold tracking-tight sm:text-5xl">
-              <span className="mr-3 text-orange-400">*</span>
+            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl text-foreground">
               Hey there, {user?.name || 'there'}
             </h1>
 
-            <div className="mt-6 rounded-3xl border border-zinc-700/80 bg-zinc-900/70 p-4 sm:p-6">
+            <div className="mt-4 rounded-xl border border-border bg-background p-3 sm:p-4">
               <textarea
                 value={quickPrompt}
                 onChange={(e) => setQuickPrompt(e.target.value)}
                 onKeyDown={handlePromptKeyDown}
-                rows={4}
+                rows={3}
                 placeholder="How can I help you today?"
-                className="w-full resize-none bg-transparent text-lg text-zinc-100 placeholder:text-zinc-400 focus:outline-none"
+                className="w-full resize-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
               />
 
-              <div className="mt-4 flex items-center justify-between border-t border-zinc-700/80 pt-4">
+              <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
                 <button
                   type="button"
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-700 text-zinc-300 transition-colors hover:border-zinc-500 hover:text-zinc-100"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:bg-muted"
                   aria-label="Attach content"
                 >
                   <Plus className="h-4 w-4" />
                 </button>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <div className="relative">
                     <select
                       value={selectedModel}
                       onChange={(e) => setSelectedModel(e.target.value as (typeof modelOptions)[number]['value'])}
-                      className="appearance-none rounded-full border border-zinc-700 bg-zinc-900 px-3 py-1.5 pr-8 text-sm text-zinc-200 outline-none transition-colors hover:border-zinc-500"
+                      className="appearance-none rounded-lg border border-border bg-muted px-2 py-1.5 pr-7 text-xs text-foreground outline-none transition-colors hover:bg-muted/80"
                       aria-label="Choose AI model"
                     >
                       {modelOptions.map((model) => (
@@ -170,48 +169,22 @@ export default function AiAssistantPage() {
                         </option>
                       ))}
                     </select>
-                    <ChevronsUpDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
+                    <ChevronsUpDown className="pointer-events-none absolute right-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
                   </div>
 
                   <button
                     onClick={handleQuickSend}
                     disabled={!quickPrompt.trim() || chatMutation.isPending}
-                    className="inline-flex items-center gap-2 rounded-full bg-orange-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <ArrowUp className="h-4 w-4" />
+                    <ArrowUp className="h-3.5 w-3.5" />
                     Send
                   </button>
                 </div>
               </div>
             </div>
 
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              variants={{
-                hidden: { opacity: 0 },
-                visible: { opacity: 1, transition: { staggerChildren: 0.04, delayChildren: 0.08 } },
-              }}
-              className="mt-4 flex flex-wrap gap-2"
-            >
-              {tools.map((tool) => (
-                <motion.button
-                  key={`quick-${tool.key}`}
-                  onClick={() => setActiveTool(tool.key)}
-                  variants={{ hidden: { opacity: 0, y: 6 }, visible: { opacity: 1, y: 0 } }}
-                  transition={{ duration: 0.2 }}
-                  className={cn(
-                    'inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition-colors',
-                    activeTool === tool.key
-                      ? 'border-orange-400/70 bg-orange-500/10 text-orange-200'
-                      : 'border-zinc-700 bg-zinc-900/70 text-zinc-300 hover:border-zinc-500 hover:text-zinc-100',
-                  )}
-                >
-                  <tool.icon className="h-4 w-4" />
-                  {tool.label}
-                </motion.button>
-              ))}
-            </motion.div>
+
           </div>
         </motion.section>
 
