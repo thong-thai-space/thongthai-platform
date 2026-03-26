@@ -44,7 +44,7 @@ export function Sidebar() {
       <div className="flex h-14 items-center justify-between border-b border-white/10 px-4">
         {!collapsed && (
           <Link href="/dashboard/projects" className="flex items-center">
-            <span className="text-sm font-bold">Thông Thái Space</span>
+            <span className="text-sm font-bold">Thong Thai Space</span>
           </Link>
         )}
         <button
