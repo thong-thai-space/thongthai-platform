@@ -38,7 +38,7 @@ export function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center">
           <span className="text-xl font-bold tracking-tight">
-            Thông Thái<span className="text-primary"> Space</span>
+            Thong Thai<span className="text-primary"> Space</span>
           </span>
         </Link>
 

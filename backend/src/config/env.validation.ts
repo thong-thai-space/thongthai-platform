@@ -42,6 +42,16 @@ function ensureOptionalUrl(env: EnvRecord, key: string) {
   }
 }
 
+function isRailwayDatabaseUrl(rawUrl: string) {
+  try {
+    const host = new URL(rawUrl).hostname.toLowerCase();
+    return host.includes('railway') || host.includes('rlwy');
+  } catch {
+    const normalized = rawUrl.toLowerCase();
+    return normalized.includes('railway') || normalized.includes('rlwy');
+  }
+}
+
 export function validateEnv(env: EnvRecord) {
   const nodeEnv = env.NODE_ENV ?? 'development';
   if (!['development', 'test', 'production'].includes(nodeEnv)) {
@@ -53,7 +63,12 @@ export function validateEnv(env: EnvRecord) {
     throw new Error('STORAGE_PROVIDER must be one of: local, r2');
   }
 
-  ensure(env, 'DATABASE_URL');
+  const databaseUrl = ensure(env, 'DATABASE_URL');
+  if (nodeEnv === 'development' && isRailwayDatabaseUrl(databaseUrl)) {
+    throw new Error(
+      'Unsafe DATABASE_URL: development environment cannot point to Railway. Use a local or dedicated dev database.',
+    );
+  }
   ensure(env, 'JWT_SECRET');
   ensure(env, 'JWT_REFRESH_SECRET');
   ensure(env, 'TURNSTILE_SECRET_KEY');

@@ -3,6 +3,40 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
+function isRailwayDatabaseUrl(rawUrl: string) {
+  try {
+    const host = new URL(rawUrl).hostname.toLowerCase();
+    return host.includes("railway") || host.includes("rlwy");
+  } catch {
+    const normalized = rawUrl.toLowerCase();
+    return normalized.includes("railway") || normalized.includes("rlwy");
+  }
+}
+
+function isDangerousPrismaCommand(argv: string[]) {
+  const args = argv.join(" ").toLowerCase();
+  return (
+    args.includes(" migrate dev") ||
+    args.includes(" migrate reset") ||
+    args.includes(" db push")
+  );
+}
+
+const databaseUrl = process.env["DATABASE_URL"];
+const allowDangerousRailway =
+  process.env["ALLOW_RAILWAY_DANGEROUS_PRISMA"] === "true";
+
+if (
+  databaseUrl &&
+  isRailwayDatabaseUrl(databaseUrl) &&
+  isDangerousPrismaCommand(process.argv) &&
+  !allowDangerousRailway
+) {
+  throw new Error(
+    "Unsafe Prisma command blocked: DATABASE_URL points to Railway while running migrate dev/reset or db push. Use a local/dev database or set ALLOW_RAILWAY_DANGEROUS_PRISMA=true if you really intend this."
+  );
+}
+
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
