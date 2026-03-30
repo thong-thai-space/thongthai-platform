@@ -1,4 +1,4 @@
 [deploy]
 startCommand = "sh ./entrypoint.sh"
-healthcheckPath = "/api/health"
+
 healthcheckTimeout = 60
