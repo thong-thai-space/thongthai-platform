@@ -1,4 +1,4 @@
 [deploy]
-startCommand = "sh ./entrypoint.sh"
-
+startCommand = "node server.js"
+healthcheckPath = "/api/health"
 healthcheckTimeout = 60
