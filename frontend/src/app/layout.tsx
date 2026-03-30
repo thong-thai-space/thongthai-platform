@@ -19,10 +19,6 @@ export const metadata: Metadata = {
   title: "Thong Thai Space | Smart Technology Solutions",
   description:
     "Project management platform and technology services by Thong Thai Space - Web, App, AI, Consulting",
-  icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
-  },
 };
 
 export default function RootLayout({
@@ -33,6 +29,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="icon" href="/logo.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/logo.png" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#2563eb" />
       </head>
