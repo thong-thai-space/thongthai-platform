@@ -1,4 +1,4 @@
 [deploy]
-startCommand = "sh -c 'PORT=${PORT:-3000} node server.js'"
-healthcheckPath = "/api/healthz"
+startCommand = "sh ./entrypoint.sh"
+healthcheckPath = "/api/health"
 healthcheckTimeout = 60
