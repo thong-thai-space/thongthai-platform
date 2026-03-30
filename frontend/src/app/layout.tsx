@@ -19,6 +19,10 @@ export const metadata: Metadata = {
   title: "Thong Thai Space | Smart Technology Solutions",
   description:
     "Project management platform and technology services by Thong Thai Space - Web, App, AI, Consulting",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({
