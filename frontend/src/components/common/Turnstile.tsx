@@ -6,14 +6,19 @@ interface TurnstileWidgetProps {
   onVerify: (token: string) => void;
   onExpire?: () => void;
   onError?: () => void;
+  siteKey?: string;
 }
 
 export function TurnstileWidget({
   onVerify,
   onExpire,
   onError,
+  siteKey: injectedSiteKey,
 }: TurnstileWidgetProps) {
-  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  const siteKey =
+    injectedSiteKey?.trim() ||
+    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() ||
+    '';
 
   if (!siteKey) {
     return (

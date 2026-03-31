@@ -4,7 +4,13 @@ import { useEffect, useState } from 'react';
 import { TurnstileWidget } from '@/components/common/Turnstile';
 import { CheckCircle } from 'lucide-react';
 
-export function TurnstileVerificationSection() {
+interface TurnstileVerificationSectionProps {
+  siteKey?: string;
+}
+
+export function TurnstileVerificationSection({
+  siteKey,
+}: TurnstileVerificationSectionProps) {
   const [isVerified, setIsVerified] = useState(() => {
     // Initialize state based on localStorage
     if (typeof window !== 'undefined') {
@@ -34,6 +40,7 @@ export function TurnstileVerificationSection() {
 
         <div className="flex justify-center">
           <TurnstileWidget
+            siteKey={siteKey}
             onVerify={handleVerify}
             onExpire={() => {
               localStorage.removeItem('turnstile_token');
