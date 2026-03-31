@@ -23,6 +23,11 @@ export function TurnstileVerificationSection({
     // Only used to sync verification state
   }, []);
 
+  // Don't render if no site key is configured
+  if (!siteKey || !siteKey.trim()) {
+    return null;
+  }
+
   if (isVerified) return null;
 
   const handleVerify = (token: string) => {
