@@ -7,7 +7,7 @@ import { useSectionContent } from '@/hooks/use-content';
 import { useShowcaseProjects } from '@/hooks/use-projects';
 import type { Project } from '@/types';
 import { useMemo, useState } from 'react';
-import { getApiOrigin } from '@/lib/asset-url';
+import { resolveBackendAssetUrl } from '@/lib/asset-url';
 
 type PortfolioContent = {
   hero: {
@@ -283,7 +283,5 @@ function mapProjectToPortfolioItem(project: Project) {
 
 function resolveAssetUrl(path?: string) {
   if (!path) return undefined;
-  if (path.startsWith('http')) return path;
-  const apiBase = getApiOrigin();
-  return `${apiBase}${path}`;
+  return resolveBackendAssetUrl(path) || undefined;
 }

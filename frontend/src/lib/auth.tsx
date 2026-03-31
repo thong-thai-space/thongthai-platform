@@ -31,15 +31,40 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
+function shouldProbeSession() {
+  if (typeof window === 'undefined') return true;
+
+  const isProtectedRoute = ['/dashboard', '/member', '/portal'].some(
+    (path) => window.location.pathname.startsWith(path),
+  );
+  const hasSessionHint = localStorage.getItem('tts_has_session') === '1';
+
+  return isProtectedRoute || hasSessionHint;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(shouldProbeSession);
 
   useEffect(() => {
+    if (!shouldProbeSession()) {
+      return;
+    }
+
     api
       .get('/auth/me')
-      .then(({ data }) => setUser(data))
-      .catch(() => setUser(null))
+      .then(({ data }) => {
+        setUser(data);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('tts_has_session', '1');
+        }
+      })
+      .catch(() => {
+        setUser(null);
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('tts_has_session');
+        }
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -53,6 +78,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       turnstileToken,
     });
     setUser(data.user);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('tts_has_session', '1');
+    }
   }, []);
 
   const loginWithGoogle = useCallback(() => {
@@ -89,6 +117,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // ignore errors during logout
     }
     setUser(null);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('tts_has_session');
+    }
     window.location.href = '/';
   }, []);
 
