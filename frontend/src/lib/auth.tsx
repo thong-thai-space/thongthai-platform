@@ -69,13 +69,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const turnstileToken = typeof window !== 'undefined' 
-      ? localStorage.getItem('turnstile_token') || ''
-      : '';
     const { data } = await api.post('/auth/login', {
       email,
       password,
-      turnstileToken,
     });
     setUser(data.user);
     if (typeof window !== 'undefined') {
@@ -95,15 +91,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password: string,
       acceptTerms: boolean,
     ) => {
-      const turnstileToken = typeof window !== 'undefined' 
-        ? localStorage.getItem('turnstile_token') || ''
-        : '';
       await api.post('/auth/register', {
         name,
         email,
         password,
         acceptTerms,
-        turnstileToken,
       });
       // No login after register — user must verify email first
     },

@@ -10,7 +10,6 @@ import * as bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EmailService } from '../email/email.service';
-import { TurnstileService } from '../../common/turnstile/turnstile.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import type { GoogleAuthUser } from './strategies/google.strategy';
@@ -22,20 +21,9 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private emailService: EmailService,
-    private turnstileService: TurnstileService,
   ) {}
 
-  async register(dto: RegisterDto, remoteIp?: string) {
-    // Only verify Turnstile if token is provided
-    if (dto.turnstileToken) {
-      const isTurnstileValid = await this.turnstileService.verify(
-        dto.turnstileToken,
-        remoteIp,
-      );
-      if (!isTurnstileValid) {
-        throw new BadRequestException('Turnstile verification failed');
-      }
-    }
+  async register(dto: RegisterDto) {
 
     const existing = await this.prisma.user.findUnique({
       where: { email: dto.email },
@@ -152,17 +140,7 @@ export class AuthService {
     return { message: 'If that email is registered and unverified, a new link has been sent.' };
   }
 
-  async login(dto: LoginDto, remoteIp?: string) {
-    // Only verify Turnstile if token is provided
-    if (dto.turnstileToken) {
-      const isTurnstileValid = await this.turnstileService.verify(
-        dto.turnstileToken,
-        remoteIp,
-      );
-      if (!isTurnstileValid) {
-        throw new BadRequestException('Turnstile verification failed');
-      }
-    }
+  async login(dto: LoginDto) {
 
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },

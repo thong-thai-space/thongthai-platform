@@ -95,10 +95,7 @@ export default function ContactPage() {
   const onSubmit = async (data: ContactForm) => {
     try {
       setError('');
-      const turnstileToken = typeof window !== 'undefined' 
-        ? localStorage.getItem('turnstile_token') || ''
-        : '';
-      await api.post('/contact', { ...data, turnstileToken });
+      await api.post('/contact', data);
       setSubmitted(true);
     } catch {
       setError(c.form.errorText || defaults.form.errorText);

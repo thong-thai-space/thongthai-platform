@@ -8,11 +8,9 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { RolesGuard } from './guards/roles.guard';
 import { EmailModule } from '../email/email.module';
-import { TurnstileModule } from '../../common/turnstile/turnstile.module';
 
 @Module({
   imports: [
-    TurnstileModule,
     PassportModule,
     JwtModule.register({}),
     EmailModule,

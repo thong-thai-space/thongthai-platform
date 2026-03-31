@@ -71,7 +71,6 @@ export function validateEnv(env: EnvRecord) {
   }
   ensure(env, 'JWT_SECRET');
   ensure(env, 'JWT_REFRESH_SECRET');
-  ensure(env, 'TURNSTILE_SECRET_KEY');
   ensure(env, 'ANTHROPIC_API_KEY');
   ensure(env, 'REDIS_URL');
   ensureUrl(env, 'FRONTEND_URL');
