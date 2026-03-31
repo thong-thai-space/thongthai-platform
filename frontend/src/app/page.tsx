@@ -10,6 +10,7 @@ import {
 import { Navbar } from '@/components/landing/navbar';
 import { Footer } from '@/components/landing/footer';
 import { PublicAiChatWidget } from '@/components/landing/ai-chat-widget';
+import { TurnstileDiagnostics } from '@/components/common/TurnstileDiagnostics';
 
 export default function Home() {
   const turnstileSiteKey =
@@ -29,6 +30,7 @@ export default function Home() {
       </main>
       <Footer />
       <PublicAiChatWidget />
+      <TurnstileDiagnostics />
     </>
   );
 }
