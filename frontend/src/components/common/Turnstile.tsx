@@ -23,12 +23,12 @@ export function TurnstileWidget({
   return (
     <div className="w-full">
       {siteKey ? (
-        <div className="animate-in fade-in duration-500">
+        <div className="flex justify-center">
           <Turnstile
             siteKey={siteKey}
             options={{
               theme: 'light',
-              size: 'flexible',
+              size: 'normal',
             }}
             onSuccess={onVerify}
             onExpire={onExpire}
@@ -36,9 +36,9 @@ export function TurnstileWidget({
           />
         </div>
       ) : (
-        <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-6 text-center">
-          <p className="text-sm text-slate-600">
-            Initializing security verification...
+        <div className="rounded-lg border border-border bg-muted/40 px-4 py-5 text-center">
+          <p className="text-sm text-muted-foreground">
+            Dang xac minh...
           </p>
         </div>
       )}
