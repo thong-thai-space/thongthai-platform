@@ -8,7 +8,7 @@ import {
   useCallback,
   type ReactNode,
 } from 'react';
-import api from './api';
+import api, { API_BASE_URL } from './api';
 import type { User } from '@/types';
 
 interface AuthContextType {
@@ -56,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const loginWithGoogle = useCallback(() => {
-    const baseUrl = String(api.defaults.baseURL || 'http://localhost:4000/api');
+    const baseUrl = String(api.defaults.baseURL || API_BASE_URL);
     window.location.href = `${baseUrl}/auth/google`;
   }, []);
 

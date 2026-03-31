@@ -10,6 +10,16 @@ import {
   type ReactNode,
 } from 'react';
 import { io, type Socket } from 'socket.io-client';
+import { API_BASE_URL } from './api';
+
+const resolveSocketUrl = () => {
+  const fromEnv = process.env.NEXT_PUBLIC_SOCKET_URL?.trim();
+  if (fromEnv) {
+    return fromEnv.replace(/\/+$/, '');
+  }
+
+  return API_BASE_URL.replace(/\/api$/, '');
+};
 
 interface SocketContextType {
   getSocket: () => Socket | null;
@@ -27,8 +37,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   const getSocket = useCallback(() => socketRef.current, []);
 
   useEffect(() => {
-    const socketUrl =
-      process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:4000';
+    const socketUrl = resolveSocketUrl();
 
     const s = io(socketUrl, {
       withCredentials: true,

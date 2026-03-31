@@ -1,7 +1,25 @@
 import axios from 'axios';
 
+const resolveApiBaseUrl = () => {
+  const fromEnv = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (fromEnv) {
+    return fromEnv.replace(/\/+$/, '');
+  }
+
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host === 'thongthaispace.com' || host.endsWith('.thongthaispace.com')) {
+      return 'https://api.thongthaispace.com/api';
+    }
+  }
+
+  return 'http://localhost:4000/api';
+};
+
+export const API_BASE_URL = resolveApiBaseUrl();
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api',
+  baseURL: API_BASE_URL,
   withCredentials: true,
 });
 
@@ -45,7 +63,7 @@ api.interceptors.response.use(
 
       try {
         await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'}/auth/refresh`,
+          `${API_BASE_URL}/auth/refresh`,
           {},
           { withCredentials: true },
         );
