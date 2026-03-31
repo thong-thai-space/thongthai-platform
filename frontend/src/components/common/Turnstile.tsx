@@ -20,24 +20,26 @@ export function TurnstileWidget({
     process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() ||
     '';
 
-  if (!siteKey) {
-    return (
-      <p className="rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2 text-xs text-destructive">
-        Missing NEXT_PUBLIC_TURNSTILE_SITE_KEY configuration.
-      </p>
-    );
-  }
-
   return (
-    <Turnstile
-      siteKey={siteKey}
-      options={{
-        theme: 'light',
-        size: 'flexible',
-      }}
-      onSuccess={onVerify}
-      onExpire={onExpire}
-      onError={onError}
-    />
+    <>
+      {siteKey ? (
+        <Turnstile
+          siteKey={siteKey}
+          options={{
+            theme: 'light',
+            size: 'flexible',
+          }}
+          onSuccess={onVerify}
+          onExpire={onExpire}
+          onError={onError}
+        />
+      ) : (
+        <div className="rounded-lg border border-border bg-muted px-4 py-8 text-center">
+          <p className="text-sm text-muted-foreground">
+            Security verification initializing...
+          </p>
+        </div>
+      )}
+    </>
   );
 }
