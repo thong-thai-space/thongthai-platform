@@ -26,12 +26,15 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto, remoteIp?: string) {
-    const isTurnstileValid = await this.turnstileService.verify(
-      dto.turnstileToken,
-      remoteIp,
-    );
-    if (!isTurnstileValid) {
-      throw new BadRequestException('Turnstile verification failed');
+    // Only verify Turnstile if token is provided
+    if (dto.turnstileToken) {
+      const isTurnstileValid = await this.turnstileService.verify(
+        dto.turnstileToken,
+        remoteIp,
+      );
+      if (!isTurnstileValid) {
+        throw new BadRequestException('Turnstile verification failed');
+      }
     }
 
     const existing = await this.prisma.user.findUnique({
@@ -150,12 +153,15 @@ export class AuthService {
   }
 
   async login(dto: LoginDto, remoteIp?: string) {
-    const isTurnstileValid = await this.turnstileService.verify(
-      dto.turnstileToken,
-      remoteIp,
-    );
-    if (!isTurnstileValid) {
-      throw new BadRequestException('Turnstile verification failed');
+    // Only verify Turnstile if token is provided
+    if (dto.turnstileToken) {
+      const isTurnstileValid = await this.turnstileService.verify(
+        dto.turnstileToken,
+        remoteIp,
+      );
+      if (!isTurnstileValid) {
+        throw new BadRequestException('Turnstile verification failed');
+      }
     }
 
     const user = await this.prisma.user.findUnique({

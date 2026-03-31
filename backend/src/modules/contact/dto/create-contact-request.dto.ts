@@ -29,7 +29,7 @@ export class CreateContactRequestDto {
   @IsString()
   message: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  turnstileToken: string;
+  turnstileToken?: string;
 }

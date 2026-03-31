@@ -14,14 +14,13 @@ import type { User } from '@/types';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string, turnstileToken: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   loginWithGoogle: () => void;
   register: (
     name: string,
     email: string,
     password: string,
     acceptTerms: boolean,
-    turnstileToken: string,
   ) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
@@ -44,7 +43,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setLoading(false));
   }, []);
 
-  const login = useCallback(async (email: string, password: string, turnstileToken: string) => {
+  const login = useCallback(async (email: string, password: string) => {
+    const turnstileToken = typeof window !== 'undefined' 
+      ? localStorage.getItem('turnstile_token') || ''
+      : '';
     const { data } = await api.post('/auth/login', {
       email,
       password,
@@ -64,8 +66,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: string,
       password: string,
       acceptTerms: boolean,
-      turnstileToken: string,
     ) => {
+      const turnstileToken = typeof window !== 'undefined' 
+        ? localStorage.getItem('turnstile_token') || ''
+        : '';
       await api.post('/auth/register', {
         name,
         email,

@@ -14,12 +14,15 @@ export class ContactService {
   ) {}
 
   async create(dto: CreateContactRequestDto, remoteIp?: string) {
-    const isTurnstileValid = await this.turnstileService.verify(
-      dto.turnstileToken,
-      remoteIp,
-    );
-    if (!isTurnstileValid) {
-      throw new BadRequestException('Turnstile verification failed');
+    // Only verify Turnstile if token is provided
+    if (dto.turnstileToken) {
+      const isTurnstileValid = await this.turnstileService.verify(
+        dto.turnstileToken,
+        remoteIp,
+      );
+      if (!isTurnstileValid) {
+        throw new BadRequestException('Turnstile verification failed');
+      }
     }
 
     const { turnstileToken: _, ...contactPayload } = dto;

@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { Eye, EyeOff, Mail } from 'lucide-react';
-import { TurnstileWidget } from '@/components/common/Turnstile';
 
 interface RegisterForm {
   name: string;
@@ -13,7 +12,6 @@ interface RegisterForm {
   password: string;
   confirmPassword: string;
   acceptTerms: boolean;
-  turnstileToken: string;
 }
 
 export default function RegisterPage() {
@@ -27,11 +25,7 @@ export default function RegisterPage() {
     watch,
     setValue,
     formState: { errors, isSubmitting },
-  } = useForm<RegisterForm>({
-    defaultValues: {
-      turnstileToken: '',
-    },
-  });
+  } = useForm<RegisterForm>();
 
   const onSubmit = async (data: RegisterForm) => {
     try {
@@ -41,7 +35,6 @@ export default function RegisterPage() {
         data.email,
         data.password,
         data.acceptTerms,
-        data.turnstileToken,
       );
       setRegisteredEmail(data.email);
     } catch (err: any) {
@@ -243,27 +236,6 @@ export default function RegisterPage() {
               <div className="rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
                 {error}
               </div>
-            )}
-
-            <input
-              type="hidden"
-              {...register('turnstileToken', {
-                required: 'Please complete Turnstile verification.',
-              })}
-            />
-            <TurnstileWidget
-              onVerify={(token) => {
-                setValue('turnstileToken', token, { shouldValidate: true });
-              }}
-              onExpire={() => {
-                setValue('turnstileToken', '', { shouldValidate: true });
-              }}
-              onError={() => {
-                setValue('turnstileToken', '', { shouldValidate: true });
-              }}
-            />
-            {errors.turnstileToken && (
-              <p className="text-xs text-destructive">{errors.turnstileToken.message}</p>
             )}
 
             <button

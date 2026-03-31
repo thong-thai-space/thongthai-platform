@@ -5,6 +5,7 @@ import {
   ProcessSection,
   TestimonialsSection,
   CtaSection,
+  TurnstileVerificationSection,
 } from '@/components/landing';
 import { Navbar } from '@/components/landing/navbar';
 import { Footer } from '@/components/landing/footer';
@@ -16,6 +17,7 @@ export default function Home() {
       <Navbar />
       <main>
         <HeroSection />
+        <TurnstileVerificationSection />
         <ServicesSection />
         <PortfolioSection />
         <ProcessSection />
