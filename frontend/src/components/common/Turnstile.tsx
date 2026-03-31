@@ -21,25 +21,27 @@ export function TurnstileWidget({
     '';
 
   return (
-    <>
+    <div className="w-full">
       {siteKey ? (
-        <Turnstile
-          siteKey={siteKey}
-          options={{
-            theme: 'light',
-            size: 'flexible',
-          }}
-          onSuccess={onVerify}
-          onExpire={onExpire}
-          onError={onError}
-        />
+        <div className="animate-in fade-in duration-500">
+          <Turnstile
+            siteKey={siteKey}
+            options={{
+              theme: 'light',
+              size: 'flexible',
+            }}
+            onSuccess={onVerify}
+            onExpire={onExpire}
+            onError={onError}
+          />
+        </div>
       ) : (
-        <div className="rounded-lg border border-border bg-muted px-4 py-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            Security verification initializing...
+        <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-6 text-center">
+          <p className="text-sm text-slate-600">
+            Initializing security verification...
           </p>
         </div>
       )}
-    </>
+    </div>
   );
 }
