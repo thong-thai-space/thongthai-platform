@@ -20,10 +20,12 @@ export function TurnstileWidget({
     process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() ||
     '';
 
-  // Don't render widget if key is not configured
-  // When key becomes available (e.g., after Railway env setup), it will appear
   if (!siteKey) {
-    return null;
+    return (
+      <p className="rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+        Missing NEXT_PUBLIC_TURNSTILE_SITE_KEY configuration.
+      </p>
+    );
   }
 
   return (
