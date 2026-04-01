@@ -1,35 +1,52 @@
 'use client';
 
 import { useBreakdownTasks } from '@/hooks/use-ai';
-import {
-  GitBranch,
-  Loader2,
-  ChevronDown,
-  ChevronRight,
-  Upload,
-  FileDown,
-  FileType,
-  FileSpreadsheet,
-} from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { GitBranch } from 'lucide-react';
+import { useState } from 'react';
 import type { TaskBreakdownResponse } from '@/hooks/use-ai';
-import {
-  exportJsonAsExcel,
-  exportJsonAsPdf,
-  exportJsonAsWord,
-  importTextFile,
-} from '@/lib/file-export';
-import { useProjects } from '@/hooks/use-projects';
-import { buildProjectAiContext, buildProjectTechStack } from '@/lib/ai-project-context';
+import { AiTaskBreakdownForm } from './ai-task-breakdown-form';
+import { AiTaskBreakdownResult } from './ai-task-breakdown-result';
 
-const priorityColors: Record<string, string> = {
-  LOW: 'bg-gray-100 text-gray-600',
-  MEDIUM: 'bg-blue-100 text-blue-600',
-  HIGH: 'bg-orange-100 text-orange-600',
-  URGENT: 'bg-red-100 text-red-600',
-};
-
+/**
+ * Pattern: Component Composition
+ * Main component orchestrates form and result sub-components
+ */
 export function AiTaskBreakdown({ initialProjectId }: { initialProjectId?: string }) {
+  const [result, setResult] = useState<TaskBreakdownResponse | null>(null);
+  const mutation = useBreakdownTasks();
+
+  const handleGenerate = (description: string, techStack: string[]) => {
+    mutation.mutate(
+      { description, techStack },
+      {
+        onSuccess: (data) => {
+          setResult(data);
+        },
+        onError: () => setResult(null),
+      },
+    );
+  };
+
+  return (
+    <div className="flex h-full flex-col">
+      <div className="flex items-center gap-2 border-b border-border px-4 py-3">
+        <GitBranch className="h-5 w-5 text-purple-500" />
+        <span className="text-sm font-medium">Task Breakdown</span>
+      </div>
+
+      <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
+        <AiTaskBreakdownForm
+          onGenerate={handleGenerate}
+          isPending={mutation.isPending}
+          initialProjectId={initialProjectId}
+        />
+
+        {/* Result */}
+        <AiTaskBreakdownResult result={result} />
+      </div>
+    </div>
+  );
+}
   const [description, setDescription] = useState('');
   const [techStackInput, setTechStackInput] = useState('');
   const [projectId, setProjectId] = useState(initialProjectId || '');

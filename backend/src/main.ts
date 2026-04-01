@@ -8,6 +8,8 @@ import cookieParser from 'cookie-parser';
 import { join } from 'path';
 import { AppModule } from './app.module';
 import { RedisIoAdapter } from './common/redis-io.adapter';
+import { GlobalExceptionFilter } from './shared/filters/global-exception.filter';
+import { ResponseEnvelopeInterceptor } from './shared/interceptors/response-envelope.interceptor';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -43,8 +45,14 @@ async function bootstrap() {
     }),
   );
 
-  // API prefix
-  app.setGlobalPrefix('api');
+  // Pattern: Global Exception Handling
+  app.useGlobalFilters(new GlobalExceptionFilter());
+
+  // Pattern: Response Envelope
+  app.useGlobalInterceptors(new ResponseEnvelopeInterceptor());
+
+  // Pattern: API Versioning
+  app.setGlobalPrefix('api/v1');
 
   const isProduction = process.env.NODE_ENV === 'production';
 
@@ -57,14 +65,14 @@ async function bootstrap() {
       .addBearerAuth()
       .build();
     const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api/docs', app, document);
+    SwaggerModule.setup('api/v1/docs', app, document);
   }
 
   const port = Number(process.env.PORT || 4000);
   await app.listen(port, '0.0.0.0');
   console.log(`🚀 Thông Thái Space API running on port ${port}`);
   if (!isProduction) {
-    console.log(`📚 Swagger docs: http://localhost:${port}/api/docs`);
+    console.log(`📚 Swagger docs: http://localhost:${port}/api/v1/docs`);
   }
 }
 bootstrap();

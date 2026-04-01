@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useAuth } from '@/lib/auth';
 import api from '@/lib/api';
 import { resolveBackendAssetUrl } from '@/lib/asset-url';
@@ -45,10 +46,13 @@ export function AvatarUpload() {
         className="group relative h-16 w-16 overflow-hidden rounded-full border-2 border-border bg-muted transition-colors hover:border-accent"
       >
         {avatarUrl ? (
-          <img
+          <Image
             src={avatarUrl}
             alt={user?.name || 'Avatar'}
+            width={64}
+            height={64}
             className="h-full w-full object-cover"
+            priority={false}
           />
         ) : (
           <span className="flex h-full w-full items-center justify-center text-xl font-semibold text-muted-foreground">

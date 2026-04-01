@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationGateway } from './notification.gateway';
 import { PushService } from './push.service';
@@ -20,7 +20,21 @@ export class NotificationService {
     });
   }
 
-  async markAsRead(id: string) {
+  async markAsRead(id: string, userId: string) {
+    const notification = await this.prisma.notification.findUnique({
+      where: { id },
+      select: { userId: true },
+    });
+
+    if (!notification) {
+      throw new Error('Notification not found');
+    }
+
+    // Pattern: Authorization - Ownership check
+    if (notification.userId !== userId) {
+      throw new ForbiddenException('You do not have permission to modify this notification');
+    }
+
     return this.prisma.notification.update({
       where: { id },
       data: { isRead: true },
@@ -40,7 +54,21 @@ export class NotificationService {
     });
   }
 
-  async remove(id: string) {
+  async remove(id: string, userId: string) {
+    const notification = await this.prisma.notification.findUnique({
+      where: { id },
+      select: { userId: true },
+    });
+
+    if (!notification) {
+      throw new Error('Notification not found');
+    }
+
+    // Pattern: Authorization - Ownership check
+    if (notification.userId !== userId) {
+      throw new ForbiddenException('You do not have permission to delete this notification');
+    }
+
     return this.prisma.notification.delete({ where: { id } });
   }
 

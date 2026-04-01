@@ -4,71 +4,40 @@ import {
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationService } from '../notification/notification.service';
-import { UserRole, NotificationType } from '@prisma/client';
+import { UserRole, NotificationType, ProjectStatus, Prisma } from '@prisma/client';
 import { CreateProjectDto, UpdateProjectDto } from './dto/project.dto';
 import { CreateProjectRequestDto } from './dto/create-project-request.dto';
 import { UpdateProjectClientDto } from './dto/update-project-client.dto';
+import { ProjectRepository } from './repositories/project.repository';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class ProjectService {
   constructor(
+    private projectRepository: ProjectRepository,
     private prisma: PrismaService,
     private notificationService: NotificationService,
   ) {}
 
   async findAll(userId: string, role: UserRole) {
     if (role === UserRole.CLIENT) {
-      return this.prisma.project.findMany({
-        where: { clientId: userId },
-        include: { tasks: { select: { id: true, status: true } } },
-        orderBy: { updatedAt: 'desc' },
-      });
+      return this.projectRepository.findByClient(userId, true);
     }
 
     // MEMBER: only see projects where they have assigned tasks
     if (role === UserRole.MEMBER) {
-      return this.prisma.project.findMany({
-        where: {
-          tasks: { some: { assigneeId: userId } },
-        },
-        include: {
-          client: { select: { id: true, name: true, email: true } },
-          tasks: { select: { id: true, status: true } },
-          _count: { select: { tasks: true } },
-        },
-        orderBy: { updatedAt: 'desc' },
-      });
+      const where: Prisma.ProjectWhereInput = {
+        tasks: { some: { assigneeId: userId } },
+      };
+      return this.projectRepository.findAllWithIncludes(where, true);
     }
 
-    return this.prisma.project.findMany({
-      include: {
-        client: { select: { id: true, name: true, email: true } },
-        tasks: { select: { id: true, status: true } },
-        _count: { select: { tasks: true, invoices: true } },
-      },
-      orderBy: { updatedAt: 'desc' },
-    });
+    return this.projectRepository.findAllWithIncludes({}, true);
   }
 
   async findOne(id: string, userId: string, role: UserRole) {
-    const project = await this.prisma.project.findUnique({
-      where: { id },
-      include: {
-        owner: { select: { id: true, name: true, email: true } },
-        client: { select: { id: true, name: true, email: true } },
-        tasks: {
-          orderBy: { order: 'asc' },
-          include: {
-            assignee: { select: { id: true, name: true, avatar: true } },
-          },
-        },
-        milestones: { orderBy: { dueDate: 'asc' } },
-        invoices: true,
-        files: true,
-      },
-    });
+    const project = await this.projectRepository.findByIdWithIncludes(id);
 
     if (!project) throw new NotFoundException('Project not found');
 
@@ -78,7 +47,7 @@ export class ProjectService {
 
     // MEMBER: can only view projects where they have assigned tasks
     if (role === UserRole.MEMBER) {
-      const hasAssignedTask = project.tasks.some((t) => t.assignee?.id === userId);
+      const hasAssignedTask = project.tasks.some((t: any) => t.assignee?.id === userId);
       if (!hasAssignedTask) throw new ForbiddenException();
     }
 
@@ -87,15 +56,15 @@ export class ProjectService {
 
   async create(dto: CreateProjectDto, userId: string) {
     const { startDate, endDate, deadline, ...rest } = dto;
-    const project = await this.prisma.project.create({
-      data: {
-        ...rest,
-        ownerId: userId,
-        startDate: startDate ? new Date(startDate) : undefined,
-        endDate: endDate ? new Date(endDate) : undefined,
-        deadline: deadline ? new Date(deadline) : undefined,
-      },
-    });
+    const createData: Prisma.ProjectCreateInput = {
+      ...rest,
+      ownerId: userId,
+      startDate: startDate ? new Date(startDate) : undefined,
+      endDate: endDate ? new Date(endDate) : undefined,
+      deadline: deadline ? new Date(deadline) : undefined,
+    } as any;
+
+    const project = await this.projectRepository.create(createData);
 
     // Notify OWNER and ADMIN users about new project
     const admins = await this.prisma.user.findMany({
@@ -137,19 +106,19 @@ export class ProjectService {
       select: { name: true },
     });
 
-    const project = await this.prisma.project.create({
-      data: {
-        name: dto.name,
-        description: dto.description,
-        budget: dto.budget,
-        currency: dto.currency,
-        deadline: dto.deadline ? new Date(dto.deadline) : undefined,
-        techStack: dto.techStack || [],
-        status: 'DRAFT',
-        ownerId: clientId,
-        clientId: clientId,
-      },
-    });
+    const createData: Prisma.ProjectCreateInput = {
+      name: dto.name,
+      description: dto.description,
+      budget: dto.budget,
+      currency: dto.currency,
+      deadline: dto.deadline ? new Date(dto.deadline) : undefined,
+      techStack: dto.techStack || [],
+      status: 'DRAFT',
+      owner: { connect: { id: clientId } },
+      client: { connect: { id: clientId } },
+    } as any;
+
+    const project = await this.projectRepository.create(createData);
 
     // Notify all OWNER and ADMIN users about the client request
     const admins = await this.prisma.user.findMany({
@@ -176,39 +145,70 @@ export class ProjectService {
   async update(id: string, dto: UpdateProjectDto) {
     const { startDate, endDate, deadline, ...rest } = dto;
 
-    return this.prisma.project.update({
-      where: { id },
-      data: {
-        ...rest,
-        startDate: startDate ? new Date(startDate) : undefined,
-        endDate: endDate ? new Date(endDate) : undefined,
-        deadline: deadline ? new Date(deadline) : undefined,
-      },
-    });
+    const existingProject = await this.projectRepository.findById(id);
+
+    if (!existingProject) {
+      throw new NotFoundException('Project not found');
+    }
+
+    // Pattern: State Machine - Validate project status transitions
+    if (dto.status && dto.status !== existingProject.status) {
+      this.validateProjectStatusTransition(
+        existingProject.status as ProjectStatus,
+        dto.status as ProjectStatus,
+      );
+    }
+
+    const updateData: Prisma.ProjectUpdateInput = {
+      ...rest,
+      startDate: startDate ? new Date(startDate) : undefined,
+      endDate: endDate ? new Date(endDate) : undefined,
+      deadline: deadline ? new Date(deadline) : undefined,
+    };
+
+    return this.projectRepository.update(id, updateData);
+  }
+
+  private validateProjectStatusTransition(
+    currentStatus: ProjectStatus,
+    newStatus: ProjectStatus,
+  ): void {
+    // Pattern: State Machine - Define valid project status transitions
+    const validTransitions: Record<ProjectStatus, ProjectStatus[]> = {
+      DRAFT: ['PROPOSAL_SENT', 'CANCELLED'],
+      PROPOSAL_SENT: ['IN_PROGRESS', 'CANCELLED'],
+      IN_PROGRESS: ['ON_HOLD', 'REVIEW', 'CANCELLED'],
+      ON_HOLD: ['IN_PROGRESS', 'CANCELLED'],
+      REVIEW: ['IN_PROGRESS', 'COMPLETED', 'CANCELLED'],
+      COMPLETED: [], // Terminal state
+      CANCELLED: [], // Terminal state
+    };
+
+    const allowedNextStates = validTransitions[currentStatus];
+    if (!allowedNextStates.includes(newStatus)) {
+      throw new BadRequestException(
+        `Cannot transition from ${currentStatus} to ${newStatus}. Allowed transitions: ${allowedNextStates.join(', ') || 'none'}`,
+      );
+    }
   }
 
   async remove(id: string) {
-    return this.prisma.project.delete({ where: { id } });
+    await this.projectRepository.delete(id);
+    return { success: true };
   }
 
   async acceptRequest(projectId: string, adminUserId: string) {
-    const project = await this.prisma.project.findUnique({
-      where: { id: projectId },
-      select: { id: true, name: true, status: true, clientId: true },
-    });
+    const project = await this.projectRepository.findById(projectId);
 
     if (!project) throw new NotFoundException('Project not found');
     if (project.status !== 'DRAFT' || !project.clientId) {
       throw new BadRequestException('This project is not a client request');
     }
 
-    const updated = await this.prisma.project.update({
-      where: { id: projectId },
-      data: {
-        ownerId: adminUserId,
-        status: 'IN_PROGRESS',
-      },
-    });
+    const updated = await this.projectRepository.update(projectId, {
+      owner: { connect: { id: adminUserId } },
+      status: 'IN_PROGRESS',
+    } as any);
 
     // Notify the client that their request was accepted
     await this.notificationService.create({
@@ -223,10 +223,7 @@ export class ProjectService {
   }
 
   async updateByClient(projectId: string, clientId: string, dto: UpdateProjectClientDto) {
-    const project = await this.prisma.project.findUnique({
-      where: { id: projectId },
-      select: { id: true, clientId: true, status: true },
-    });
+    const project = await this.projectRepository.findById(projectId);
 
     if (!project) throw new NotFoundException('Project not found');
     if (project.clientId !== clientId) throw new ForbiddenException();
@@ -234,33 +231,19 @@ export class ProjectService {
       throw new BadRequestException('Only DRAFT projects can be edited');
     }
 
-    return this.prisma.project.update({
-      where: { id: projectId },
-      data: {
-        name: dto.name,
-        description: dto.description,
-        budget: dto.budget,
-        currency: dto.currency,
-        deadline: dto.deadline ? new Date(dto.deadline) : undefined,
-        techStack: dto.techStack,
-      },
-    });
+    const updateData: Prisma.ProjectUpdateInput = {
+      name: dto.name,
+      description: dto.description,
+      budget: dto.budget,
+      currency: dto.currency,
+      deadline: dto.deadline ? new Date(dto.deadline) : undefined,
+      techStack: dto.techStack,
+    };
+
+    return this.projectRepository.update(projectId, updateData);
   }
 
   async getShowcase() {
-    return this.prisma.project.findMany({
-      where: { isShowcase: true },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        techStack: true,
-        liveUrl: true,
-        thumbnailUrl: true,
-        screenshots: true,
-        showcaseOrder: true,
-      },
-      orderBy: { showcaseOrder: 'asc' },
-    });
+    return this.projectRepository.findShowcase();
   }
 }

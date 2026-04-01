@@ -66,14 +66,20 @@ export class NotificationController {
   @Patch(':id/read')
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
-  markAsRead(@Param('id') id: string) {
-    return this.notificationService.markAsRead(id);
+  markAsRead(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.notificationService.markAsRead(id, userId);
   }
 
   @Delete(':id')
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
-  remove(@Param('id') id: string) {
-    return this.notificationService.remove(id);
+  remove(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.notificationService.remove(id, userId);
   }
 }

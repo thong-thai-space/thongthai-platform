@@ -158,6 +158,8 @@ export class MessageService {
   }
 
   async findConversation(userId: string, otherUserId: string) {
+    // Pattern: Authorization - Ownership check
+    // Only the participants of a conversation can view it
     return this.prisma.message.findMany({
       where: {
         OR: [

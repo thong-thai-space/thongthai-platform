@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { resolveBackendAssetUrl } from '@/lib/asset-url';
 
 export function UserAvatar({
@@ -17,16 +18,25 @@ export function UserAvatar({
     lg: 'h-12 w-12 text-lg',
   };
 
+  const sizePixels = {
+    sm: 32,
+    md: 40,
+    lg: 48,
+  };
+
   const avatarUrl = resolveBackendAssetUrl(avatar);
 
   const initial = name?.charAt(0).toUpperCase() || '?';
 
   if (avatarUrl) {
     return (
-      <img
+      <Image
         src={avatarUrl}
         alt={name || 'Avatar'}
+        width={sizePixels[size]}
+        height={sizePixels[size]}
         className={`${sizeClasses[size]} shrink-0 rounded-full object-cover`}
+        priority={false}
       />
     );
   }

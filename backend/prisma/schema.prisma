@@ -111,6 +111,11 @@ model User {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
+  // Pattern: Quota - AI usage limits per user (monthly resets)
+  aiQuotaUsedTokens Int @default(0) // Cumulative tokens used this month
+  aiQuotaLimitTokens Int @default(100000) // Monthly token limit per user (configurable)
+  aiQuotaResetDate DateTime @default(now()) // Last reset date for monthly quota
+
   // Relations
   ownedProjects   Project[]        @relation("ProjectOwner")
   assignedTasks   Task[]           @relation("TaskAssignee")

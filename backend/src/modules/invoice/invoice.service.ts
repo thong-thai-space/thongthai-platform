@@ -1,37 +1,32 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { Prisma, UserRole } from '@prisma/client';
+import { BadRequestException, Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Prisma, UserRole, InvoiceStatus } from '@prisma/client';
 import { CreateInvoiceDto, UpdateInvoiceDto } from './dto/invoice.dto';
+import { TaxCalculator } from '../../shared/utils/tax-calculator';
+import { InvoiceRepository } from './repositories/invoice.repository';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class InvoiceService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private invoiceRepository: InvoiceRepository,
+    private prisma: PrismaService,
+  ) {}
 
   async findAll(userId: string, role: UserRole) {
-    const where = role === UserRole.CLIENT ? { clientId: userId } : {};
-
-    return this.prisma.invoice.findMany({
-      where,
-      include: {
-        client: { select: { id: true, name: true, email: true } },
-        project: { select: { id: true, name: true } },
-        _count: { select: { items: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+    const where = role === UserRole.CLIENT ? { clientId: userId } : undefined;
+    return this.invoiceRepository.findAll(where);
   }
 
-  async findOne(id: string) {
-    const invoice = await this.prisma.invoice.findUnique({
-      where: { id },
-      include: {
-        client: { select: { id: true, name: true, email: true, phone: true } },
-        creator: { select: { id: true, name: true } },
-        project: { select: { id: true, name: true } },
-        items: true,
-      },
-    });
+  async findOne(id: string, userId: string, role: UserRole) {
+    const invoice = await this.invoiceRepository.findById(id);
     if (!invoice) throw new NotFoundException('Invoice not found');
+
+    // Pattern: Authorization - Per-resource access control
+    // OWNER/ADMIN can access any invoice; CLIENT can only access their own
+    if (role === UserRole.CLIENT && invoice.clientId !== userId) {
+      throw new ForbiddenException('You do not have permission to access this invoice');
+    }
+
     return invoice;
   }
 
@@ -83,29 +78,32 @@ export class InvoiceService {
 
     const subtotal = computedItems.reduce((sum, it) => sum + Number(it.amount), 0);
     const rate = taxRate ?? 0;
-    const tax = Math.round(subtotal * rate) / 100;
+    // Pattern: Precision - Use TaxCalculator for accurate financial arithmetic
+    const tax = TaxCalculator.calculateTax(
+      TaxCalculator.toCents(subtotal),
+      rate,
+    ) / 100;
     const discount = dto.discount ?? 0;
     const total = subtotal + tax - discount;
 
     const invoiceNumber = await this.generateInvoiceNumber();
 
+    const createData: Prisma.InvoiceCreateInput = {
+      ...invoiceData,
+      dueDate,
+      invoiceNumber,
+      creatorId,
+      subtotal,
+      tax,
+      discount,
+      total,
+      items: {
+        create: computedItems,
+      },
+    } as any;
+
     try {
-      return await this.prisma.invoice.create({
-        data: {
-          ...invoiceData,
-          dueDate,
-          invoiceNumber,
-          creatorId,
-          subtotal,
-          tax,
-          discount,
-          total,
-          items: {
-            create: computedItems,
-          },
-        },
-        include: { items: true },
-      });
+      return await this.invoiceRepository.create(createData);
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2003') {
@@ -120,38 +118,59 @@ export class InvoiceService {
   }
 
   async update(id: string, dto: UpdateInvoiceDto) {
-    const data: UpdateInvoiceDto & { paidAt?: Date; paidAmount?: any } = {
+    const existingInvoice = await this.invoiceRepository.findById(id);
+
+    if (!existingInvoice) {
+      throw new NotFoundException('Invoice not found');
+    }
+
+    // Pattern: State Machine - Validate invoice status transitions
+    if (dto.status && dto.status !== existingInvoice.status) {
+      this.validateStatusTransition(
+        existingInvoice.status as InvoiceStatus,
+        dto.status as InvoiceStatus,
+      );
+    }
+
+    const updateData: Prisma.InvoiceUpdateInput = {
       ...dto,
     };
 
     if (dto.status === 'PAID') {
-      data.paidAt = new Date();
-      const invoice = await this.prisma.invoice.findUnique({
-        where: { id },
-      });
-      data.paidAmount = invoice?.total;
+      updateData.paidAt = new Date();
+      updateData.paidAmount = existingInvoice.total;
     }
 
-    return this.prisma.invoice.update({
-      where: { id },
-      data,
-      include: { items: true },
-    });
+    return this.invoiceRepository.update(id, updateData);
+  }
+
+  private validateStatusTransition(
+    currentStatus: InvoiceStatus,
+    newStatus: InvoiceStatus,
+  ): void {
+    // Pattern: State Machine - Define valid transitions
+    const validTransitions: Record<InvoiceStatus, InvoiceStatus[]> = {
+      DRAFT: ['SENT', 'CANCELLED'],
+      SENT: ['PAID', 'OVERDUE', 'CANCELLED'],
+      PAID: [], // Terminal state
+      OVERDUE: ['PAID', 'CANCELLED'],
+      CANCELLED: [], // Terminal state
+    };
+
+    const allowedNextStates = validTransitions[currentStatus];
+    if (!allowedNextStates.includes(newStatus)) {
+      throw new BadRequestException(
+        `Cannot transition from ${currentStatus} to ${newStatus}. Allowed transitions: ${allowedNextStates.join(', ') || 'none'}`,
+      );
+    }
   }
 
   async remove(id: string) {
-    return this.prisma.invoice.delete({ where: { id } });
+    await this.invoiceRepository.delete(id);
+    return { success: true };
   }
 
   private async generateInvoiceNumber(): Promise<string> {
-    const year = new Date().getFullYear();
-    const count = await this.prisma.invoice.count({
-      where: {
-        createdAt: {
-          gte: new Date(`${year}-01-01`),
-        },
-      },
-    });
-    return `INV-${year}-${String(count + 1).padStart(4, '0')}`;
+    return this.invoiceRepository.generateNextInvoiceNumber('INV');
   }
 }

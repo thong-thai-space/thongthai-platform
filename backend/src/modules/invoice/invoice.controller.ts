@@ -33,8 +33,12 @@ export class InvoiceController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.invoiceService.findOne(id);
+  findOne(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') role: UserRole,
+  ) {
+    return this.invoiceService.findOne(id, userId, role);
   }
 
   @Post()

@@ -21,9 +21,16 @@ export class FileService {
     });
   }
 
-  async findOne(id: string) {
-    const file = await this.prisma.projectFile.findUnique({ where: { id } });
+  async findOne(id: string, userId: string, role: UserRole) {
+    const file = await this.prisma.projectFile.findUnique({ 
+      where: { id },
+      include: { project: { select: { id: true, clientId: true } } },
+    });
     if (!file) throw new NotFoundException('File not found');
+
+    // Pattern: Authorization - Per-resource access control
+    await this.assertProjectAccess(file.projectId, userId, role);
+
     return file;
   }
 
@@ -66,7 +73,16 @@ export class FileService {
     });
   }
 
-  async remove(id: string) {
+  async remove(id: string, userId: string, role: UserRole) {
+    const file = await this.prisma.projectFile.findUnique({
+      where: { id },
+      select: { projectId: true },
+    });
+    if (!file) throw new NotFoundException('File not found');
+
+    // Pattern: Authorization - Per-resource access control
+    await this.assertProjectAccess(file.projectId, userId, role);
+
     return this.prisma.projectFile.delete({ where: { id } });
   }
 

@@ -8,6 +8,7 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { RolesGuard } from './guards/roles.guard';
 import { EmailModule } from '../email/email.module';
+import { AuthRepository } from './repositories/auth.repository';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { EmailModule } from '../email/email.module';
   controllers: [AuthController],
   providers: [
     AuthService,
+    AuthRepository,
     JwtStrategy,
     JwtRefreshStrategy,
     GoogleStrategy,

@@ -10,6 +10,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
@@ -68,11 +69,14 @@ export class AuthController {
     res.clearCookie('refreshToken', clearOptions);
   }
 
+  // Pattern: Security - Rate limiting for brute force protection
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 requests per minute
   @Post('register')
   async register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 requests per minute
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(
@@ -85,6 +89,7 @@ export class AuthController {
     return { user };
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 requests per minute
   @Get('verify-email')
   async verifyEmail(
     @Query('token') token: string,
@@ -96,6 +101,7 @@ export class AuthController {
     return { user };
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 requests per minute
   @Post('resend-verification')
   @HttpCode(HttpStatus.OK)
   async resendVerification(@Body('email') email: string) {

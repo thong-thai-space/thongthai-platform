@@ -8,8 +8,8 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
-import { PrismaService } from '../../prisma/prisma.service';
 import { EmailService } from '../email/email.service';
+import { AuthRepository } from './repositories/auth.repository';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import type { GoogleAuthUser } from './strategies/google.strategy';
@@ -17,7 +17,7 @@ import type { GoogleAuthUser } from './strategies/google.strategy';
 @Injectable()
 export class AuthService {
   constructor(
-    private prisma: PrismaService,
+    private authRepository: AuthRepository,
     private jwtService: JwtService,
     private configService: ConfigService,
     private emailService: EmailService,
@@ -25,9 +25,7 @@ export class AuthService {
 
   async register(dto: RegisterDto) {
 
-    const existing = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-    });
+    const existing = await this.authRepository.findByEmail(dto.email);
     const verifyToken = randomBytes(32).toString('hex');
     const verifyExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
 
@@ -38,20 +36,17 @@ export class AuthService {
       }
 
       const hashedPassword = await bcrypt.hash(dto.password, 12);
-      await this.prisma.user.update({
-        where: { id: existing.id },
-        data: {
-          name: dto.name,
-          phone: dto.phone,
-          role: dto.role,
-          locale: dto.locale,
-          password: hashedPassword,
-          termsAcceptedAt: new Date(),
-          privacyAcceptedAt: new Date(),
-          emailVerifyToken: verifyToken,
-          emailVerifyTokenExpiry: verifyExpiry,
-          isActive: true,
-        },
+      await this.authRepository.update(existing.id, {
+        name: dto.name,
+        phone: dto.phone,
+        role: dto.role,
+        locale: dto.locale,
+        password: hashedPassword,
+        termsAcceptedAt: new Date(),
+        privacyAcceptedAt: new Date(),
+        emailVerifyToken: verifyToken,
+        emailVerifyTokenExpiry: verifyExpiry,
+        isActive: true,
       });
 
       await this.emailService.sendVerificationEmail(
@@ -68,20 +63,18 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(dto.password, 12);
 
-    await this.prisma.user.create({
-      data: {
-        email: dto.email,
-        name: dto.name,
-        phone: dto.phone,
-        role: dto.role,
-        locale: dto.locale,
-        password: hashedPassword,
-        termsAcceptedAt: new Date(),
-        privacyAcceptedAt: new Date(),
-        emailVerified: false,
-        emailVerifyToken: verifyToken,
-        emailVerifyTokenExpiry: verifyExpiry,
-      },
+    await this.authRepository.create({
+      email: dto.email,
+      name: dto.name,
+      phone: dto.phone,
+      role: dto.role,
+      locale: dto.locale,
+      password: hashedPassword,
+      termsAcceptedAt: new Date(),
+      privacyAcceptedAt: new Date(),
+      emailVerified: false,
+      emailVerifyToken: verifyToken,
+      emailVerifyTokenExpiry: verifyExpiry,
     });
 
     await this.emailService.sendVerificationEmail(dto.email, dto.name, verifyToken);
@@ -90,9 +83,7 @@ export class AuthService {
   }
 
   async verifyEmail(token: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { emailVerifyToken: token },
-    });
+    const user = await this.authRepository.findByVerificationToken(token);
 
     if (!user) throw new BadRequestException('Invalid verification link');
     if (user.emailVerified) throw new BadRequestException('Email already verified');
@@ -100,14 +91,11 @@ export class AuthService {
       throw new BadRequestException('Verification link has expired. Please request a new one.');
     }
 
-    const updated = await this.prisma.user.update({
-      where: { id: user.id },
-      data: {
-        emailVerified: true,
-        emailVerifyToken: null,
-        emailVerifyTokenExpiry: null,
-        lastLoginAt: new Date(),
-      },
+    const updated = await this.authRepository.update(user.id, {
+      emailVerified: true,
+      emailVerifyToken: null,
+      emailVerifyTokenExpiry: null,
+      lastLoginAt: new Date(),
     });
 
     const tokens = await this.generateTokens(updated.id, updated.role);
@@ -117,7 +105,7 @@ export class AuthService {
   }
 
   async resendVerification(email: string) {
-    const user = await this.prisma.user.findUnique({ where: { email } });
+    const user = await this.authRepository.findByEmail(email);
 
     if (!user || user.emailVerified) {
       // Return generic message to avoid exposing whether email exists
@@ -127,12 +115,9 @@ export class AuthService {
     const verifyToken = randomBytes(32).toString('hex');
     const verifyExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: {
-        emailVerifyToken: verifyToken,
-        emailVerifyTokenExpiry: verifyExpiry,
-      },
+    await this.authRepository.update(user.id, {
+      emailVerifyToken: verifyToken,
+      emailVerifyTokenExpiry: verifyExpiry,
     });
 
     await this.emailService.sendVerificationEmail(user.email, user.name, verifyToken);
@@ -142,9 +127,7 @@ export class AuthService {
 
   async login(dto: LoginDto) {
 
-    const user = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-    });
+    const user = await this.authRepository.findByEmail(dto.email);
     if (!user || !user.isActive)
       throw new UnauthorizedException('Invalid credentials');
 
@@ -156,9 +139,8 @@ export class AuthService {
       throw new UnauthorizedException('Please verify your email before signing in.');
     }
 
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { lastLoginAt: new Date() },
+    await this.authRepository.update(user.id, {
+      lastLoginAt: new Date(),
     });
 
     const tokens = await this.generateTokens(user.id, user.role);
@@ -168,9 +150,7 @@ export class AuthService {
   }
 
   async loginWithGoogle(googleUser: GoogleAuthUser) {
-    const existing = await this.prisma.user.findUnique({
-      where: { email: googleUser.email },
-    });
+    const existing = await this.authRepository.findByEmail(googleUser.email);
 
     let user = existing;
 
@@ -179,30 +159,25 @@ export class AuthService {
         randomBytes(24).toString('hex'),
         12,
       );
-      user = await this.prisma.user.create({
-        data: {
-          email: googleUser.email,
-          name: googleUser.name,
-          password: placeholderPassword,
-          googleId: googleUser.googleId,
-          avatar: googleUser.avatar,
-          emailVerified: true,
-          termsAcceptedAt: new Date(),
-          privacyAcceptedAt: new Date(),
-          isActive: true,
-        },
+      user = await this.authRepository.create({
+        email: googleUser.email,
+        name: googleUser.name,
+        password: placeholderPassword,
+        googleId: googleUser.googleId,
+        avatar: googleUser.avatar,
+        emailVerified: true,
+        termsAcceptedAt: new Date(),
+        privacyAcceptedAt: new Date(),
+        isActive: true,
       });
     } else {
-      user = await this.prisma.user.update({
-        where: { id: user.id },
-        data: {
-          googleId: user.googleId || googleUser.googleId,
-          name: user.name || googleUser.name,
-          avatar: user.avatar || googleUser.avatar,
-          emailVerified: true,
-          isActive: true,
-          lastLoginAt: new Date(),
-        },
+      user = await this.authRepository.update(user.id, {
+        googleId: user.googleId || googleUser.googleId,
+        name: user.name || googleUser.name,
+        avatar: user.avatar || googleUser.avatar,
+        emailVerified: true,
+        isActive: true,
+        lastLoginAt: new Date(),
       });
     }
 
@@ -213,39 +188,21 @@ export class AuthService {
   }
 
   async getProfile(userId: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        avatar: true,
-        phone: true,
-        role: true,
-        locale: true,
-        isActive: true,
-        lastLoginAt: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+    const user = await this.authRepository.findByIdWithProfile(userId);
     if (!user || !user.isActive) throw new UnauthorizedException();
     return user;
   }
 
   async refreshToken(userId: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
+    const user = await this.authRepository.findByIdWithProfile(userId);
     if (!user || !user.isActive) throw new UnauthorizedException();
 
     return this.generateTokens(user.id, user.role);
   }
 
   async logout(userId: string) {
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { refreshTokenHash: null },
+    await this.authRepository.update(userId, {
+      refreshTokenHash: null,
     });
     return { message: 'Logged out successfully' };
   }
@@ -269,10 +226,7 @@ export class AuthService {
     ]);
 
     const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { refreshTokenHash },
-    });
+    await this.authRepository.update(userId, { refreshTokenHash });
 
     return { accessToken, refreshToken };
   }
