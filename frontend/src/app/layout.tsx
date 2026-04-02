@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Grand_Hotel } from "next/font/google";
+import { Geist, Geist_Mono, Lobster_Two } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
 import { QueryProvider } from "@/lib/query-provider";
@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const canvaFont = Grand_Hotel({
+const canvaFont = Lobster_Two({
   variable: "--font-canva",
   weight: "400",
   subsets: ["latin"],

@@ -58,7 +58,7 @@ export function HeroSection() {
                 {c.badge}
               </div>
 
-              <h1 className="font-canva text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl">
+              <h1 className="font-canva text-2xl font-normal leading-tight text-white sm:text-3xl lg:text-4xl">
                 {c.title}{' '}
                 <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                   {c.titleHighlight}
