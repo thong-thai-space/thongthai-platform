@@ -133,14 +133,21 @@ export class AuthController {
     @Res() res: Response,
   ) {
     const googleUser = req.user;
-    const { accessToken, refreshToken } =
+    const { user, accessToken, refreshToken } =
       await this.authService.loginWithGoogle(googleUser);
 
     this.setAuthCookies(res, accessToken, refreshToken);
 
-    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
-    const callbackUrl = new URL('/auth/google/callback', frontendUrl);
-    callbackUrl.searchParams.set('state', 'success');
+    const frontendUrl =
+      this.configService.get<string>('FRONTEND_URL') ||
+      'http://localhost:3000';
+    const redirectPath =
+      user.role === 'CLIENT'
+        ? '/portal'
+        : user.role === 'MEMBER'
+          ? '/member'
+          : '/dashboard';
+    const callbackUrl = new URL(redirectPath, frontendUrl);
 
     return res.redirect(callbackUrl.toString());
   }
