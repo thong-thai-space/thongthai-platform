@@ -35,13 +35,13 @@ export function HeroSection() {
   return (
     <>
       {/* Video block - separate section on top */}
-      <section className="relative h-[28vh] overflow-hidden sm:h-[32vh] lg:h-[36vh]">
+      <section className="relative h-[34vh] overflow-hidden bg-black sm:h-[42vh] lg:h-[56vh]">
         <video
           autoPlay
           muted
           loop
           playsInline
-          className="h-full w-full object-cover"
+          className="h-full w-full object-contain"
         >
           <source src="/videos/video_abdeaea5-859e-4b99-8330-da037fe439e8.mp4" type="video/mp4" />
         </video>
@@ -50,7 +50,7 @@ export function HeroSection() {
 
       {/* Hero content block - separate section below video */}
       <section className="bg-gradient-to-br from-background via-background to-primary/5">
-        <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+        <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-6">
           <div className="flex justify-center">
             <div className="max-w-3xl rounded-2xl border border-white/15 bg-slate-950/35 p-5 text-center shadow-2xl backdrop-blur-md sm:p-7">
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
