@@ -9,6 +9,7 @@ import { GoogleStrategy } from './strategies/google.strategy';
 import { RolesGuard } from './guards/roles.guard';
 import { EmailModule } from '../email/email.module';
 import { AuthRepository } from './repositories/auth.repository';
+import { TurnstileService } from '../../common/turnstile/turnstile.service';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { AuthRepository } from './repositories/auth.repository';
     JwtRefreshStrategy,
     GoogleStrategy,
     RolesGuard,
+    TurnstileService,
   ],
   exports: [AuthService, RolesGuard],
 })

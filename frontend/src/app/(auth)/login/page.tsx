@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import api from "@/lib/api";
 import { Eye, EyeOff } from "lucide-react";
+import { TurnstileWidget } from "@/components/security/turnstile-widget";
 
 interface LoginForm {
   email: string;
@@ -20,6 +21,10 @@ export default function LoginPage() {
   const [resendMessage, setResendMessage] = useState("");
   const [isResending, setIsResending] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const isTurnstileEnabled = Boolean(
+    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim(),
+  );
   const {
     register,
     handleSubmit,
@@ -35,7 +40,12 @@ export default function LoginPage() {
     try {
       setError("");
       setResendMessage("");
-      await login(data.email, data.password);
+      if (isTurnstileEnabled && !turnstileToken) {
+        setError("Please complete the security challenge.");
+        return;
+      }
+
+      await login(data.email, data.password, turnstileToken || undefined);
       // Role-based redirects still happen in layout guards.
       // For OWNER/ADMIN, open Projects first.
       router.push("/dashboard/projects");
@@ -208,9 +218,14 @@ export default function LoginPage() {
               </div>
             )}
 
+            <TurnstileWidget
+              onTokenChange={setTurnstileToken}
+              className="flex justify-center"
+            />
+
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || (isTurnstileEnabled && !turnstileToken)}
               className="w-full rounded-lg bg-primary py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
             >
               {isSubmitting ? "Processing..." : "Sign in"}

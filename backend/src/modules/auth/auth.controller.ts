@@ -69,11 +69,22 @@ export class AuthController {
     res.clearCookie('refreshToken', clearOptions);
   }
 
+  private getClientIp(req: Request): string | undefined {
+    const forwardedFor = req.headers['x-forwarded-for'];
+    if (typeof forwardedFor === 'string' && forwardedFor.length > 0) {
+      return forwardedFor.split(',')[0]?.trim();
+    }
+    if (Array.isArray(forwardedFor) && forwardedFor.length > 0) {
+      return forwardedFor[0];
+    }
+    return req.ip;
+  }
+
   // Pattern: Security - Rate limiting for brute force protection
   @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 requests per minute
   @Post('register')
-  async register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto);
+  async register(@Body() dto: RegisterDto, @Req() req: Request) {
+    return this.authService.register(dto, this.getClientIp(req));
   }
 
   @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 requests per minute
@@ -81,10 +92,11 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async login(
     @Body() dto: LoginDto,
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
     const { user, accessToken, refreshToken } =
-      await this.authService.login(dto);
+      await this.authService.login(dto, this.getClientIp(req));
     this.setAuthCookies(res, accessToken, refreshToken);
     return { user };
   }

@@ -3,6 +3,7 @@ import {
   UnauthorizedException,
   ConflictException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -13,17 +14,49 @@ import { AuthRepository } from './repositories/auth.repository';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import type { GoogleAuthUser } from './strategies/google.strategy';
+import { TurnstileService } from '../../common/turnstile/turnstile.service';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private authRepository: AuthRepository,
     private jwtService: JwtService,
     private configService: ConfigService,
     private emailService: EmailService,
+    private turnstileService: TurnstileService,
   ) {}
 
-  async register(dto: RegisterDto) {
+  private isMissingColumnError(error: unknown): boolean {
+    if (!(error instanceof Error)) return false;
+    const message = error.message.toLowerCase();
+    return (
+      message.includes('does not exist in the current database') ||
+      message.includes('column')
+    );
+  }
+
+  private async ensureTurnstile(
+    token: string | undefined,
+    remoteIp?: string,
+  ): Promise<void> {
+    if (!this.turnstileService.isEnabled()) {
+      return;
+    }
+
+    if (!token) {
+      throw new BadRequestException('Please complete the security challenge');
+    }
+
+    const isValid = await this.turnstileService.verifyToken(token, remoteIp);
+    if (!isValid) {
+      throw new UnauthorizedException('Security challenge validation failed');
+    }
+  }
+
+  async register(dto: RegisterDto, remoteIp?: string) {
+    await this.ensureTurnstile(dto.turnstileToken, remoteIp);
 
     const existing = await this.authRepository.findByEmail(dto.email);
     const verifyToken = randomBytes(32).toString('hex');
@@ -125,7 +158,8 @@ export class AuthService {
     return { message: 'If that email is registered and unverified, a new link has been sent.' };
   }
 
-  async login(dto: LoginDto) {
+  async login(dto: LoginDto, remoteIp?: string) {
+    await this.ensureTurnstile(dto.turnstileToken, remoteIp);
 
     const user = await this.authRepository.findByEmail(dto.email);
     if (!user || !user.isActive)
@@ -165,26 +199,53 @@ export class AuthService {
         randomBytes(24).toString('hex'),
         12,
       );
-      user = await this.authRepository.create({
-        email: googleUser.email,
-        name: googleUser.name,
-        password: placeholderPassword,
-        googleId: googleUser.googleId,
-        avatar: googleUser.avatar,
-        emailVerified: true,
-        termsAcceptedAt: new Date(),
-        privacyAcceptedAt: new Date(),
-        isActive: true,
-      });
+      try {
+        user = await this.authRepository.create({
+          email: googleUser.email,
+          name: googleUser.name,
+          password: placeholderPassword,
+          googleId: googleUser.googleId,
+          avatar: googleUser.avatar,
+          emailVerified: true,
+          termsAcceptedAt: new Date(),
+          privacyAcceptedAt: new Date(),
+          isActive: true,
+        });
+      } catch (error) {
+        if (!this.isMissingColumnError(error)) {
+          throw error;
+        }
+
+        this.logger.warn(
+          'Detected outdated DB schema during Google signup. Creating user with minimal fields; please run latest Prisma migrations.',
+        );
+
+        user = await this.authRepository.create({
+          email: googleUser.email,
+          name: googleUser.name,
+          password: placeholderPassword,
+          isActive: true,
+        });
+      }
     } else {
-      user = await this.authRepository.update(user.id, {
-        googleId: user.googleId || googleUser.googleId,
-        name: user.name || googleUser.name,
-        avatar: user.avatar || googleUser.avatar,
-        emailVerified: true,
-        isActive: true,
-        lastLoginAt: new Date(),
-      });
+      try {
+        user = await this.authRepository.update(user.id, {
+          googleId: user.googleId || googleUser.googleId,
+          name: user.name || googleUser.name,
+          avatar: user.avatar || googleUser.avatar,
+          emailVerified: true,
+          isActive: true,
+          lastLoginAt: new Date(),
+        });
+      } catch (error) {
+        if (this.isMissingColumnError(error)) {
+          this.logger.warn(
+            'Detected outdated DB schema during Google login. Skipping profile sync update; please run latest Prisma migrations.',
+          );
+        } else {
+          throw error;
+        }
+      }
     }
 
     const tokens = await this.generateTokens(user.id, user.role);

@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { Eye, EyeOff, Mail } from 'lucide-react';
+import { TurnstileWidget } from '@/components/security/turnstile-widget';
 
 interface RegisterForm {
   name: string;
@@ -19,6 +20,10 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [registeredEmail, setRegisteredEmail] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const isTurnstileEnabled = Boolean(
+    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim(),
+  );
   const {
     register,
     handleSubmit,
@@ -30,11 +35,17 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterForm) => {
     try {
       setError('');
+      if (isTurnstileEnabled && !turnstileToken) {
+        setError('Please complete the security challenge.');
+        return;
+      }
+
       await authRegister(
         data.name,
         data.email,
         data.password,
         data.acceptTerms,
+        turnstileToken || undefined,
       );
       setRegisteredEmail(data.email);
     } catch (err: any) {
@@ -238,9 +249,14 @@ export default function RegisterPage() {
               </div>
             )}
 
+            <TurnstileWidget
+              onTokenChange={setTurnstileToken}
+              className="flex justify-center"
+            />
+
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || (isTurnstileEnabled && !turnstileToken)}
               className="w-full rounded-lg bg-primary py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
             >
               {isSubmitting ? 'Processing...' : 'Sign up'}
