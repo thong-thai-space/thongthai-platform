@@ -38,9 +38,15 @@ const processQueue = (error: unknown) => {
   failedQueue = [];
 };
 
-// Auto-refresh on 401
+// Unwrap response envelope
 api.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    // If response has envelope format { success, data }, return just data
+    if (res.data && typeof res.data === 'object' && 'data' in res.data && 'success' in res.data) {
+      return { ...res, data: res.data.data };
+    }
+    return res;
+  },
   async (error) => {
     const originalRequest = error.config;
     const requestUrl = String(originalRequest?.url || '');
