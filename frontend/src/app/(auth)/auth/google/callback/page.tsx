@@ -30,6 +30,7 @@ export default function GoogleAuthCallbackPage() {
     const handleAuth = async () => {
       try {
         const { data } = await api.get<MeResponse>('/auth/me');
+        localStorage.setItem('tts_has_session', '1');
         router.replace(resolveRedirectByRole(data.role));
       } catch {
         setError('Could not complete Google login. Please sign in again.');

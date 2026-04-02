@@ -13,12 +13,16 @@ export type GoogleAuthUser = {
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(private configService: ConfigService) {
+    const backendBaseUrl =
+      configService.get('BACKEND_URL') ||
+      `http://localhost:${configService.get('PORT') || '4000'}`;
+
     super({
       clientID: configService.get('GOOGLE_CLIENT_ID') || 'disabled',
       clientSecret: configService.get('GOOGLE_CLIENT_SECRET') || 'disabled',
       callbackURL:
         configService.get('GOOGLE_CALLBACK_URL') ||
-        'http://localhost:4000/api/auth/google/callback',
+        `${backendBaseUrl}/api/v1/auth/google/callback`,
       scope: ['email', 'profile'],
     });
   }

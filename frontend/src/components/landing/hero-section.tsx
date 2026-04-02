@@ -77,7 +77,7 @@ export function HeroSection() {
               </h1> */}
 
               <h1
-                className={`${syne.className} text-2xl tracking-tight text-white sm:text-3xl lg:text-4xl`}
+                className={`${syne.className} text-xl tracking-tight text-white sm:text-2xl lg:text-3xl`}
               >
                 {c.title}{" "}
                 <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
