@@ -5,6 +5,8 @@ import { AuthProvider } from "@/lib/auth";
 import { QueryProvider } from "@/lib/query-provider";
 import { SocketProvider } from "@/lib/socket";
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://thongthaispace.com";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -16,9 +18,17 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "Thong Thai Space | Smart Technology Solutions",
   description:
     "Project management platform and technology services by Thong Thai Space - Web, App, AI, Consulting",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    url: "/",
+    siteName: "Thong Thai Space",
+  },
 };
 
 export default function RootLayout({

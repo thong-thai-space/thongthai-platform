@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useSectionContent } from "@/hooks/use-content";
-import { Pacifico } from "next/font/google";
+import { Syne } from "next/font/google";
 
-const pacifico = Pacifico({
-  weight: "400",
+const syne = Syne({
+  weight: ["700"],
   subsets: ["latin"],
   display: "swap",
 });
@@ -77,7 +77,7 @@ export function HeroSection() {
               </h1> */}
 
               <h1
-                className={`${pacifico.className} text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl`}
+                className={`${syne.className} text-2xl tracking-tight text-white sm:text-3xl lg:text-4xl`}
               >
                 {c.title}{" "}
                 <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
