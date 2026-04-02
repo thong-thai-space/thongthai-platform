@@ -131,7 +131,17 @@ export class AuthService {
     if (!user || !user.isActive)
       throw new UnauthorizedException('Invalid credentials');
 
-    const isMatch = await bcrypt.compare(dto.password, user.password);
+    if (!user.password || typeof user.password !== 'string') {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    let isMatch = false;
+    try {
+      isMatch = await bcrypt.compare(dto.password, user.password);
+    } catch {
+      // Handles corrupted or non-bcrypt hashes without leaking internals.
+      throw new UnauthorizedException('Invalid credentials');
+    }
     if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 
     // Block login for email/password users who haven't verified
