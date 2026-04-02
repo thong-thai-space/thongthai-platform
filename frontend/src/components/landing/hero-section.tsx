@@ -43,7 +43,7 @@ export function HeroSection() {
         className="absolute inset-0 h-full w-full object-cover"
         style={{ zIndex: 0 }}
       >
-        <source src="/videos/hero-bg.mp4" type="video/mp4" />
+        <source src="/videos/video_abdeaea5-859e-4b99-8330-da037fe439e8.mp4" type="video/mp4" />
       </video>
 
       {/* Dark overlay for text readability */}
