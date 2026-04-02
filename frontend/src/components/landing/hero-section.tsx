@@ -41,7 +41,7 @@ export function HeroSection() {
           muted
           loop
           playsInline
-          className="h-[44vh] w-full object-cover sm:h-[52vh] lg:h-[60vh]"
+          className="h-[28vh] w-full object-cover sm:h-[32vh] lg:h-[36vh]"
         >
           <source src="/videos/video_abdeaea5-859e-4b99-8330-da037fe439e8.mp4" type="video/mp4" />
         </video>
@@ -49,14 +49,14 @@ export function HeroSection() {
       </div>
 
       {/* Hero content card block */}
-      <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
-        <div className="max-w-3xl rounded-2xl border border-white/15 bg-slate-950/35 p-6 text-center shadow-2xl backdrop-blur-md sm:p-8 lg:text-left">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+      <div className="relative mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
+        <div className="max-w-3xl rounded-2xl border border-white/15 bg-slate-950/35 p-4 text-center shadow-2xl backdrop-blur-md sm:p-5 lg:text-left">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary sm:text-sm">
             <Sparkles className="h-4 w-4" />
             {c.badge}
           </div>
 
-          <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+          <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
             {c.title}{' '}
             <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               {c.titleHighlight}
@@ -64,36 +64,33 @@ export function HeroSection() {
             {c.titleEnd}
           </h1>
 
-          <p className="mt-6 text-lg leading-8 text-slate-200 sm:text-xl">
+          <p className="mt-4 text-base leading-7 text-slate-200 sm:text-lg">
             {c.subtitle}
           </p>
 
-          <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center lg:justify-start">
+          <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
             <Link
               href={c.primaryCta.href}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30"
             >
               {c.primaryCta.text}
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href={c.secondaryCta.href}
-              className="inline-flex items-center gap-2 rounded-lg border border-white/25 bg-white/5 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-white/15"
+              className="inline-flex items-center gap-2 rounded-lg border border-white/25 bg-white/5 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/15"
             >
               {c.secondaryCta.text}
             </Link>
           </div>
-        </div>
 
-        {/* Stats strip */}
-        <div className="mt-6 rounded-2xl border border-white/15 bg-slate-950/25 p-5 shadow-xl backdrop-blur-sm sm:p-6">
-          <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {c.stats.map((stat) => (
               <div key={stat.label}>
-                <div className="text-2xl font-bold text-primary sm:text-3xl">
+                <div className="text-xl font-bold text-primary sm:text-2xl">
                   {stat.value}
                 </div>
-                <div className="mt-1 text-sm text-slate-200">{stat.label}</div>
+                <div className="mt-0.5 text-xs text-slate-200 sm:text-sm">{stat.label}</div>
               </div>
             ))}
           </div>
