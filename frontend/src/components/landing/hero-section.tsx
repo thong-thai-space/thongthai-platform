@@ -33,31 +33,26 @@ export function HeroSection() {
   };
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-background via-background to-primary/5">
-      {/* Video background */}
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="absolute inset-0 h-full w-full object-cover"
-        style={{ zIndex: 0 }}
-      >
-        <source src="/videos/video_abdeaea5-859e-4b99-8330-da037fe439e8.mp4" type="video/mp4" />
-      </video>
+    <>
+      {/* Video block - separate section on top */}
+      <section className="relative h-[28vh] overflow-hidden sm:h-[32vh] lg:h-[36vh]">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="h-full w-full object-cover"
+        >
+          <source src="/videos/video_abdeaea5-859e-4b99-8330-da037fe439e8.mp4" type="video/mp4" />
+        </video>
+        <div className="pointer-events-none absolute inset-0 bg-black/25" />
+      </section>
 
-      {/* Dark overlay for text readability */}
-      <div className="absolute inset-0 bg-black/35" style={{ zIndex: 1 }} />
-
-      {/* Background decoration (alternative fallback) */}
-      <div className="pointer-events-none absolute inset-0" style={{ zIndex: 0 }}>
-        <div className="absolute -right-40 -top-40 h-80 w-80 rounded-full bg-primary/10 blur-3xl opacity-30" />
-        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-accent/10 blur-3xl opacity-30" />
-      </div>
-
-      <div className="relative mx-auto max-w-7xl px-4 pb-10 pt-36 sm:px-6 sm:pb-14 sm:pt-40 lg:px-8 lg:pb-16 lg:pt-48" style={{ zIndex: 10 }}>
-        <div className="flex justify-center">
-          <div className="max-w-3xl rounded-2xl border border-white/15 bg-slate-950/25 p-5 text-center shadow-2xl backdrop-blur-md sm:p-7">
+      {/* Hero content block - separate section below video */}
+      <section className="bg-gradient-to-br from-background via-background to-primary/5">
+        <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+          <div className="flex justify-center">
+            <div className="max-w-3xl rounded-2xl border border-white/15 bg-slate-950/35 p-5 text-center shadow-2xl backdrop-blur-md sm:p-7">
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
                 <Sparkles className="h-4 w-4" />
                 {c.badge}
@@ -75,7 +70,7 @@ export function HeroSection() {
                 {c.subtitle}
               </p>
 
-              <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center lg:justify-start">
+              <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
                 <Link
                   href={c.primaryCta.href}
                   className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30"
@@ -90,23 +85,24 @@ export function HeroSection() {
                   {c.secondaryCta.text}
                 </Link>
               </div>
-        </div>
-        </div>
+            </div>
+          </div>
 
-        {/* Stats strip */}
-        <div className="mx-auto mt-14 max-w-4xl rounded-2xl border border-white/15 bg-slate-950/25 p-5 shadow-xl backdrop-blur-sm sm:p-6">
-          <div className="grid grid-cols-2 gap-6 text-center sm:grid-cols-4">
-            {c.stats.map((stat) => (
-              <div key={stat.label}>
-                <div className="text-2xl font-bold text-primary sm:text-3xl">
-                  {stat.value}
+          {/* Stats strip */}
+          <div className="mx-auto mt-6 max-w-4xl rounded-2xl border border-white/15 bg-slate-950/25 p-5 shadow-xl backdrop-blur-sm sm:p-6">
+            <div className="grid grid-cols-2 gap-6 text-center sm:grid-cols-4">
+              {c.stats.map((stat) => (
+                <div key={stat.label}>
+                  <div className="text-2xl font-bold text-primary sm:text-3xl">
+                    {stat.value}
+                  </div>
+                  <div className="mt-1 text-sm text-slate-200">{stat.label}</div>
                 </div>
-                <div className="mt-1 text-sm text-slate-200">{stat.label}</div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }
