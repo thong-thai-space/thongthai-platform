@@ -149,10 +149,6 @@ export class AuthService {
       throw new UnauthorizedException('Please verify your email before signing in.');
     }
 
-    await this.authRepository.update(user.id, {
-      lastLoginAt: new Date(),
-    });
-
     const tokens = await this.generateTokens(user.id, user.role);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _, ...userWithoutPassword } = user;
@@ -236,7 +232,12 @@ export class AuthService {
     ]);
 
     const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
-    await this.authRepository.update(userId, { refreshTokenHash });
+    try {
+      await this.authRepository.update(userId, { refreshTokenHash });
+    } catch {
+      // If production DB schema is behind, do not block login.
+      // Refresh-token rotation may be impaired until the database is migrated.
+    }
 
     return { accessToken, refreshToken };
   }
