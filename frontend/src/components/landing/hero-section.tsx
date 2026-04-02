@@ -1,28 +1,35 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { ArrowRight, Sparkles } from 'lucide-react';
-import { useSectionContent } from '@/hooks/use-content';
+import Link from "next/link";
+import { ArrowRight, Sparkles } from "lucide-react";
+import { useSectionContent } from "@/hooks/use-content";
+import { Pacifico } from "next/font/google";
+
+const pacifico = Pacifico({
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 const defaults = {
-  badge: 'Smart technology solutions',
-  title: 'Turn ideas into',
-  titleHighlight: 'outstanding digital',
-  titleEnd: 'products',
+  badge: "Smart technology solutions",
+  title: "Turn ideas into",
+  titleHighlight: "outstanding digital",
+  titleEnd: "products",
   subtitle:
-    'Thong Thai Space specializes in Web & App development, AI integration, and IT consulting. Our expert team helps businesses digitize processes and achieve sustainable growth.',
-  primaryCta: { text: 'Get a free quote', href: '/contact' },
-  secondaryCta: { text: 'View our projects', href: '/portfolio' },
+    "Thong Thai Space specializes in Web & App development, AI integration, and IT consulting. Our expert team helps businesses digitize processes and achieve sustainable growth.",
+  primaryCta: { text: "Get a free quote", href: "/contact" },
+  secondaryCta: { text: "View our projects", href: "/portfolio" },
   stats: [
-    { value: '50+', label: 'Projects completed' },
-    { value: '30+', label: 'Trusted clients' },
-    { value: '5+', label: 'Years of experience' },
-    { value: '99%', label: 'Client satisfaction' },
+    { value: "50+", label: "Projects completed" },
+    { value: "30+", label: "Trusted clients" },
+    { value: "5+", label: "Years of experience" },
+    { value: "99%", label: "Client satisfaction" },
   ],
 };
 
 export function HeroSection() {
-  const { data } = useSectionContent('hero');
+  const { data } = useSectionContent("hero");
   const raw = (data?.data as Partial<typeof defaults>) || {};
   const c = {
     ...defaults,
@@ -43,7 +50,10 @@ export function HeroSection() {
           playsInline
           className="h-full w-full scale-[1.3] object-contain"
         >
-          <source src="/videos/video_abdeaea5-859e-4b99-8330-da037fe439e8.mp4" type="video/mp4" />
+          <source
+            src="/videos/video_abdeaea5-859e-4b99-8330-da037fe439e8.mp4"
+            type="video/mp4"
+          />
         </video>
         <div className="pointer-events-none absolute inset-0 bg-black/25" />
       </section>
@@ -58,11 +68,21 @@ export function HeroSection() {
                 {c.badge}
               </div>
 
-              <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl">
+              {/* <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl">
                 {c.title}{' '}
                 <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                   {c.titleHighlight}
                 </span>{' '}
+                {c.titleEnd}
+              </h1> */}
+
+              <h1
+                className={`${pacifico.className} text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl`}
+              >
+                {c.title}{" "}
+                <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                  {c.titleHighlight}
+                </span>{" "}
                 {c.titleEnd}
               </h1>
 
@@ -96,7 +116,9 @@ export function HeroSection() {
                   <div className="text-2xl font-bold text-primary sm:text-3xl">
                     {stat.value}
                   </div>
-                  <div className="mt-1 text-sm text-slate-200">{stat.label}</div>
+                  <div className="mt-1 text-sm text-slate-200">
+                    {stat.label}
+                  </div>
                 </div>
               ))}
             </div>
