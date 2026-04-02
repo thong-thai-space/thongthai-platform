@@ -2,6 +2,25 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { User, Prisma } from '@prisma/client';
 
+type AuthUserRecord = Pick<
+  User,
+  | 'id'
+  | 'email'
+  | 'name'
+  | 'phone'
+  | 'avatar'
+  | 'role'
+  | 'password'
+  | 'isActive'
+  | 'emailVerified'
+  | 'googleId'
+  | 'emailVerifyToken'
+  | 'emailVerifyTokenExpiry'
+  | 'lastLoginAt'
+  | 'createdAt'
+  | 'updatedAt'
+>;
+
 /**
  * Pattern: Repository Pattern
  * Encapsulates all User data access for Auth module
@@ -13,10 +32,27 @@ export class AuthRepository {
   /**
    * Find user by email
    */
-  async findByEmail(email: string): Promise<User | null> {
+  async findByEmail(email: string): Promise<AuthUserRecord | null> {
     try {
       return await this.prisma.user.findUnique({
         where: { email },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          phone: true,
+          avatar: true,
+          role: true,
+          password: true,
+          isActive: true,
+          emailVerified: true,
+          googleId: true,
+          emailVerifyToken: true,
+          emailVerifyTokenExpiry: true,
+          lastLoginAt: true,
+          createdAt: true,
+          updatedAt: true,
+        },
       });
     } catch (error) {
       throw new Error(`Failed to find user by email: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -26,10 +62,27 @@ export class AuthRepository {
   /**
    * Find user by ID with profile
    */
-  async findByIdWithProfile(id: string): Promise<User | null> {
+  async findByIdWithProfile(id: string): Promise<AuthUserRecord | null> {
     try {
       return await this.prisma.user.findUnique({
         where: { id },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          phone: true,
+          avatar: true,
+          role: true,
+          password: true,
+          isActive: true,
+          emailVerified: true,
+          googleId: true,
+          emailVerifyToken: true,
+          emailVerifyTokenExpiry: true,
+          lastLoginAt: true,
+          createdAt: true,
+          updatedAt: true,
+        },
       });
     } catch (error) {
       throw new Error(`Failed to find user: ${error instanceof Error ? error.message : 'Unknown error'}`);

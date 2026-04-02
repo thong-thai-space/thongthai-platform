@@ -55,8 +55,8 @@ export function HeroSection() {
         <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-accent/10 blur-3xl opacity-30" />
       </div>
 
-      <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24" style={{ zIndex: 10 }}>
-        <div className="grid items-center gap-8 lg:grid-cols-12">
+      <div className="relative mx-auto max-w-7xl px-4 pb-10 pt-28 sm:px-6 sm:pb-12 sm:pt-32 lg:px-8 lg:pb-14 lg:pt-40" style={{ zIndex: 10 }}>
+        <div className="grid items-end gap-8 lg:min-h-[58vh] lg:grid-cols-12">
           <div className="lg:col-span-7">
             <div className="max-w-2xl rounded-2xl border border-white/15 bg-slate-950/40 p-6 text-center shadow-2xl backdrop-blur-md sm:p-8 lg:text-left">
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
