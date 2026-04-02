@@ -1,0 +1,103 @@
+2026-04-02T00:42:22.779870034Z [inf]  
+2026-04-02T00:42:26.621133269Z [inf]  [35m[Region: asia-southeast1][0m
+2026-04-02T00:42:26.635226959Z [inf]  [35m=========================
+2026-04-02T00:42:26.635253880Z [inf]  Using Detected Dockerfile
+2026-04-02T00:42:26.635257826Z [inf]  =========================
+2026-04-02T00:42:26.635261351Z [inf]  [0m
+2026-04-02T00:42:26.635271784Z [inf]  context: gmgk-9mJ6
+2026-04-02T00:42:26.780025868Z [inf]  [internal] load build definition from Dockerfile
+2026-04-02T00:42:26.780069006Z [inf]  [internal] load build definition from Dockerfile
+2026-04-02T00:42:26.780081406Z [inf]  [internal] load build definition from Dockerfile
+2026-04-02T00:42:26.780094444Z [inf]  [internal] load build definition from Dockerfile
+2026-04-02T00:42:26.784422961Z [inf]  [internal] load build definition from Dockerfile
+2026-04-02T00:42:26.786766919Z [inf]  [internal] load metadata for docker.io/library/node:20-alpine
+2026-04-02T00:42:27.092413072Z [inf]  [internal] load metadata for docker.io/library/node:20-alpine
+2026-04-02T00:42:27.092465805Z [inf]  [internal] load .dockerignore
+2026-04-02T00:42:27.092487003Z [inf]  [internal] load .dockerignore
+2026-04-02T00:42:27.092504110Z [inf]  [internal] load .dockerignore
+2026-04-02T00:42:27.100509757Z [inf]  [internal] load .dockerignore
+2026-04-02T00:42:27.104766113Z [inf]  [runner 5/9] COPY --from=builder /app/node_modules ./node_modules
+2026-04-02T00:42:27.104788006Z [inf]  [runner 4/9] COPY --from=builder /app/dist ./dist
+2026-04-02T00:42:27.104798317Z [inf]  [builder 7/7] RUN pnpm build
+2026-04-02T00:42:27.104806744Z [inf]  [builder 4/7] COPY --from=deps /app/node_modules ./node_modules
+2026-04-02T00:42:27.104820252Z [inf]  [builder 5/7] COPY . .
+2026-04-02T00:42:27.104828741Z [inf]  [runner 7/9] COPY --from=builder /app/prisma ./prisma
+2026-04-02T00:42:27.104837059Z [inf]  [runner 9/9] COPY --from=builder /app/entrypoint.sh ./entrypoint.sh
+2026-04-02T00:42:27.104844909Z [inf]  [deps 4/5] COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+2026-04-02T00:42:27.104856282Z [inf]  [internal] load build context
+2026-04-02T00:42:27.104864476Z [inf]  [deps 3/5] WORKDIR /app
+2026-04-02T00:42:27.104872955Z [inf]  [deps 2/5] RUN corepack enable && corepack prepare pnpm@latest --activate
+2026-04-02T00:42:27.104881599Z [inf]  [runner 6/9] COPY --from=builder /app/package.json ./
+2026-04-02T00:42:27.104890067Z [inf]  [runner 8/9] COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
+2026-04-02T00:42:27.104898816Z [inf]  [deps 5/5] RUN pnpm install --frozen-lockfile
+2026-04-02T00:42:27.104908984Z [inf]  [deps 1/5] FROM docker.io/library/node:20-alpine@sha256:f598378b5240225e6beab68fa9f356db1fb8efe55173e6d4d8153113bb8f333c
+2026-04-02T00:42:27.104916595Z [inf]  [builder 6/7] RUN pnpm prisma generate
+2026-04-02T00:42:27.104933073Z [inf]  [deps 1/5] FROM docker.io/library/node:20-alpine@sha256:f598378b5240225e6beab68fa9f356db1fb8efe55173e6d4d8153113bb8f333c
+2026-04-02T00:42:27.104948236Z [inf]  [internal] load build context
+2026-04-02T00:42:27.110971515Z [inf]  [deps 1/5] FROM docker.io/library/node:20-alpine@sha256:f598378b5240225e6beab68fa9f356db1fb8efe55173e6d4d8153113bb8f333c
+2026-04-02T00:42:27.111433788Z [inf]  [internal] load build context
+2026-04-02T00:42:27.151625986Z [inf]  [internal] load build context
+2026-04-02T00:42:27.155481091Z [inf]  [deps 2/5] RUN corepack enable && corepack prepare pnpm@latest --activate
+2026-04-02T00:42:27.155514011Z [inf]  [deps 3/5] WORKDIR /app
+2026-04-02T00:42:27.155523902Z [inf]  [deps 4/5] COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+2026-04-02T00:42:27.155531400Z [inf]  [deps 5/5] RUN pnpm install --frozen-lockfile
+2026-04-02T00:42:27.155537830Z [inf]  [builder 4/7] COPY --from=deps /app/node_modules ./node_modules
+2026-04-02T00:42:27.155544480Z [inf]  [builder 5/7] COPY . .
+2026-04-02T00:42:27.373411616Z [inf]  [builder 5/7] COPY . .
+2026-04-02T00:42:27.374688301Z [inf]  [builder 6/7] RUN pnpm prisma generate
+2026-04-02T00:42:29.232421478Z [inf]  Loaded Prisma config from prisma.config.ts.
+
+
+2026-04-02T00:42:29.304268127Z [inf]  Prisma schema loaded from prisma/schema.prisma.
+
+2026-04-02T00:42:29.867157025Z [inf]  
+✔ Generated Prisma Client (v7.4.2) to ./node_modules/.pnpm/@prisma+client@7.4.2_prisma@7.4.2_@types+react@19.2.14_react-dom@19.2.4_react@19.2.4__r_49b4b128965f74ea9bbd7586bc0c7d7a/node_modules/@prisma/client in 390ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+
+
+2026-04-02T00:42:30.005035463Z [inf]  [builder 6/7] RUN pnpm prisma generate
+2026-04-02T00:42:30.007017847Z [inf]  [builder 7/7] RUN pnpm build
+2026-04-02T00:42:30.421323435Z [inf]  
+> backend@0.0.1 build /app
+> nest build
+
+
+2026-04-02T00:42:37.597227589Z [inf]  [builder 7/7] RUN pnpm build
+2026-04-02T00:42:48.552290007Z [inf]  [deps 3/5] WORKDIR /app
+2026-04-02T00:42:48.552746611Z [inf]  [runner 4/9] COPY --from=builder /app/dist ./dist
+2026-04-02T00:42:49.361244869Z [inf]  [runner 4/9] COPY --from=builder /app/dist ./dist
+2026-04-02T00:42:49.363585656Z [inf]  [runner 5/9] COPY --from=builder /app/node_modules ./node_modules
+2026-04-02T00:42:52.613026886Z [inf]  [runner 5/9] COPY --from=builder /app/node_modules ./node_modules
+2026-04-02T00:42:52.617050718Z [inf]  [runner 6/9] COPY --from=builder /app/package.json ./
+2026-04-02T00:42:52.939401155Z [inf]  [runner 6/9] COPY --from=builder /app/package.json ./
+2026-04-02T00:42:52.940970463Z [inf]  [runner 7/9] COPY --from=builder /app/prisma ./prisma
+2026-04-02T00:42:52.965742208Z [inf]  [runner 7/9] COPY --from=builder /app/prisma ./prisma
+2026-04-02T00:42:52.967082982Z [inf]  [runner 8/9] COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
+2026-04-02T00:42:52.986183703Z [inf]  [runner 8/9] COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
+2026-04-02T00:42:52.987618586Z [inf]  [runner 9/9] COPY --from=builder /app/entrypoint.sh ./entrypoint.sh
+2026-04-02T00:42:53.008009989Z [inf]  [runner 9/9] COPY --from=builder /app/entrypoint.sh ./entrypoint.sh
+2026-04-02T00:42:53.010807088Z [inf]  exporting to image
+2026-04-02T00:42:58.040997157Z [inf]  importing to docker
+2026-04-02T00:43:00.373716331Z [inf]  [auth] sharing credentials for production-asia-southeast1-eqsg3a.railway-registry.com
+2026-04-02T00:43:00.373765832Z [inf]  [auth] sharing credentials for production-asia-southeast1-eqsg3a.railway-registry.com
+2026-04-02T00:43:08.223214802Z [inf]  importing to docker
+2026-04-02T00:43:24.840341309Z [inf]  [92mBuild time: 58.21 seconds[0m
+2026-04-02T00:43:55.707976984Z [inf]  
+2026-04-02T00:43:55.707980282Z [inf]  [35m====================
+Starting Healthcheck
+====================
+[0m
+2026-04-02T00:43:55.707981014Z [inf]  [37mPath: /api/healthz[0m
+2026-04-02T00:43:55.707981765Z [inf]  [37mRetry window: 1m0s[0m
+2026-04-02T00:43:55.707982369Z [inf]  
+2026-04-02T00:43:59.003788013Z [inf]  [93mAttempt #1 failed with service unavailable. Continuing to retry for 56s[0m
+2026-04-02T00:44:00.187895468Z [inf]  [93mAttempt #2 failed with service unavailable. Continuing to retry for 55s[0m
+2026-04-02T00:44:02.364318086Z [inf]  [93mAttempt #3 failed with service unavailable. Continuing to retry for 53s[0m
+2026-04-02T00:44:06.540667671Z [inf]  [93mAttempt #4 failed with service unavailable. Continuing to retry for 49s[0m
+2026-04-02T00:44:14.716946179Z [inf]  [93mAttempt #5 failed with service unavailable. Continuing to retry for 41s[0m
+2026-04-02T00:44:30.891040729Z [inf]  [93mAttempt #6 failed with service unavailable. Continuing to retry for 24s[0m
+2026-04-02T00:44:30.940806591Z [inf]  
+2026-04-02T00:44:30.940810960Z [inf]  [91m1/1 replicas never became healthy![0m
+2026-04-02T00:44:30.940811838Z [inf]  [91mHealthcheck failed![0m

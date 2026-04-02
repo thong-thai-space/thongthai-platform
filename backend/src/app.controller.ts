@@ -19,12 +19,3 @@ export class AppController {
     };
   }
 }
-
-// Health check without global prefix (for orchestrators like Railway, K8s)
-@Controller('api')
-export class HealthCheckController {
-  @Get('healthz')
-  healthz() {
-    return { status: 'ok', service: 'backend' };
-  }
-}

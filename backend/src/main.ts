@@ -36,6 +36,9 @@ async function bootstrap() {
   app.useWebSocketAdapter(redisIoAdapter);
   logger.log('Socket.IO Redis adapter connected');
 
+  // Pattern: Health check without global prefix (for orchestrators like Railway)
+  app.get('/api/healthz', () => ({ status: 'ok', service: 'backend' }));
+
   // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({

@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { AppController, HealthCheckController } from './app.controller';
+import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -78,7 +78,7 @@ import { HealthModule } from './modules/health/health.module';
     ContentModule,
     HealthModule,
   ],
-  controllers: [AppController, HealthCheckController],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
