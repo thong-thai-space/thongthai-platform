@@ -71,12 +71,6 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
-.font-canva {
-  font-family: var(--font-canva), var(--font-sans), system-ui, sans-serif;
-  font-weight: 400;
-  letter-spacing: normal;
-}
-
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
