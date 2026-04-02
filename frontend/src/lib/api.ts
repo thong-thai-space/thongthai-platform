@@ -9,7 +9,7 @@ const resolveApiBaseUrl = () => {
   if (typeof window !== 'undefined') {
     const host = window.location.hostname;
     if (host === 'thongthaispace.com' || host.endsWith('.thongthaispace.com')) {
-      return 'https://api.thongthaispace.com/api';
+      return 'https://api.thongthaispace.com/api/v1';
     }
   }
 
