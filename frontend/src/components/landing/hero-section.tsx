@@ -41,7 +41,7 @@ export function HeroSection() {
           muted
           loop
           playsInline
-          className="h-full w-full scale-[1.2] object-contain"
+          className="h-full w-full scale-[1.3] object-contain"
         >
           <source src="/videos/video_abdeaea5-859e-4b99-8330-da037fe439e8.mp4" type="video/mp4" />
         </video>
