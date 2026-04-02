@@ -33,73 +33,60 @@ export function HeroSection() {
   };
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-background via-background to-primary/5">
-      {/* Video background */}
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="absolute inset-0 h-full w-full object-cover"
-        style={{ zIndex: 0 }}
-      >
-        <source src="/videos/video_abdeaea5-859e-4b99-8330-da037fe439e8.mp4" type="video/mp4" />
-      </video>
-
-      {/* Dark overlay for text readability */}
-      <div className="absolute inset-0 bg-black/35" style={{ zIndex: 1 }} />
-
-      {/* Background decoration (alternative fallback) */}
-      <div className="pointer-events-none absolute inset-0" style={{ zIndex: 0 }}>
-        <div className="absolute -right-40 -top-40 h-80 w-80 rounded-full bg-primary/10 blur-3xl opacity-30" />
-        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-accent/10 blur-3xl opacity-30" />
+    <section className="bg-gradient-to-br from-background via-background to-primary/5">
+      {/* Video block */}
+      <div className="relative overflow-hidden">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="h-[44vh] w-full object-cover sm:h-[52vh] lg:h-[60vh]"
+        >
+          <source src="/videos/video_abdeaea5-859e-4b99-8330-da037fe439e8.mp4" type="video/mp4" />
+        </video>
+        <div className="pointer-events-none absolute inset-0 bg-black/25" />
       </div>
 
-      <div className="relative mx-auto max-w-7xl px-4 pb-10 pt-36 sm:px-6 sm:pb-14 sm:pt-40 lg:px-8 lg:pb-16 lg:pt-48" style={{ zIndex: 10 }}>
-        <div className="grid items-end gap-8 lg:min-h-[72vh] lg:grid-cols-12">
-          <div className="lg:col-span-7">
-            <div className="max-w-lg rounded-2xl border border-white/15 bg-slate-950/25 p-5 text-center shadow-2xl backdrop-blur-md sm:p-7 lg:text-left">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
-                <Sparkles className="h-4 w-4" />
-                {c.badge}
-              </div>
-
-              <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
-                {c.title}{' '}
-                <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  {c.titleHighlight}
-                </span>{' '}
-                {c.titleEnd}
-              </h1>
-
-              <p className="mt-6 text-lg leading-8 text-slate-200 sm:text-xl">
-                {c.subtitle}
-              </p>
-
-              <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center lg:justify-start">
-                <Link
-                  href={c.primaryCta.href}
-                  className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30"
-                >
-                  {c.primaryCta.text}
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-                <Link
-                  href={c.secondaryCta.href}
-                  className="inline-flex items-center gap-2 rounded-lg border border-white/25 bg-white/5 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-white/15"
-                >
-                  {c.secondaryCta.text}
-                </Link>
-              </div>
-            </div>
+      {/* Hero content card block */}
+      <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+        <div className="max-w-3xl rounded-2xl border border-white/15 bg-slate-950/35 p-6 text-center shadow-2xl backdrop-blur-md sm:p-8 lg:text-left">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+            <Sparkles className="h-4 w-4" />
+            {c.badge}
           </div>
 
-          {/* Empty visual space to keep center-right video area clear */}
-          <div className="hidden lg:col-span-5 lg:block" />
+          <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+            {c.title}{' '}
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              {c.titleHighlight}
+            </span>{' '}
+            {c.titleEnd}
+          </h1>
+
+          <p className="mt-6 text-lg leading-8 text-slate-200 sm:text-xl">
+            {c.subtitle}
+          </p>
+
+          <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center lg:justify-start">
+            <Link
+              href={c.primaryCta.href}
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30"
+            >
+              {c.primaryCta.text}
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href={c.secondaryCta.href}
+              className="inline-flex items-center gap-2 rounded-lg border border-white/25 bg-white/5 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-white/15"
+            >
+              {c.secondaryCta.text}
+            </Link>
+          </div>
         </div>
 
         {/* Stats strip */}
-        <div className="mt-14 rounded-2xl border border-white/15 bg-slate-950/25 p-5 shadow-xl backdrop-blur-sm sm:p-6">
+        <div className="mt-6 rounded-2xl border border-white/15 bg-slate-950/25 p-5 shadow-xl backdrop-blur-sm sm:p-6">
           <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
             {c.stats.map((stat) => (
               <div key={stat.label}>
