@@ -37,7 +37,6 @@ export function TurnstileWidget({ onTokenChange, className }: TurnstileWidgetPro
     }
 
     let mounted = true;
-    let retryTimer: ReturnType<typeof setTimeout> | null = null;
 
     const renderWidget = () => {
       if (!mounted || !containerRef.current || !window.turnstile || widgetIdRef.current) {
@@ -53,47 +52,20 @@ export function TurnstileWidget({ onTokenChange, className }: TurnstileWidgetPro
       });
     };
 
-    const tryRenderWithRetry = (attempt = 0) => {
-      if (!mounted || widgetIdRef.current) {
-        return;
-      }
-
-      if (window.turnstile) {
-        renderWidget();
-        return;
-      }
-
-      if (attempt >= 20) {
-        return;
-      }
-
-      retryTimer = setTimeout(() => tryRenderWithRetry(attempt + 1), 150);
-    };
-
-    const existingScript = document.getElementById(
-      'cloudflare-turnstile-script',
-    ) as HTMLScriptElement | null;
-
-    if (!existingScript) {
+    if (!document.getElementById('cloudflare-turnstile-script')) {
       const script = document.createElement('script');
       script.id = 'cloudflare-turnstile-script';
       script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
       script.async = true;
       script.defer = true;
-      script.onload = () => tryRenderWithRetry();
+      script.onload = renderWidget;
       document.head.appendChild(script);
     } else {
-      existingScript.addEventListener('load', () => tryRenderWithRetry(), {
-        once: true,
-      });
-      tryRenderWithRetry();
+      renderWidget();
     }
 
     return () => {
       mounted = false;
-      if (retryTimer) {
-        clearTimeout(retryTimer);
-      }
       if (widgetIdRef.current && window.turnstile) {
         window.turnstile.remove(widgetIdRef.current);
         widgetIdRef.current = null;
