@@ -9,6 +9,13 @@ RUN pnpm install --frozen-lockfile
 FROM node:20-alpine AS builder
 RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
+
+# Build-time environment variables for Next.js
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_SOCKET_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_SOCKET_URL=$NEXT_PUBLIC_SOCKET_URL
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN pnpm build
