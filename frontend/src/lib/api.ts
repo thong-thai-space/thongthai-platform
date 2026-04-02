@@ -9,11 +9,11 @@ const resolveApiBaseUrl = () => {
   if (typeof window !== 'undefined') {
     const host = window.location.hostname;
     if (host === 'thongthaispace.com' || host.endsWith('.thongthaispace.com')) {
-      return 'https://api.thongthaispace.com/api/v1';
+      return 'https://api.thongthaispace.com/api';
     }
   }
 
-  return 'http://localhost:4000/api/v1';
+  return 'http://localhost:4000/api';
 };
 
 export const API_BASE_URL = resolveApiBaseUrl();
