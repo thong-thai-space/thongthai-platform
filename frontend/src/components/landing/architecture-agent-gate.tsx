@@ -31,6 +31,7 @@ export function ArchitectureAgentGate({
   const [result, setResult] = useState<ArchitectureAgentResponse | null>(null);
   const [error, setError] = useState("");
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   const requiresAuth = !loading && !user;
 
@@ -48,6 +49,19 @@ export function ArchitectureAgentGate({
       localStorage.removeItem(DRAFT_STORAGE_KEY);
     }
   }, [message]);
+
+  useEffect(() => {
+    if (!canRenderAgent) {
+      setIsVisible(false);
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setIsVisible(true);
+    }, 40);
+
+    return () => window.clearTimeout(timer);
+  }, [canRenderAgent]);
 
   const svgPreviewUrl = useMemo(() => {
     if (!result?.svg) return "";
@@ -154,8 +168,12 @@ export function ArchitectureAgentGate({
 
   return (
     <>
-      <div className="pointer-events-none absolute inset-x-0 bottom-4 z-30 px-4 sm:bottom-6 sm:px-6 lg:bottom-8">
-        <div className="mx-auto max-w-5xl pointer-events-auto rounded-3xl border border-white/20 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-md sm:p-5">
+      <div
+        className={`mx-auto w-full max-w-5xl px-4 transition-all duration-500 sm:px-6 lg:px-8 ${
+          isVisible ? "translate-y-0 opacity-100" : "-translate-y-5 opacity-0"
+        }`}
+      >
+        <div className="rounded-3xl border border-white/20 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-md sm:p-5">
           <div className="mb-2 flex justify-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-200">
               <Sparkles className="h-3.5 w-3.5" />

@@ -83,8 +83,13 @@ export function HeroSection({
           />
         </video>
         <div className="pointer-events-none absolute inset-0 bg-black/25" />
-        {architectureOverlay}
       </section>
+
+      {architectureOverlay ? (
+        <div className="relative z-20 -mt-5 pb-4 sm:-mt-7 sm:pb-5 lg:-mt-8 lg:pb-6">
+          {architectureOverlay}
+        </div>
+      ) : null}
 
       {/* Hero content block - separate section below video */}
       <section className="bg-linear-to-br from-slate-50 via-white to-blue-50/60 dark:from-background dark:via-background dark:to-primary/5">
