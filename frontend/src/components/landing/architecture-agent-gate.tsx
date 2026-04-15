@@ -169,11 +169,11 @@ export function ArchitectureAgentGate({
   return (
     <>
       <div
-        className={`mx-auto w-full max-w-5xl px-4 transition-all duration-500 sm:px-6 lg:px-8 ${
-          isVisible ? "translate-y-0 opacity-100" : "-translate-y-5 opacity-0"
+        className={`mx-auto w-full max-w-5xl px-4 transform-gpu sm:px-6 lg:px-8 ${
+          isVisible ? "ai-agent-enter opacity-100" : "-translate-y-5 scale-[0.985] opacity-0 blur-[6px]"
         }`}
       >
-        <div className="rounded-3xl border border-white/20 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-md sm:p-5">
+        <div className="ai-agent-shell rounded-3xl border border-white/20 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-md sm:p-5">
           <div className="mb-2 flex justify-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-200">
               <Sparkles className="h-3.5 w-3.5" />
