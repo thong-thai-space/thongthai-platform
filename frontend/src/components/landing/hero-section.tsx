@@ -35,6 +35,13 @@ interface HeroSectionProps {
 
 export function HeroSection({ onIntroVideoCompleted }: HeroSectionProps) {
   const hasNotifiedIntroEndRef = useRef(false);
+
+  const notifyIntroCompleted = () => {
+    if (hasNotifiedIntroEndRef.current) return;
+    hasNotifiedIntroEndRef.current = true;
+    onIntroVideoCompleted?.();
+  };
+
   const { data } = useSectionContent("hero");
   const raw = (data?.data as Partial<typeof defaults>) || {};
   const c = {
@@ -54,10 +61,15 @@ export function HeroSection({ onIntroVideoCompleted }: HeroSectionProps) {
           muted
           loop
           playsInline
-          onEnded={() => {
-            if (hasNotifiedIntroEndRef.current) return;
-            hasNotifiedIntroEndRef.current = true;
-            onIntroVideoCompleted?.();
+          onEnded={notifyIntroCompleted}
+          onTimeUpdate={(event) => {
+            const video = event.currentTarget;
+            if (!Number.isFinite(video.duration) || video.duration <= 0) return;
+
+            // With loop enabled, onEnded is not always reliable across browsers.
+            if (video.currentTime >= video.duration - 0.15) {
+              notifyIntroCompleted();
+            }
           }}
           className="h-full w-full scale-[1.3] object-contain"
         >
