@@ -175,7 +175,7 @@ export function ArchitectureAgentGate({
       >
         <div className="ai-agent-shell rounded-3xl border border-white/20 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-md sm:p-5">
           <div className="mb-2 flex justify-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-200">
+            <div className="ai-agent-badge inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-200">
               <Sparkles className="h-3.5 w-3.5" />
               Architecture Agent
             </div>
@@ -186,10 +186,16 @@ export function ArchitectureAgentGate({
             onChange={(e) => setMessage(e.target.value)}
             rows={3}
             placeholder="How can I help your project today? Describe your requirements, upload a file, then click View Architecture..."
-            className="w-full resize-none rounded-2xl border border-white/15 bg-slate-900/70 px-4 py-3 text-sm text-white placeholder:text-slate-400 focus:border-cyan-400/70 focus:outline-none"
+            className={`w-full resize-none rounded-2xl border border-white/15 bg-slate-900/70 px-4 py-3 text-sm text-white placeholder:text-slate-400 focus:border-cyan-400/70 focus:outline-none ${
+              isVisible ? "ai-agent-stagger-1" : ""
+            }`}
           />
 
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-sm">
+          <div
+            className={`mt-3 flex flex-wrap items-center justify-between gap-3 text-sm ${
+              isVisible ? "ai-agent-stagger-2" : ""
+            }`}
+          >
             <div className="flex items-center gap-3 text-slate-300">
               <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-white/15 px-3 py-1.5 transition hover:bg-white/10">
                 <Plus className="h-4 w-4" />

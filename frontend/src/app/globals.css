@@ -142,6 +142,45 @@ body {
   }
 }
 
+@keyframes ai-agent-grid-drift {
+  0% {
+    transform: translateY(0) translateX(0);
+  }
+  100% {
+    transform: translateY(18px) translateX(12px);
+  }
+}
+
+@keyframes ai-agent-badge-pulse {
+  0%,
+  84%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(34, 211, 238, 0);
+  }
+  88% {
+    transform: scale(1.035);
+    box-shadow: 0 0 0.9rem rgba(34, 211, 238, 0.26);
+  }
+  92% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(34, 211, 238, 0);
+  }
+}
+
+@keyframes ai-agent-stagger-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
 .ai-agent-enter {
   animation: ai-agent-enter 640ms cubic-bezier(0.16, 1, 0.3, 1) both;
   will-change: transform, opacity, filter;
@@ -170,6 +209,40 @@ body {
   animation: ai-agent-sheen 3.4s linear infinite;
 }
 
+.ai-agent-shell::after {
+  content: "";
+  position: absolute;
+  inset: -20% -10% auto -10%;
+  height: 140%;
+  pointer-events: none;
+  opacity: 0.12;
+  background-image:
+    linear-gradient(rgba(34, 211, 238, 0.22) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 211, 238, 0.16) 1px, transparent 1px);
+  background-size: 24px 24px, 24px 24px;
+  mask-image: radial-gradient(circle at 50% 40%, black 28%, transparent 78%);
+  animation: ai-agent-grid-drift 20s linear infinite;
+}
+
+.ai-agent-badge {
+  animation: ai-agent-badge-pulse 7.2s ease-in-out infinite;
+  will-change: transform, box-shadow;
+}
+
+.ai-agent-stagger-1,
+.ai-agent-stagger-2 {
+  animation: ai-agent-stagger-in 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity, filter;
+}
+
+.ai-agent-stagger-1 {
+  animation-delay: 110ms;
+}
+
+.ai-agent-stagger-2 {
+  animation-delay: 190ms;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ai-agent-enter {
     animation: none;
@@ -180,5 +253,21 @@ body {
 
   .ai-agent-shell::before {
     animation: none;
+  }
+
+  .ai-agent-shell::after {
+    animation: none;
+  }
+
+  .ai-agent-badge {
+    animation: none;
+  }
+
+  .ai-agent-stagger-1,
+  .ai-agent-stagger-2 {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
   }
 }
