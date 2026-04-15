@@ -5,6 +5,8 @@ import { AiService } from './ai.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationService } from '../notification/notification.service';
 import { UserRole } from '@prisma/client';
+import { FileParserService } from './services/file-parser.service';
+import { DocxGeneratorService } from './services/docx-generator.service';
 
 // Mock Anthropic SDK
 const mockCreate = jest.fn();
@@ -35,6 +37,8 @@ const mockPrisma = {
   },
   user: {
     count: jest.fn(),
+    findUnique: jest.fn(),
+    update: jest.fn(),
   },
   task: {
     count: jest.fn(),
@@ -50,6 +54,14 @@ const mockNotificationService = {
   create: jest.fn(),
 };
 
+const mockFileParserService = {
+  parse: jest.fn(),
+};
+
+const mockDocxGeneratorService = {
+  generateArchitectureReport: jest.fn(),
+};
+
 describe('AiService', () => {
   let service: AiService;
 
@@ -60,6 +72,8 @@ describe('AiService', () => {
         { provide: PrismaService, useValue: mockPrisma },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: NotificationService, useValue: mockNotificationService },
+        { provide: FileParserService, useValue: mockFileParserService },
+        { provide: DocxGeneratorService, useValue: mockDocxGeneratorService },
       ],
     }).compile();
 
@@ -67,6 +81,12 @@ describe('AiService', () => {
     jest.clearAllMocks();
 
     mockPrisma.user.count.mockResolvedValue(0);
+    mockPrisma.user.findUnique.mockResolvedValue({
+      id: 'user-1',
+      aiQuotaUsedTokens: 0,
+      aiQuotaLimitTokens: 100000,
+    });
+    mockPrisma.user.update.mockResolvedValue({});
     mockPrisma.project.count.mockResolvedValue(0);
     mockPrisma.task.count.mockResolvedValue(0);
     mockPrisma.$transaction.mockImplementation(async (queries: Promise<unknown>[]) =>
@@ -305,6 +325,69 @@ describe('AiService', () => {
       await expect(
         service.generateProgressReport('user-1', UserRole.OWNER, 'nonexistent'),
       ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('generateArchitectureDiagram', () => {
+    it('should generate architecture payload and docx for valid input', async () => {
+      mockFileParserService.parse.mockResolvedValue({ textContext: '' });
+      mockCreate.mockResolvedValue({
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              description: 'Architecture overview',
+              layers: ['Client', 'API', 'Data'],
+              svg: '<svg viewBox="0 0 900 600"></svg>',
+            }),
+          },
+        ],
+        usage: { input_tokens: 100, output_tokens: 200 },
+      });
+      mockDocxGeneratorService.generateArchitectureReport.mockResolvedValue(
+        Buffer.from('docx-content'),
+      );
+
+      const result = await service.generateArchitectureDiagram(
+        'user-1',
+        UserRole.OWNER,
+        'Design a SaaS platform',
+      );
+
+      expect(result.description).toBe('Architecture overview');
+      expect(result.docxBase64).toBe(Buffer.from('docx-content').toString('base64'));
+      expect(result.usage.totalTokens).toBe(300);
+      expect(mockPrisma.user.update).toHaveBeenCalled();
+    });
+
+    it('should throw when quota is exceeded', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: 'user-1',
+        aiQuotaUsedTokens: 99990,
+        aiQuotaLimitTokens: 100000,
+      });
+      mockFileParserService.parse.mockResolvedValue({ textContext: '' });
+      mockCreate.mockResolvedValue({
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              description: 'Architecture overview',
+              layers: ['Client', 'API', 'Data'],
+              svg: '<svg viewBox="0 0 900 600"></svg>',
+            }),
+          },
+        ],
+        usage: { input_tokens: 20, output_tokens: 20 },
+      });
+
+      await expect(
+        service.generateArchitectureDiagram(
+          'user-1',
+          UserRole.OWNER,
+          'Design a SaaS platform',
+        ),
+      ).rejects.toThrow();
     });
   });
 });

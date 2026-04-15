@@ -3,6 +3,9 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
+  InternalServerErrorException,
+  HttpException,
+  HttpStatus,
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -37,7 +40,16 @@ import {
   PROFESSIONAL_OUTPUT_RULES,
   STRATEGIC_PLAN_PROMPT,
   ROLE_PROMPT_MAP,
+  ARCHITECTURE_DIAGRAM_PROMPT,
 } from './prompts';
+import { FileParserService } from './services/file-parser.service';
+import { DocxGeneratorService } from './services/docx-generator.service';
+
+interface ArchitectureAgentResult {
+  description: string;
+  layers: string[];
+  svg: string;
+}
 
 @Injectable()
 export class AiService {
@@ -48,6 +60,8 @@ export class AiService {
     private configService: ConfigService,
     private prisma: PrismaService,
     private notificationService: NotificationService,
+    private fileParserService: FileParserService,
+    private docxGeneratorService: DocxGeneratorService,
   ) {
     this.client = new Anthropic({
       apiKey: this.configService.getOrThrow('ANTHROPIC_API_KEY'),
@@ -130,6 +144,184 @@ export class AiService {
       .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[EMAIL]')
       .replace(/\b(?:\+?84|0)(?:\d[\s.-]?){8,10}\b/g, '[PHONE]')
       .replace(/\b\d{9,16}\b/g, '[ID]');
+  }
+
+  private async consumeAiQuota(userId: string, totalTokens: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        aiQuotaUsedTokens: true,
+        aiQuotaLimitTokens: true,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.aiQuotaUsedTokens + totalTokens > user.aiQuotaLimitTokens) {
+      throw new HttpException('AI quota exceeded', HttpStatus.TOO_MANY_REQUESTS);
+    }
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        aiQuotaUsedTokens: {
+          increment: totalTokens,
+        },
+      },
+    });
+  }
+
+  private parseArchitectureResponse(content: string): ArchitectureAgentResult {
+    const parsed = this.tryParseJson<ArchitectureAgentResult>(content);
+
+    if ('raw' in parsed) {
+      throw new BadRequestException('AI returned non-JSON architecture output');
+    }
+
+    const description = typeof parsed.description === 'string' ? parsed.description.trim() : '';
+    const layers = Array.isArray(parsed.layers)
+      ? parsed.layers.filter((layer) => typeof layer === 'string').map((layer) => layer.trim())
+      : [];
+    const svg = typeof parsed.svg === 'string' ? parsed.svg.trim() : '';
+
+    if (!description) {
+      throw new BadRequestException('Architecture description is missing');
+    }
+
+    if (layers.length === 0) {
+      throw new BadRequestException('Architecture layers are missing');
+    }
+
+    if (!svg.startsWith('<svg') || !svg.includes('viewBox="0 0 900 600"')) {
+      throw new BadRequestException('Architecture SVG is invalid');
+    }
+
+    return { description, layers, svg };
+  }
+
+  async generateArchitectureDiagram(
+    userId: string,
+    role: UserRole,
+    message: string,
+    file?: Express.Multer.File,
+  ) {
+    const sanitizedMessage = this.maskSensitiveData(message);
+    const startedAt = Date.now();
+
+    try {
+      const parsedFile = await this.fileParserService.parse(file);
+
+      const userPromptParts = [
+        `User role: ${role}`,
+        `Project requirements:\n${sanitizedMessage}`,
+      ];
+
+      if (parsedFile.textContext) {
+        userPromptParts.push(parsedFile.textContext);
+      }
+
+      const userPrompt = userPromptParts.join('\n\n');
+
+      let response = await this.client.messages.create({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4096,
+        system:
+          ARCHITECTURE_DIAGRAM_PROMPT +
+          PROFESSIONAL_OUTPUT_RULES +
+          this.roleDirective(role),
+        messages: [{ role: 'user', content: userPrompt }],
+      });
+
+      let parsed: ArchitectureAgentResult;
+      try {
+        parsed = this.parseArchitectureResponse(this.extractText(response));
+      } catch {
+        response = await this.client.messages.create({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 4096,
+          system:
+            ARCHITECTURE_DIAGRAM_PROMPT +
+            '\n\nCorrection: Your previous output was invalid. Respond with valid JSON only and include a valid SVG with viewBox="0 0 900 600".',
+          messages: [{ role: 'user', content: userPrompt }],
+        });
+
+        parsed = this.parseArchitectureResponse(this.extractText(response));
+      }
+
+      const inputTokens = response.usage.input_tokens;
+      const outputTokens = response.usage.output_tokens;
+      const totalTokens = inputTokens + outputTokens;
+
+      await this.consumeAiQuota(userId, totalTokens);
+
+      const docxBuffer = await this.docxGeneratorService.generateArchitectureReport({
+        title: 'System Architecture Report',
+        description: parsed.description,
+        svg: parsed.svg,
+        generatedAt: new Date(),
+      });
+
+      const estimatedCostUsd = this.estimateCostUsd(inputTokens, outputTokens);
+
+      await this.logAiAudit({
+        feature: AiFeature.ARCHITECTURE_DIAGRAM,
+        userId,
+        model: 'claude-sonnet-4-20250514',
+        success: true,
+        inputTokens,
+        outputTokens,
+        totalTokens,
+        estimatedCostUsd,
+        durationMs: Date.now() - startedAt,
+        metadata: {
+          hasFile: Boolean(file),
+          mimeType: file?.mimetype,
+          layers: parsed.layers,
+        },
+      });
+
+      return {
+        description: parsed.description,
+        layers: parsed.layers,
+        svg: parsed.svg,
+        docxBase64: docxBuffer.toString('base64'),
+        usage: {
+          inputTokens,
+          outputTokens,
+          totalTokens,
+          estimatedCostUsd: Number(estimatedCostUsd.toFixed(6)),
+        },
+      };
+    } catch (error) {
+      await this.logAiAudit({
+        feature: AiFeature.ARCHITECTURE_DIAGRAM,
+        userId,
+        model: 'claude-sonnet-4-20250514',
+        success: false,
+        errorMessage: error instanceof Error ? error.message : 'Unknown AI error',
+        durationMs: Date.now() - startedAt,
+        metadata: {
+          hasFile: Boolean(file),
+          mimeType: file?.mimetype,
+        },
+      });
+
+      if (
+        error instanceof BadRequestException ||
+        (error instanceof HttpException && error.getStatus() === HttpStatus.TOO_MANY_REQUESTS)
+      ) {
+        throw error;
+      }
+
+      this.logger.error(
+        'Architecture diagram generation failed',
+        error instanceof Error ? error.stack : undefined,
+      );
+      throw new InternalServerErrorException('Failed to generate architecture diagram');
+    }
   }
 
   private async buildOperationalSnapshot(userId: string, userRole?: UserRole) {

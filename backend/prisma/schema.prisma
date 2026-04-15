@@ -80,6 +80,7 @@ enum AiFeature {
   STRATEGIC_PLAN
   APPLY_STRATEGIC_PLAN
   PUBLIC_CHAT
+  ARCHITECTURE_DIAGRAM
 }
 
 enum AiApplyRequestStatus {

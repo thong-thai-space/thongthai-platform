@@ -8,9 +8,14 @@ import {
   Body,
   Param,
   UseGuards,
+  BadRequestException,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { memoryStorage } from 'multer';
 import { AiService } from './ai.service';
 import {
   ChatDto,
@@ -25,6 +30,7 @@ import {
   AuditQueryDto,
   PurgeAuditDto,
 } from './dto/ai.dto';
+import { ArchitectureAgentDto } from './dto/architecture-agent.dto';
 import { Roles } from '../../shared/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { CurrentUser } from '../../shared/decorators/current-user.decorator';
@@ -36,6 +42,42 @@ import { UserRole } from '@prisma/client';
 @Controller('ai')
 export class AiController {
   constructor(private aiService: AiService) {}
+
+  @Post('architecture-agent')
+  @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.MEMBER, UserRole.CLIENT)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: 10 * 1024 * 1024 },
+      fileFilter: (req, file, callback) => {
+        const allowedMimeTypes = [
+          'image/png',
+          'image/jpeg',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        ];
+
+        if (allowedMimeTypes.includes(file.mimetype)) {
+          callback(null, true);
+          return;
+        }
+
+        callback(
+          new BadRequestException(`File type ${file.mimetype} is not allowed`),
+          false,
+        );
+      },
+    }),
+  )
+  async architectureAgent(
+    @Body() dto: ArchitectureAgentDto,
+    @UploadedFile() file: Express.Multer.File | undefined,
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') role: UserRole,
+  ) {
+    return this.aiService.generateArchitectureDiagram(userId, role, dto.message, file);
+  }
 
   @Post('chat')
   @Roles(UserRole.OWNER, UserRole.ADMIN, UserRole.MEMBER, UserRole.CLIENT)
