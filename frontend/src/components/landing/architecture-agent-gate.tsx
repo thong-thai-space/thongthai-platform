@@ -30,6 +30,7 @@ export function ArchitectureAgentGate({
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<ArchitectureAgentResponse | null>(null);
   const [error, setError] = useState("");
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
 
   const requiresAuth = !loading && !user;
 
@@ -64,7 +65,7 @@ export function ArchitectureAgentGate({
 
     const trimmed = message.trim();
     if (!trimmed) {
-      setError("Vui long nhap yeu cau du an truoc khi xem architecture.");
+      setError("Please enter your project requirements before viewing the architecture.");
       return;
     }
 
@@ -76,7 +77,7 @@ export function ArchitectureAgentGate({
           fileName: file?.name,
         }),
       );
-      setError("Ban can dang nhap hoac dang ky de su dung Architecture Agent.");
+      setShowAuthDialog(true);
       return;
     }
 
@@ -95,9 +96,9 @@ export function ArchitectureAgentGate({
           ?.data?.message === "string"
           ? (err as { response?: { data?: { message?: string } } }).response?.data
               ?.message
-          : "Khong the generate architecture diagram. Vui long thu lai.";
+            : "Could not generate architecture diagram. Please try again.";
 
-      setError(messageFromApi || "Khong the generate architecture diagram. Vui long thu lai.");
+          setError(messageFromApi || "Could not generate architecture diagram. Please try again.");
     }
   };
 
@@ -152,114 +153,131 @@ export function ArchitectureAgentGate({
   }
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-4 z-30 px-4 sm:bottom-6 sm:px-6 lg:bottom-8">
-      <div className="mx-auto max-w-5xl pointer-events-auto rounded-3xl border border-white/20 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-md sm:p-5">
-        <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-200">
-          <Sparkles className="h-3.5 w-3.5" />
-          Architecture Agent
-        </div>
-
-        <textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          rows={3}
-          placeholder="How can I help your project today? Mieu ta yeu cau, upload file va bam Xem Architecture..."
-          className="w-full resize-none rounded-2xl border border-white/15 bg-slate-900/70 px-4 py-3 text-sm text-white placeholder:text-slate-400 focus:border-cyan-400/70 focus:outline-none"
-        />
-
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-sm">
-          <div className="flex items-center gap-3 text-slate-300">
-            <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-white/15 px-3 py-1.5 transition hover:bg-white/10">
-              <Plus className="h-4 w-4" />
-              File
-              <input
-                type="file"
-                accept={ALLOWED_FILE_TYPES}
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
-                className="hidden"
-              />
-            </label>
-            <span className="text-xs text-slate-400">
-              {file?.name || "PNG, JPG, DOCX, XLSX, PPTX"}
-            </span>
+    <>
+      <div className="pointer-events-none absolute inset-x-0 bottom-4 z-30 px-4 sm:bottom-6 sm:px-6 lg:bottom-8">
+        <div className="mx-auto max-w-5xl pointer-events-auto rounded-3xl border border-white/20 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-md sm:p-5">
+          <div className="mb-2 flex justify-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-200">
+              <Sparkles className="h-3.5 w-3.5" />
+              Architecture Agent
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            {requiresAuth ? (
-              <>
-                <button
-                  type="button"
-                  onClick={() => goToAuth("login")}
-                  className="rounded-xl border border-white/20 px-3 py-1.5 text-xs text-white hover:bg-white/10"
-                >
-                  Dang nhap
-                </button>
-                <button
-                  type="button"
-                  onClick={() => goToAuth("register")}
-                  className="rounded-xl border border-white/20 px-3 py-1.5 text-xs text-white hover:bg-white/10"
-                >
-                  Dang ky
-                </button>
-              </>
-            ) : null}
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            rows={3}
+            placeholder="How can I help your project today? Describe your requirements, upload a file, then click View Architecture..."
+            className="w-full resize-none rounded-2xl border border-white/15 bg-slate-900/70 px-4 py-3 text-sm text-white placeholder:text-slate-400 focus:border-cyan-400/70 focus:outline-none"
+          />
 
-            <button
-              type="button"
-              onClick={handleGenerate}
-              disabled={architectureAgent.isPending}
-              className="rounded-xl bg-cyan-400 px-4 py-1.5 text-xs font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:opacity-60"
-            >
-              {architectureAgent.isPending ? "Dang generate..." : "Xem Architecture"}
-            </button>
-          </div>
-        </div>
-
-        {requiresAuth ? (
-          <p className="mt-3 inline-flex items-center gap-2 text-xs text-amber-200">
-            <Lock className="h-3.5 w-3.5" />
-            Bam Xem Architecture se yeu cau login/register.
-          </p>
-        ) : null}
-
-        {error ? <p className="mt-2 text-xs text-rose-300">{error}</p> : null}
-
-        {result ? (
-          <div className="mt-3 rounded-2xl border border-white/10 bg-slate-900/70 p-3">
-            <p className="line-clamp-2 text-xs text-slate-200">{result.description}</p>
-
-            {svgPreviewUrl ? (
-              <div className="mt-2 rounded-lg bg-white p-1">
-                <img
-                  src={svgPreviewUrl}
-                  alt="Architecture diagram"
-                  className="h-28 w-full rounded object-contain"
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-sm">
+            <div className="flex items-center gap-3 text-slate-300">
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-white/15 px-3 py-1.5 transition hover:bg-white/10">
+                <Plus className="h-4 w-4" />
+                File
+                <input
+                  type="file"
+                  accept={ALLOWED_FILE_TYPES}
+                  onChange={(e) => setFile(e.target.files?.[0] || null)}
+                  className="hidden"
                 />
-              </div>
-            ) : null}
+              </label>
+              <span className="text-xs text-slate-400">
+                {file?.name || "PNG, JPG, DOCX, XLSX, PPTX"}
+              </span>
+            </div>
 
-            <div className="mt-2 flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                onClick={handleDownloadDocx}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-400/30 bg-emerald-500/15 px-2.5 py-1 text-xs font-medium text-emerald-200 hover:bg-emerald-500/25"
+                onClick={handleGenerate}
+                disabled={architectureAgent.isPending}
+                className="rounded-xl bg-cyan-400 px-4 py-1.5 text-xs font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:opacity-60"
               >
-                <Download className="h-3.5 w-3.5" />
-                Tai DOCX
-              </button>
-
-              <button
-                type="button"
-                onClick={handleImportAndGoPortal}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-violet-400/30 bg-violet-500/15 px-2.5 py-1 text-xs font-medium text-violet-200 hover:bg-violet-500/25"
-              >
-                <FileUp className="h-3.5 w-3.5" />
-                Import vao portal
+                {architectureAgent.isPending ? "Generating..." : "View Architecture"}
               </button>
             </div>
           </div>
-        ) : null}
+
+          {error ? <p className="mt-2 text-xs text-rose-300">{error}</p> : null}
+
+          {result ? (
+            <div className="mt-3 rounded-2xl border border-white/10 bg-slate-900/70 p-3">
+              <p className="line-clamp-2 text-xs text-slate-200">{result.description}</p>
+
+              {svgPreviewUrl ? (
+                <div className="mt-2 rounded-lg bg-white p-1">
+                  <img
+                    src={svgPreviewUrl}
+                    alt="Architecture diagram"
+                    className="h-28 w-full rounded object-contain"
+                  />
+                </div>
+              ) : null}
+
+              <div className="mt-2 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={handleDownloadDocx}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-400/30 bg-emerald-500/15 px-2.5 py-1 text-xs font-medium text-emerald-200 hover:bg-emerald-500/25"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  Download DOCX
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleImportAndGoPortal}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-violet-400/30 bg-violet-500/15 px-2.5 py-1 text-xs font-medium text-violet-200 hover:bg-violet-500/25"
+                >
+                  <FileUp className="h-3.5 w-3.5" />
+                  Import to Portal
+                </button>
+              </div>
+            </div>
+          ) : null}
+        </div>
       </div>
-    </div>
+
+      {showAuthDialog ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-md rounded-2xl border border-white/15 bg-slate-950 p-5 text-white shadow-2xl">
+            <p className="inline-flex items-center gap-2 text-sm font-medium text-amber-200">
+              <Lock className="h-4 w-4" />
+              Authentication required
+            </p>
+            <h3 className="mt-2 text-lg font-semibold">Sign in to continue</h3>
+            <p className="mt-2 text-sm text-slate-300">
+              To generate an architecture diagram, please sign in or create an account.
+            </p>
+
+            <div className="mt-5 flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShowAuthDialog(false)}
+                className="rounded-xl border border-white/20 px-3 py-1.5 text-xs text-white hover:bg-white/10"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => goToAuth("login")}
+                className="rounded-xl border border-white/20 px-3 py-1.5 text-xs text-white hover:bg-white/10"
+              >
+                Sign in
+              </button>
+              <button
+                type="button"
+                onClick={() => goToAuth("register")}
+                className="rounded-xl bg-cyan-400 px-3 py-1.5 text-xs font-semibold text-slate-950 hover:bg-cyan-300"
+              >
+                Register
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }
