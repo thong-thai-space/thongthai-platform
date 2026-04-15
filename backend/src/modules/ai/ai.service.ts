@@ -53,6 +53,7 @@ interface ArchitectureAgentResult {
 
 @Injectable()
 export class AiService {
+  private static readonly ARCHITECTURE_TRIAL_REQUEST_LIMIT = 4;
   private client: Anthropic;
   private readonly logger = new Logger(AiService.name);
 
@@ -202,6 +203,23 @@ export class AiService {
     return { description, layers, svg };
   }
 
+  private async ensureArchitectureTrialLimit(userId: string) {
+    const usedRequests = await this.prisma.aiUsageAudit.count({
+      where: {
+        userId,
+        feature: AiFeature.ARCHITECTURE_DIAGRAM,
+        success: true,
+      },
+    });
+
+    if (usedRequests >= AiService.ARCHITECTURE_TRIAL_REQUEST_LIMIT) {
+      throw new HttpException(
+        `Trial limit reached: maximum ${AiService.ARCHITECTURE_TRIAL_REQUEST_LIMIT} requests`,
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+  }
+
   async generateArchitectureDiagram(
     userId: string,
     role: UserRole,
@@ -212,6 +230,8 @@ export class AiService {
     const startedAt = Date.now();
 
     try {
+      await this.ensureArchitectureTrialLimit(userId);
+
       const parsedFile = await this.fileParserService.parse(file);
 
       const userPromptParts = [

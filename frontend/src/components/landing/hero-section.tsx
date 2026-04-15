@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useSectionContent } from "@/hooks/use-content";
 import { Syne } from "next/font/google";
+import { useRef } from "react";
 
 const syne = Syne({
   weight: ["700"],
@@ -28,7 +29,12 @@ const defaults = {
   ],
 };
 
-export function HeroSection() {
+interface HeroSectionProps {
+  onIntroVideoCompleted?: () => void;
+}
+
+export function HeroSection({ onIntroVideoCompleted }: HeroSectionProps) {
+  const hasNotifiedIntroEndRef = useRef(false);
   const { data } = useSectionContent("hero");
   const raw = (data?.data as Partial<typeof defaults>) || {};
   const c = {
@@ -48,6 +54,11 @@ export function HeroSection() {
           muted
           loop
           playsInline
+          onEnded={() => {
+            if (hasNotifiedIntroEndRef.current) return;
+            hasNotifiedIntroEndRef.current = true;
+            onIntroVideoCompleted?.();
+          }}
           className="h-full w-full scale-[1.3] object-contain"
         >
           <source

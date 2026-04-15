@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import api from "@/lib/api";
 import { Eye, EyeOff } from "lucide-react";
@@ -17,6 +18,7 @@ interface LoginForm {
 export default function LoginPage() {
   const { login, loginWithGoogle } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [error, setError] = useState("");
   const [resendMessage, setResendMessage] = useState("");
   const [isResending, setIsResending] = useState(false);
@@ -46,9 +48,8 @@ export default function LoginPage() {
       }
 
       await login(data.email, data.password, turnstileToken || undefined);
-      // Role-based redirects still happen in layout guards.
-      // For OWNER/ADMIN, open Projects first.
-      router.push("/dashboard/projects");
+      const redirectTo = searchParams.get("redirectTo");
+      router.push(redirectTo || "/dashboard/projects");
     } catch (err: unknown) {
       const message =
         typeof err === "object" &&
@@ -235,7 +236,11 @@ export default function LoginPage() {
           <div className="mt-6 text-center text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}
             <Link
-              href="/register"
+              href={
+                searchParams.get("redirectTo")
+                  ? `/register?redirectTo=${encodeURIComponent(searchParams.get("redirectTo") || "")}`
+                  : "/register"
+              }
               className="font-medium text-primary hover:text-primary/80"
             >
               Sign up now

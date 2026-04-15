@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { Eye, EyeOff, Mail } from 'lucide-react';
 import { TurnstileWidget } from '@/components/security/turnstile-widget';
@@ -17,6 +18,7 @@ interface RegisterForm {
 
 export default function RegisterPage() {
   const { register: authRegister, loginWithGoogle } = useAuth();
+  const searchParams = useSearchParams();
   const [error, setError] = useState('');
   const [registeredEmail, setRegisteredEmail] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -28,9 +30,13 @@ export default function RegisterPage() {
     register,
     handleSubmit,
     watch,
-    setValue,
     formState: { errors, isSubmitting },
   } = useForm<RegisterForm>();
+
+  const redirectTo = searchParams.get('redirectTo');
+  const loginHref = redirectTo
+    ? `/login?redirectTo=${encodeURIComponent(redirectTo)}`
+    : '/login';
 
   const onSubmit = async (data: RegisterForm) => {
     try {
@@ -81,7 +87,7 @@ export default function RegisterPage() {
             </p>
             <div className="mt-6 text-center text-sm text-muted-foreground">
               Already verified?{' '}
-              <Link href="/login" className="font-medium text-primary hover:text-primary/80">
+              <Link href={loginHref} className="font-medium text-primary hover:text-primary/80">
                 Sign in
               </Link>
             </div>
@@ -265,7 +271,7 @@ export default function RegisterPage() {
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
             Already have an account?{' '}
-            <Link href="/login" className="font-medium text-primary hover:text-primary/80">
+            <Link href={loginHref} className="font-medium text-primary hover:text-primary/80">
               Sign in
             </Link>
           </div>

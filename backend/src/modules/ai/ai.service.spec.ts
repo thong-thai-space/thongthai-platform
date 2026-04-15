@@ -29,6 +29,7 @@ const mockPrisma = {
   },
   aiUsageAudit: {
     create: jest.fn(),
+    count: jest.fn(),
   },
   project: {
     findMany: jest.fn(),
@@ -81,6 +82,7 @@ describe('AiService', () => {
     jest.clearAllMocks();
 
     mockPrisma.user.count.mockResolvedValue(0);
+    mockPrisma.aiUsageAudit.count.mockResolvedValue(0);
     mockPrisma.user.findUnique.mockResolvedValue({
       id: 'user-1',
       aiQuotaUsedTokens: 0,
@@ -388,6 +390,21 @@ describe('AiService', () => {
           'Design a SaaS platform',
         ),
       ).rejects.toThrow();
+    });
+
+    it('should throw when trial request limit is reached', async () => {
+      mockPrisma.aiUsageAudit.count.mockResolvedValue(4);
+
+      await expect(
+        service.generateArchitectureDiagram(
+          'user-1',
+          UserRole.OWNER,
+          'Design a SaaS platform',
+        ),
+      ).rejects.toThrow('Trial limit reached: maximum 4 requests');
+
+      expect(mockFileParserService.parse).not.toHaveBeenCalled();
+      expect(mockCreate).not.toHaveBeenCalled();
     });
   });
 });

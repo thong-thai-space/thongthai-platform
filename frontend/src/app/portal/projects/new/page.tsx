@@ -2,14 +2,18 @@
 
 import { PortalHeader } from '@/components/portal/header';
 import { useCreateProjectRequest } from '@/hooks/use-projects';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { ArrowLeft, Send } from 'lucide-react';
 import Link from 'next/link';
 
+const ARCHITECTURE_IMPORT_STORAGE_KEY = 'tts_project_request_import';
+
 export default function PortalNewProjectPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const createRequest = useCreateProjectRequest();
+  const isArchitectureImport = searchParams.get('import') === 'architecture';
   const [form, setForm] = useState({
     name: '',
     description: '',
@@ -19,10 +23,40 @@ export default function PortalNewProjectPage() {
     techStack: '',
   });
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+
+  useEffect(() => {
+    if (searchParams.get('import') !== 'architecture') return;
+
+    const importedRaw = localStorage.getItem(ARCHITECTURE_IMPORT_STORAGE_KEY);
+    if (!importedRaw) return;
+
+    try {
+      const imported = JSON.parse(importedRaw) as {
+        name?: string;
+        description?: string;
+        techStack?: string[];
+      };
+
+      setForm((prev) => ({
+        ...prev,
+        name: imported.name || prev.name,
+        description: imported.description || prev.description,
+        techStack: Array.isArray(imported.techStack)
+          ? imported.techStack.join(', ')
+          : prev.techStack,
+      }));
+    } catch {
+      // Ignore malformed import payload.
+    } finally {
+      localStorage.removeItem(ARCHITECTURE_IMPORT_STORAGE_KEY);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccessMessage('');
 
     if (!form.name.trim()) {
       setError('Please enter a project name.');
@@ -40,6 +74,15 @@ export default function PortalNewProjectPage() {
           ? form.techStack.split(',').map((s) => s.trim()).filter(Boolean)
           : undefined,
       });
+
+      if (isArchitectureImport) {
+        setSuccessMessage('Import thanh cong, dang chuyen ve Portal...');
+        setTimeout(() => {
+          router.push('/portal');
+        }, 900);
+        return;
+      }
+
       router.push('/portal/projects');
     } catch {
       setError('An error occurred. Please try again.');
@@ -136,10 +179,11 @@ export default function PortalNewProjectPage() {
               </div>
 
               {error && <p className="text-sm text-red-600">{error}</p>}
+              {successMessage && <p className="text-sm text-emerald-600">{successMessage}</p>}
 
               <button
                 type="submit"
-                disabled={createRequest.isPending}
+                disabled={createRequest.isPending || Boolean(successMessage)}
                 className="inline-flex items-center gap-2 rounded-lg bg-accent px-6 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent/90 disabled:opacity-50"
               >
                 <Send className="h-4 w-4" />

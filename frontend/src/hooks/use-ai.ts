@@ -95,6 +95,19 @@ export interface StrategicPlanResponse {
   };
 }
 
+export interface ArchitectureAgentResponse {
+  description: string;
+  layers: string[];
+  svg: string;
+  docxBase64: string;
+  usage?: {
+    inputTokens: number;
+    outputTokens: number;
+    totalTokens: number;
+    estimatedCostUsd: number;
+  };
+}
+
 export interface AiApplyRequest {
   id: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
@@ -260,6 +273,28 @@ export function usePurgeAiAudits() {
 export function useDeleteAiAudit() {
   return useMutation<unknown, Error, { id: string }>({
     mutationFn: ({ id }) => api.delete(`/ai/audit/${id}`).then((r) => r.data),
+  });
+}
+
+export function useArchitectureAgent() {
+  return useMutation<
+    ArchitectureAgentResponse,
+    Error,
+    { message: string; file?: File }
+  >({
+    mutationFn: async ({ message, file }) => {
+      const formData = new FormData();
+      formData.append('message', message);
+      if (file) {
+        formData.append('file', file);
+      }
+
+      const response = await api.post('/ai/architecture-agent', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      return response.data;
+    },
   });
 }
 
