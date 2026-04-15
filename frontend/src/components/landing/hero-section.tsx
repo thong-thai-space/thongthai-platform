@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useSectionContent } from "@/hooks/use-content";
 import { Syne } from "next/font/google";
-import { useRef } from "react";
+import { type ReactNode, useRef } from "react";
 
 const syne = Syne({
   weight: ["700"],
@@ -31,9 +31,13 @@ const defaults = {
 
 interface HeroSectionProps {
   onIntroVideoCompleted?: () => void;
+  architectureOverlay?: ReactNode;
 }
 
-export function HeroSection({ onIntroVideoCompleted }: HeroSectionProps) {
+export function HeroSection({
+  onIntroVideoCompleted,
+  architectureOverlay,
+}: HeroSectionProps) {
   const hasNotifiedIntroEndRef = useRef(false);
 
   const notifyIntroCompleted = () => {
@@ -79,6 +83,7 @@ export function HeroSection({ onIntroVideoCompleted }: HeroSectionProps) {
           />
         </video>
         <div className="pointer-events-none absolute inset-0 bg-black/25" />
+        {architectureOverlay}
       </section>
 
       {/* Hero content block - separate section below video */}

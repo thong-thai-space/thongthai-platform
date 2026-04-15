@@ -30,8 +30,12 @@ export default function Home() {
     <>
       <Navbar />
       <main>
-        <HeroSection onIntroVideoCompleted={() => setIntroVideoDone(true)} />
-        <ArchitectureAgentGate canRenderAgent={canRenderArchitectureAgent} />
+        <HeroSection
+          onIntroVideoCompleted={() => setIntroVideoDone(true)}
+          architectureOverlay={
+            <ArchitectureAgentGate canRenderAgent={canRenderArchitectureAgent} />
+          }
+        />
         <ServicesSection />
         <PortfolioSection />
         <ProcessSection />
