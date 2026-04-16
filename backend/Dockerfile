@@ -19,9 +19,7 @@ FROM node:20-alpine AS runner
 RUN corepack enable && corepack prepare pnpm@latest --activate
 RUN apk add --no-cache \
 	fontconfig \
-	ttf-dejavu \
-	noto-fonts \
-	noto-fonts-cjk
+	ttf-dejavu
 WORKDIR /app
 ENV NODE_ENV=production
 

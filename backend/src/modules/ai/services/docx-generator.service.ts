@@ -59,7 +59,7 @@ export class DocxGeneratorService {
         font: {
           loadSystemFonts: true,
           fontFiles,
-          defaultFontFamily: 'Noto Sans',
+          defaultFontFamily: 'DejaVu Sans',
         },
       });
       pngBuffer = resvg.render().asPng();
