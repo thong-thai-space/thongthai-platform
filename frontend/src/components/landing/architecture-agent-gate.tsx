@@ -37,6 +37,8 @@ export function ArchitectureAgentGate({
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const reviewFxTimerRef = useRef<number | null>(null);
+  const shouldAutoResumeRef = useRef(false);
+  const hasAutoResumedRef = useRef(false);
 
   const requiresAuth = !loading && !user;
 
@@ -45,10 +47,11 @@ export function ArchitectureAgentGate({
     if (!raw) return;
 
     try {
-      const parsed = JSON.parse(raw) as { message?: string };
+      const parsed = JSON.parse(raw) as { message?: string; autoRun?: boolean };
       if (parsed.message && !message) {
         setMessage(parsed.message);
       }
+      shouldAutoResumeRef.current = Boolean(parsed.autoRun);
       localStorage.removeItem(DRAFT_STORAGE_KEY);
     } catch {
       localStorage.removeItem(DRAFT_STORAGE_KEY);
@@ -88,6 +91,32 @@ export function ArchitectureAgentGate({
     router.push(`/${mode}?redirectTo=${redirectTo}`);
   };
 
+  const getWorkspacePathByRole = () => {
+    if (!user) return "/";
+    if (user.role === "CLIENT") return "/portal";
+    if (user.role === "MEMBER") return "/member";
+    return "/dashboard";
+  };
+
+  const generateArchitecture = async (requestMessage: string, attachedFile?: File) => {
+    const payload = await architectureAgent.mutateAsync({
+      message: requestMessage,
+      file: attachedFile,
+    });
+
+    if (reviewFxTimerRef.current !== null) {
+      window.clearTimeout(reviewFxTimerRef.current);
+    }
+
+    setShowReviewFormation(true);
+    setReviewFxKey((prev) => prev + 1);
+    reviewFxTimerRef.current = window.setTimeout(() => {
+      setResult(payload);
+      setShowReviewFormation(false);
+      reviewFxTimerRef.current = null;
+    }, 760);
+  };
+
   const handleGenerate = async () => {
     setError("");
     setResult(null);
@@ -104,6 +133,7 @@ export function ArchitectureAgentGate({
         JSON.stringify({
           message: trimmed,
           fileName: file?.name,
+          autoRun: true,
         }),
       );
       setShowAuthDialog(true);
@@ -111,22 +141,7 @@ export function ArchitectureAgentGate({
     }
 
     try {
-      const payload = await architectureAgent.mutateAsync({
-        message: trimmed,
-        file: file ?? undefined,
-      });
-
-      if (reviewFxTimerRef.current !== null) {
-        window.clearTimeout(reviewFxTimerRef.current);
-      }
-
-      setShowReviewFormation(true);
-      setReviewFxKey((prev) => prev + 1);
-      reviewFxTimerRef.current = window.setTimeout(() => {
-        setResult(payload);
-        setShowReviewFormation(false);
-        reviewFxTimerRef.current = null;
-      }, 760);
+      await generateArchitecture(trimmed, file ?? undefined);
     } catch (err: unknown) {
       const messageFromApi =
         typeof err === "object" &&
@@ -141,6 +156,33 @@ export function ArchitectureAgentGate({
           setError(messageFromApi || "Could not generate architecture diagram. Please try again.");
     }
   };
+
+  useEffect(() => {
+    if (loading || !user) return;
+    if (!canRenderAgent) return;
+    if (!shouldAutoResumeRef.current || hasAutoResumedRef.current) return;
+
+    const trimmed = message.trim();
+    if (!trimmed) return;
+
+    hasAutoResumedRef.current = true;
+    setError("");
+    setResult(null);
+
+    void generateArchitecture(trimmed).catch((err: unknown) => {
+      const messageFromApi =
+        typeof err === "object" &&
+        err !== null &&
+        "response" in err &&
+        typeof (err as { response?: { data?: { message?: string } } }).response
+          ?.data?.message === "string"
+          ? (err as { response?: { data?: { message?: string } } }).response?.data
+              ?.message
+          : "Could not generate architecture diagram. Please try again.";
+
+      setError(messageFromApi || "Could not generate architecture diagram. Please try again.");
+    });
+  }, [loading, user, canRenderAgent, message]);
 
   const handleDownloadDocx = () => {
     if (!result?.docxBase64) return;
@@ -241,6 +283,16 @@ export function ArchitectureAgentGate({
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
+              {user ? (
+                <button
+                  type="button"
+                  onClick={() => router.push(getWorkspacePathByRole())}
+                  className="rounded-xl border border-slate-300 px-4 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-white/20 dark:text-white dark:hover:bg-white/10"
+                >
+                  {user.role === "CLIENT" ? "Go to Client Portal" : "Go to Workspace"}
+                </button>
+              ) : null}
+
               <button
                 type="button"
                 onClick={handleGenerate}
