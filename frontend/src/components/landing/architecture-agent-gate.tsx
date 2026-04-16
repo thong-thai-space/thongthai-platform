@@ -15,6 +15,7 @@ const ALLOWED_FILE_TYPES =
 
 const DRAFT_STORAGE_KEY = "tts_architecture_agent_draft";
 const IMPORT_STORAGE_KEY = "tts_project_request_import";
+const POST_AUTH_REDIRECT_KEY = "tts_post_auth_redirect";
 
 interface ArchitectureAgentGateProps {
   canRenderAgent: boolean;
@@ -81,7 +82,9 @@ export function ArchitectureAgentGate({
   }, [result?.svg]);
 
   const goToAuth = (mode: "login" | "register") => {
-    const redirectTo = encodeURIComponent("/?openArchitectureAgent=1");
+    const redirectPath = "/?openArchitectureAgent=1";
+    localStorage.setItem(POST_AUTH_REDIRECT_KEY, redirectPath);
+    const redirectTo = encodeURIComponent(redirectPath);
     router.push(`/${mode}?redirectTo=${redirectTo}`);
   };
 

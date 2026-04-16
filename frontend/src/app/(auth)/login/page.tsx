@@ -15,6 +15,8 @@ interface LoginForm {
   password: string;
 }
 
+const POST_AUTH_REDIRECT_KEY = "tts_post_auth_redirect";
+
 export default function LoginPage() {
   const { login, loginWithGoogle } = useAuth();
   const router = useRouter();
@@ -49,7 +51,15 @@ export default function LoginPage() {
 
       await login(data.email, data.password, turnstileToken || undefined);
       const redirectTo = searchParams.get("redirectTo");
-      router.push(redirectTo || "/dashboard/projects");
+      const fallbackRedirect =
+        typeof window !== "undefined"
+          ? localStorage.getItem(POST_AUTH_REDIRECT_KEY)
+          : null;
+      const finalRedirect = redirectTo || fallbackRedirect || "/dashboard/projects";
+      if (typeof window !== "undefined") {
+        localStorage.removeItem(POST_AUTH_REDIRECT_KEY);
+      }
+      router.push(finalRedirect);
     } catch (err: unknown) {
       const message =
         typeof err === "object" &&

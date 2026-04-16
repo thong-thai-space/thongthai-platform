@@ -8,6 +8,8 @@ type MeResponse = {
   role?: 'OWNER' | 'ADMIN' | 'MEMBER' | 'CLIENT';
 };
 
+const POST_AUTH_REDIRECT_KEY = 'tts_post_auth_redirect';
+
 function resolveRedirectByRole(role?: MeResponse['role']) {
   if (role === 'CLIENT') return '/portal';
   if (role === 'MEMBER') return '/member';
@@ -31,6 +33,13 @@ export default function GoogleAuthCallbackPage() {
       try {
         const { data } = await api.get<MeResponse>('/auth/me');
         localStorage.setItem('tts_has_session', '1');
+        const pendingRedirect = localStorage.getItem(POST_AUTH_REDIRECT_KEY);
+        if (pendingRedirect) {
+          localStorage.removeItem(POST_AUTH_REDIRECT_KEY);
+          router.replace(pendingRedirect);
+          return;
+        }
+
         router.replace(resolveRedirectByRole(data.role));
       } catch {
         setError('Could not complete Google login. Please sign in again.');
