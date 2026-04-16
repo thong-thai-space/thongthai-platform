@@ -181,6 +181,15 @@ body {
   }
 }
 
+@keyframes ai-agent-progress-loop {
+  0% {
+    transform: translateX(-130%);
+  }
+  100% {
+    transform: translateX(340%);
+  }
+}
+
 .ai-agent-enter {
   animation: ai-agent-enter 640ms cubic-bezier(0.16, 1, 0.3, 1) both;
   will-change: transform, opacity, filter;
@@ -259,6 +268,10 @@ body {
   animation-delay: 190ms;
 }
 
+.ai-agent-progress-bar {
+  animation: ai-agent-progress-loop 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ai-agent-enter {
     animation: none;
@@ -285,5 +298,11 @@ body {
     opacity: 1;
     transform: none;
     filter: none;
+  }
+
+  .ai-agent-progress-bar {
+    animation: none;
+    transform: none;
+    width: 60%;
   }
 }

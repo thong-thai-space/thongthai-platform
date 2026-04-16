@@ -16,6 +16,11 @@ const ALLOWED_FILE_TYPES =
 const DRAFT_STORAGE_KEY = "tts_architecture_agent_draft";
 const IMPORT_STORAGE_KEY = "tts_project_request_import";
 const POST_AUTH_REDIRECT_KEY = "tts_post_auth_redirect";
+const GENERATING_STEPS = [
+  "Analyzing project requirements...",
+  "Designing system layers and data flow...",
+  "Rendering architecture diagram...",
+];
 
 interface ArchitectureAgentGateProps {
   canRenderAgent: boolean;
@@ -36,6 +41,8 @@ export function ArchitectureAgentGate({
   const [error, setError] = useState("");
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [generatingStepIndex, setGeneratingStepIndex] = useState(0);
+  const [svgBlobUrl, setSvgBlobUrl] = useState("");
   const reviewFxTimerRef = useRef<number | null>(null);
   const shouldAutoResumeRef = useRef(false);
   const hasAutoResumedRef = useRef(false);
@@ -79,10 +86,33 @@ export function ArchitectureAgentGate({
     };
   }, []);
 
-  const svgPreviewUrl = useMemo(() => {
-    if (!result?.svg) return "";
-    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(result.svg)}`;
+  const svgPreviewUrl = useMemo(() => svgBlobUrl, [svgBlobUrl]);
+
+  useEffect(() => {
+    if (!result?.svg) {
+      setSvgBlobUrl("");
+      return;
+    }
+
+    const blob = new Blob([result.svg], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    setSvgBlobUrl(url);
+
+    return () => URL.revokeObjectURL(url);
   }, [result?.svg]);
+
+  useEffect(() => {
+    if (!architectureAgent.isPending) {
+      setGeneratingStepIndex(0);
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setGeneratingStepIndex((prev) => (prev + 1) % GENERATING_STEPS.length);
+    }, 1200);
+
+    return () => window.clearInterval(timer);
+  }, [architectureAgent.isPending]);
 
   const goToAuth = (mode: "login" | "register") => {
     const redirectPath = "/?openArchitectureAgent=1";
@@ -306,6 +336,17 @@ export function ArchitectureAgentGate({
 
           {error ? <p className="mt-2 text-xs text-rose-600 dark:text-rose-300">{error}</p> : null}
 
+          {architectureAgent.isPending && !showReviewFormation ? (
+            <div className="mt-3 rounded-2xl border border-cyan-300/40 bg-cyan-50/70 p-3 dark:border-cyan-400/25 dark:bg-slate-900/70">
+              <p className="text-xs font-medium text-cyan-700 dark:text-cyan-200">
+                {GENERATING_STEPS[generatingStepIndex]}
+              </p>
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-cyan-100 dark:bg-slate-800">
+                <div className="ai-agent-progress-bar h-full w-1/3 rounded-full bg-cyan-500" />
+              </div>
+            </div>
+          ) : null}
+
           {showReviewFormation ? (
             <div className="mt-3 rounded-2xl border border-cyan-300/40 bg-white/70 p-3 dark:border-cyan-400/25 dark:bg-slate-900/75">
               <p className="mb-2 text-xs font-medium text-cyan-700 dark:text-cyan-200">
@@ -325,11 +366,16 @@ export function ArchitectureAgentGate({
 
               {svgPreviewUrl ? (
                 <div className="mt-2 rounded-lg bg-white p-1">
-                  <img
-                    src={svgPreviewUrl}
-                    alt="Architecture diagram"
-                    className="h-28 w-full rounded object-contain"
-                  />
+                  <object
+                    data={svgPreviewUrl}
+                    type="image/svg+xml"
+                    aria-label="Architecture diagram"
+                    className="h-44 w-full rounded object-contain"
+                  >
+                    <p className="p-3 text-xs text-slate-500">
+                      Diagram preview is not available in this browser.
+                    </p>
+                  </object>
                 </div>
               ) : null}
 

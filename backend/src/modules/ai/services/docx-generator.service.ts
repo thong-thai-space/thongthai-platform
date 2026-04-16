@@ -9,6 +9,11 @@ import {
 } from 'docx';
 import { Resvg } from '@resvg/resvg-js';
 
+const SVG_FALLBACK_PNG_1X1 = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7Y7j8AAAAASUVORK5CYII=',
+  'base64',
+);
+
 @Injectable()
 export class DocxGeneratorService {
   async generateArchitectureReport(input: {
@@ -68,27 +73,33 @@ export class DocxGeneratorService {
               text: 'Architecture Diagram',
               heading: HeadingLevel.HEADING_1,
             }),
-            ...(pngBuffer
-              ? [
-                  new Paragraph({
-                    children: [
-                      new ImageRun({
+            new Paragraph({
+              children: [
+                new ImageRun(
+                  pngBuffer
+                    ? {
                         type: 'png',
                         data: pngBuffer,
                         transformation: {
                           width: 900,
                           height: 600,
                         },
-                      }),
-                    ],
-                  }),
-                ]
-              : [
-                  new Paragraph(
-                    'Diagram preview is unavailable in this environment. The SVG source is included below.',
-                  ),
-                  new Paragraph({ text: input.svg }),
-                ]),
+                      }
+                    : {
+                        type: 'svg',
+                        data: input.svg,
+                        fallback: {
+                          type: 'png',
+                          data: SVG_FALLBACK_PNG_1X1,
+                        },
+                        transformation: {
+                          width: 900,
+                          height: 600,
+                        },
+                      },
+                ),
+              ],
+            }),
           ],
         },
       ],
