@@ -2,21 +2,20 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Download, FileUp, Lock, Maximize2, Plus, Sparkles, X } from "lucide-react";
+import { Download, Lock, Maximize2, Plus, Sparkles, X } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import {
   type ArchitectureAgentResponse,
   useArchitectureAgent,
 } from "@/hooks/use-ai";
 import { AiParticleFormation } from "./ai-particle-formation";
-import api from "@/lib/api";
 
 const ALLOWED_FILE_TYPES =
   "image/png,image/jpeg,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.presentationml.presentation";
 
 const DRAFT_STORAGE_KEY = "tts_architecture_agent_draft";
-const IMPORT_STORAGE_KEY = "tts_project_request_import";
 const POST_AUTH_REDIRECT_KEY = "tts_post_auth_redirect";
+const MAX_PERSISTABLE_FILE_BYTES = 2_500_000;
 const GENERATING_STEPS = [
   "Analyzing project requirements...",
   "Designing system layers and data flow...",
@@ -49,22 +48,85 @@ export function ArchitectureAgentGate({
   const shouldAutoResumeRef = useRef(false);
   const hasAutoResumedRef = useRef(false);
 
+  const fileToDataUrl = (targetFile: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ""));
+      reader.onerror = () => reject(new Error("Failed to read file"));
+      reader.readAsDataURL(targetFile);
+    });
+
+  const persistDraftBeforeAuth = async (draftMessage: string, draftFile?: File | null) => {
+    const payload: {
+      message: string;
+      autoRun: boolean;
+      fileName?: string;
+      fileType?: string;
+      fileDataUrl?: string;
+      fileTooLargeToPersist?: boolean;
+    } = {
+      message: draftMessage,
+      autoRun: true,
+    };
+
+    if (draftFile) {
+      payload.fileName = draftFile.name;
+      payload.fileType = draftFile.type;
+
+      if (draftFile.size <= MAX_PERSISTABLE_FILE_BYTES) {
+        try {
+          payload.fileDataUrl = await fileToDataUrl(draftFile);
+        } catch {
+          payload.fileDataUrl = undefined;
+        }
+      } else {
+        payload.fileTooLargeToPersist = true;
+      }
+    }
+
+    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(payload));
+  };
+
   const requiresAuth = !loading && !user;
 
   useEffect(() => {
     const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
     if (!raw) return;
 
-    try {
-      const parsed = JSON.parse(raw) as { message?: string; autoRun?: boolean };
-      if (parsed.message && !message) {
-        setMessage(parsed.message);
+    const restoreDraft = async () => {
+      try {
+        const parsed = JSON.parse(raw) as {
+          message?: string;
+          autoRun?: boolean;
+          fileName?: string;
+          fileType?: string;
+          fileDataUrl?: string;
+          fileTooLargeToPersist?: boolean;
+        };
+
+        if (parsed.message && !message) {
+          setMessage(parsed.message);
+        }
+        shouldAutoResumeRef.current = Boolean(parsed.autoRun);
+
+        if (parsed.fileDataUrl && parsed.fileName && !file) {
+          const restoredBlob = await fetch(parsed.fileDataUrl).then((r) => r.blob());
+          setFile(
+            new File([restoredBlob], parsed.fileName, {
+              type: parsed.fileType || restoredBlob.type || "application/octet-stream",
+            }),
+          );
+        } else if (parsed.fileTooLargeToPersist) {
+          setError("Please re-upload your file after login (file was too large to persist securely).");
+        }
+      } catch {
+        // Ignore malformed persisted draft.
+      } finally {
+        localStorage.removeItem(DRAFT_STORAGE_KEY);
       }
-      shouldAutoResumeRef.current = Boolean(parsed.autoRun);
-      localStorage.removeItem(DRAFT_STORAGE_KEY);
-    } catch {
-      localStorage.removeItem(DRAFT_STORAGE_KEY);
-    }
+    };
+
+    void restoreDraft();
   }, [message]);
 
   useEffect(() => {
@@ -160,22 +222,9 @@ export function ArchitectureAgentGate({
     }
 
     if (requiresAuth) {
-      try {
-        await api.get('/auth/me');
-        await generateArchitecture(trimmed, file ?? undefined);
-        return;
-      } catch {
-        localStorage.setItem(
-          DRAFT_STORAGE_KEY,
-          JSON.stringify({
-            message: trimmed,
-            fileName: file?.name,
-            autoRun: true,
-          }),
-        );
-        setShowAuthDialog(true);
-        return;
-      }
+      await persistDraftBeforeAuth(trimmed, file ?? undefined);
+      setShowAuthDialog(true);
+      return;
     }
 
     try {
@@ -241,31 +290,6 @@ export function ArchitectureAgentGate({
     a.download = "ThongThaiSpace_Architecture_Report.docx";
     a.click();
     URL.revokeObjectURL(url);
-  };
-
-  const handleImportAndGoPortal = () => {
-    if (!result) return;
-
-    const importedDescription = [
-      "[Imported from Landing Architecture Agent]",
-      result.description,
-      "",
-      `Layers: ${result.layers.join(" -> ")}`,
-      "",
-      "SVG:",
-      result.svg,
-    ].join("\n");
-
-    localStorage.setItem(
-      IMPORT_STORAGE_KEY,
-      JSON.stringify({
-        name: "Architecture-based Project Request",
-        description: importedDescription,
-        techStack: result.layers,
-      }),
-    );
-
-    router.push("/portal/projects/new?import=architecture");
   };
 
   if (!canRenderAgent) {
@@ -395,15 +419,6 @@ export function ArchitectureAgentGate({
                 >
                   <Download className="h-3.5 w-3.5" />
                   Download DOCX
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleImportAndGoPortal}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-violet-500/35 bg-violet-500/12 px-2.5 py-1 text-xs font-medium text-violet-700 hover:bg-violet-500/18 dark:border-violet-400/30 dark:bg-violet-500/15 dark:text-violet-200 dark:hover:bg-violet-500/25"
-                >
-                  <FileUp className="h-3.5 w-3.5" />
-                  Import to Portal
                 </button>
 
                 {svgPreviewUrl ? (

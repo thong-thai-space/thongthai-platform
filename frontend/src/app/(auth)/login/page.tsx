@@ -71,6 +71,11 @@ export default function LoginPage() {
           ? (err as { response?: { data?: { message?: string } } }).response
               ?.data?.message
           : "Sign in failed. Please try again.";
+
+      if (/turnstile|security challenge|captcha/i.test(String(message || ""))) {
+        setTurnstileToken(null);
+      }
+
       setError(message || "Sign in failed. Please try again.");
     }
   };

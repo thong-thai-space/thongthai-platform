@@ -8,6 +8,7 @@ import {
   useCallback,
   type ReactNode,
 } from 'react';
+import { usePathname } from 'next/navigation';
 import api, { API_BASE_URL } from './api';
 import type { User } from '@/types';
 
@@ -37,11 +38,12 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 const POST_AUTH_REDIRECT_KEY = 'tts_post_auth_redirect';
 
-function shouldProbeSession() {
+function shouldProbeSession(pathname?: string) {
   if (typeof window === 'undefined') return true;
 
+  const currentPath = pathname || window.location.pathname;
   const isProtectedRoute = ['/dashboard', '/member', '/portal'].some(
-    (path) => window.location.pathname.startsWith(path),
+    (path) => currentPath.startsWith(path),
   );
   const hasSessionHint = localStorage.getItem('tts_has_session') === '1';
 
@@ -49,13 +51,17 @@ function shouldProbeSession() {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(shouldProbeSession);
+  const [loading, setLoading] = useState(() => shouldProbeSession(pathname));
 
   useEffect(() => {
-    if (!shouldProbeSession()) {
+    if (!shouldProbeSession(pathname)) {
+      setLoading(false);
       return;
     }
+
+    setLoading(true);
 
     api
       .get('/auth/me')
@@ -72,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [pathname]);
 
   const login = useCallback(async (
     email: string,
