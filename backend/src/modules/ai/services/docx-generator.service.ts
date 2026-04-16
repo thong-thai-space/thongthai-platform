@@ -18,13 +18,20 @@ export class DocxGeneratorService {
     generatedAt?: Date;
   }): Promise<Buffer> {
     const generatedAt = input.generatedAt ?? new Date();
-    const resvg = new Resvg(input.svg, {
-      fitTo: {
-        mode: 'width',
-        value: 900,
-      },
-    });
-    const pngBuffer = resvg.render().asPng();
+    let pngBuffer: Buffer | null = null;
+
+    try {
+      const resvg = new Resvg(input.svg, {
+        fitTo: {
+          mode: 'width',
+          value: 900,
+        },
+      });
+      pngBuffer = resvg.render().asPng();
+    } catch {
+      // Keep report generation resilient in environments where SVG rendering can fail.
+      pngBuffer = null;
+    }
 
     const descriptionParagraphs = input.description
       .split(/\n\s*\n/g)
@@ -61,18 +68,27 @@ export class DocxGeneratorService {
               text: 'Architecture Diagram',
               heading: HeadingLevel.HEADING_1,
             }),
-            new Paragraph({
-              children: [
-                new ImageRun({
-                  type: 'png',
-                  data: pngBuffer,
-                  transformation: {
-                    width: 900,
-                    height: 600,
-                  },
-                }),
-              ],
-            }),
+            ...(pngBuffer
+              ? [
+                  new Paragraph({
+                    children: [
+                      new ImageRun({
+                        type: 'png',
+                        data: pngBuffer,
+                        transformation: {
+                          width: 900,
+                          height: 600,
+                        },
+                      }),
+                    ],
+                  }),
+                ]
+              : [
+                  new Paragraph(
+                    'Diagram preview is unavailable in this environment. The SVG source is included below.',
+                  ),
+                  new Paragraph({ text: input.svg }),
+                ]),
           ],
         },
       ],
