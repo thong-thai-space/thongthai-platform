@@ -196,11 +196,11 @@ export function ArchitectureAgentGate({
           isVisible ? "ai-agent-enter opacity-100" : "-translate-y-5 scale-[0.985] opacity-0 blur-[6px]"
         }`}
       >
-        <div className="ai-agent-shell rounded-3xl border border-white/20 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-md sm:p-5">
+        <div className="ai-agent-shell rounded-3xl border border-sky-200/80 bg-white/86 p-4 text-slate-900 shadow-[0_18px_45px_rgba(2,6,23,0.14)] backdrop-blur-md sm:p-5 dark:border-white/20 dark:bg-slate-950/80 dark:text-white dark:shadow-2xl">
           <AiParticleFormation active={isVisible} className="mb-3" />
 
           <div className="mb-2 flex justify-center">
-            <div className="ai-agent-badge inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-200">
+            <div className="ai-agent-badge inline-flex items-center gap-2 rounded-full border border-cyan-400/35 bg-cyan-500/12 px-3 py-1 text-xs font-medium text-cyan-700 dark:text-cyan-200">
               <Sparkles className="h-3.5 w-3.5" />
               Architecture Agent
             </div>
@@ -211,7 +211,7 @@ export function ArchitectureAgentGate({
             onChange={(e) => setMessage(e.target.value)}
             rows={3}
             placeholder="How can I help your project today? Describe your requirements, upload a file, then click View Architecture..."
-            className={`w-full resize-none rounded-2xl border border-white/15 bg-slate-900/70 px-4 py-3 text-sm text-white placeholder:text-slate-400 focus:border-cyan-400/70 focus:outline-none ${
+            className={`w-full resize-none rounded-2xl border border-slate-200 bg-white/74 px-4 py-3 text-sm text-slate-800 placeholder:text-slate-500 focus:border-cyan-500/60 focus:outline-none dark:border-white/15 dark:bg-slate-900/70 dark:text-white dark:placeholder:text-slate-400 dark:focus:border-cyan-400/70 ${
               isVisible ? "ai-agent-stagger-1" : ""
             }`}
           />
@@ -221,8 +221,8 @@ export function ArchitectureAgentGate({
               isVisible ? "ai-agent-stagger-2" : ""
             }`}
           >
-            <div className="flex items-center gap-3 text-slate-300">
-              <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-white/15 px-3 py-1.5 transition hover:bg-white/10">
+            <div className="flex items-center gap-3 text-slate-500 dark:text-slate-300">
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-300/80 px-3 py-1.5 text-slate-700 transition hover:bg-slate-100 dark:border-white/15 dark:text-slate-200 dark:hover:bg-white/10">
                 <Plus className="h-4 w-4" />
                 File
                 <input
@@ -232,7 +232,7 @@ export function ArchitectureAgentGate({
                   className="hidden"
                 />
               </label>
-              <span className="text-xs text-slate-400">
+              <span className="text-xs text-slate-500 dark:text-slate-400">
                 {file?.name || "PNG, JPG, DOCX, XLSX, PPTX"}
               </span>
             </div>
@@ -249,24 +249,24 @@ export function ArchitectureAgentGate({
             </div>
           </div>
 
-          {error ? <p className="mt-2 text-xs text-rose-300">{error}</p> : null}
+          {error ? <p className="mt-2 text-xs text-rose-600 dark:text-rose-300">{error}</p> : null}
 
           {showReviewFormation ? (
-            <div className="mt-3 rounded-2xl border border-cyan-400/25 bg-slate-900/75 p-3">
-              <p className="mb-2 text-xs font-medium text-cyan-200">
+            <div className="mt-3 rounded-2xl border border-cyan-300/40 bg-white/70 p-3 dark:border-cyan-400/25 dark:bg-slate-900/75">
+              <p className="mb-2 text-xs font-medium text-cyan-700 dark:text-cyan-200">
                 Synthesizing architecture review...
               </p>
               <AiParticleFormation
                 key={reviewFxKey}
                 active={showReviewFormation}
-                canvasClassName="h-20 w-full rounded-xl border border-cyan-400/20 bg-slate-950/70"
+                canvasClassName="h-20 w-full rounded-xl border border-cyan-300/35 bg-white/72 dark:border-cyan-400/20 dark:bg-slate-950/70"
               />
             </div>
           ) : null}
 
           {result ? (
-            <div className="mt-3 rounded-2xl border border-white/10 bg-slate-900/70 p-3">
-              <p className="line-clamp-2 text-xs text-slate-200">{result.description}</p>
+            <div className="mt-3 rounded-2xl border border-sky-200/70 bg-white/74 p-3 dark:border-white/10 dark:bg-slate-900/70">
+              <p className="line-clamp-2 text-xs text-slate-700 dark:text-slate-200">{result.description}</p>
 
               {svgPreviewUrl ? (
                 <div className="mt-2 rounded-lg bg-white p-1">
@@ -282,7 +282,7 @@ export function ArchitectureAgentGate({
                 <button
                   type="button"
                   onClick={handleDownloadDocx}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-400/30 bg-emerald-500/15 px-2.5 py-1 text-xs font-medium text-emerald-200 hover:bg-emerald-500/25"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/35 bg-emerald-500/12 px-2.5 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-500/18 dark:border-emerald-400/30 dark:bg-emerald-500/15 dark:text-emerald-200 dark:hover:bg-emerald-500/25"
                 >
                   <Download className="h-3.5 w-3.5" />
                   Download DOCX
@@ -291,7 +291,7 @@ export function ArchitectureAgentGate({
                 <button
                   type="button"
                   onClick={handleImportAndGoPortal}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-violet-400/30 bg-violet-500/15 px-2.5 py-1 text-xs font-medium text-violet-200 hover:bg-violet-500/25"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-violet-500/35 bg-violet-500/12 px-2.5 py-1 text-xs font-medium text-violet-700 hover:bg-violet-500/18 dark:border-violet-400/30 dark:bg-violet-500/15 dark:text-violet-200 dark:hover:bg-violet-500/25"
                 >
                   <FileUp className="h-3.5 w-3.5" />
                   Import to Portal
@@ -304,13 +304,13 @@ export function ArchitectureAgentGate({
 
       {showAuthDialog ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-md rounded-2xl border border-white/15 bg-slate-950 p-5 text-white shadow-2xl">
-            <p className="inline-flex items-center gap-2 text-sm font-medium text-amber-200">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 text-slate-900 shadow-2xl dark:border-white/15 dark:bg-slate-950 dark:text-white">
+            <p className="inline-flex items-center gap-2 text-sm font-medium text-amber-600 dark:text-amber-200">
               <Lock className="h-4 w-4" />
               Authentication required
             </p>
             <h3 className="mt-2 text-lg font-semibold">Sign in to continue</h3>
-            <p className="mt-2 text-sm text-slate-300">
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
               To generate an architecture diagram, please sign in or create an account.
             </p>
 
@@ -318,14 +318,14 @@ export function ArchitectureAgentGate({
               <button
                 type="button"
                 onClick={() => setShowAuthDialog(false)}
-                className="rounded-xl border border-white/20 px-3 py-1.5 text-xs text-white hover:bg-white/10"
+                className="rounded-xl border border-slate-300 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-100 dark:border-white/20 dark:text-white dark:hover:bg-white/10"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={() => goToAuth("login")}
-                className="rounded-xl border border-white/20 px-3 py-1.5 text-xs text-white hover:bg-white/10"
+                className="rounded-xl border border-slate-300 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-100 dark:border-white/20 dark:text-white dark:hover:bg-white/10"
               >
                 Sign in
               </button>

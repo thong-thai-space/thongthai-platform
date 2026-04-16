@@ -198,7 +198,7 @@ export function AiParticleFormation({
         ref={canvasRef}
         className={
           canvasClassName ||
-          "h-28 w-full rounded-2xl border border-cyan-400/15 bg-slate-950/65"
+          "h-28 w-full rounded-2xl border border-cyan-300/45 bg-white/72 dark:border-cyan-400/15 dark:bg-slate-950/65"
         }
       />
     </div>
