@@ -203,6 +203,31 @@ export class AiService {
     return { description, layers, svg };
   }
 
+  private buildFallbackArchitectureResult(message: string): ArchitectureAgentResult {
+    const summary = message
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 340);
+
+    const description =
+      `Fallback architecture generated due to temporary AI provider unavailability.\n\n` +
+      `The system is structured in layered modules to keep clear separation between user interface, API orchestration, domain logic, and persistent storage. This allows independent scaling and easier maintenance for project management workflows.\n\n` +
+      `Core business capabilities include contract and delivery tracking, financial control, and partner integrations. Each domain is exposed through dedicated APIs and protected with authentication, authorization, and audit logging.\n\n` +
+      `User requirement summary: ${summary || 'General business management requirements.'}`;
+
+    const layers = [
+      'Client Layer',
+      'API Layer',
+      'Business Logic Layer',
+      'Data Layer',
+      'External Integrations',
+    ];
+
+    const svg = `<svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#e3f2fd"/><stop offset="100%" stop-color="#fff8e1"/></linearGradient><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#334155"/></marker></defs><rect x="0" y="0" width="900" height="600" fill="url(#bg)"/><rect x="60" y="50" width="780" height="90" rx="10" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/><text x="450" y="82" text-anchor="middle" font-family="Arial" font-size="18" font-weight="bold" fill="#1e40af">CLIENT LAYER</text><text x="450" y="108" text-anchor="middle" font-family="Arial" font-size="12" fill="#334155">Web dashboard, client portal, architecture review UI</text><rect x="60" y="165" width="780" height="90" rx="10" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/><text x="450" y="197" text-anchor="middle" font-family="Arial" font-size="18" font-weight="bold" fill="#166534">API LAYER</text><text x="450" y="223" text-anchor="middle" font-family="Arial" font-size="12" fill="#334155">Auth APIs, Project APIs, AI orchestration endpoints</text><rect x="60" y="280" width="780" height="90" rx="10" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/><text x="450" y="312" text-anchor="middle" font-family="Arial" font-size="18" font-weight="bold" fill="#9a3412">BUSINESS LOGIC LAYER</text><text x="450" y="338" text-anchor="middle" font-family="Arial" font-size="12" fill="#334155">Workflow engine, quota guard, architecture generation service</text><rect x="60" y="395" width="780" height="90" rx="10" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/><text x="450" y="427" text-anchor="middle" font-family="Arial" font-size="18" font-weight="bold" fill="#5b21b6">DATA LAYER</text><text x="450" y="453" text-anchor="middle" font-family="Arial" font-size="12" fill="#334155">PostgreSQL (Prisma), audit logs, project/task/invoice data</text><rect x="60" y="510" width="780" height="60" rx="10" fill="#ecfeff" stroke="#0891b2" stroke-width="2"/><text x="450" y="537" text-anchor="middle" font-family="Arial" font-size="16" font-weight="bold" fill="#0e7490">EXTERNAL INTEGRATIONS</text><text x="450" y="557" text-anchor="middle" font-family="Arial" font-size="12" fill="#334155">Anthropic API, Email provider, OAuth, ERP/Payment/Delivery APIs</text><line x1="450" y1="140" x2="450" y2="165" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/><line x1="450" y1="255" x2="450" y2="280" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/><line x1="450" y1="370" x2="450" y2="395" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/><line x1="450" y1="485" x2="450" y2="510" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/></svg>`;
+
+    return { description, layers, svg };
+  }
+
   private async ensureArchitectureTrialLimit(userId: string) {
     const usedRequests = await this.prisma.aiUsageAudit.count({
       where: {
@@ -245,37 +270,49 @@ export class AiService {
 
       const userPrompt = userPromptParts.join('\n\n');
 
-      let response = await this.client.messages.create({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4096,
-        system:
-          ARCHITECTURE_DIAGRAM_PROMPT +
-          PROFESSIONAL_OUTPUT_RULES +
-          this.roleDirective(role),
-        messages: [{ role: 'user', content: userPrompt }],
-      });
-
       let parsed: ArchitectureAgentResult;
+      let inputTokens = 0;
+      let outputTokens = 0;
+      let totalTokens = 0;
+      let fallbackUsed = false;
+
       try {
-        parsed = this.parseArchitectureResponse(this.extractText(response));
-      } catch {
-        response = await this.client.messages.create({
+        let response = await this.client.messages.create({
           model: 'claude-sonnet-4-20250514',
           max_tokens: 4096,
           system:
             ARCHITECTURE_DIAGRAM_PROMPT +
-            '\n\nCorrection: Your previous output was invalid. Respond with valid JSON only and include a valid SVG with viewBox="0 0 900 600".',
+            PROFESSIONAL_OUTPUT_RULES +
+            this.roleDirective(role),
           messages: [{ role: 'user', content: userPrompt }],
         });
 
-        parsed = this.parseArchitectureResponse(this.extractText(response));
+        try {
+          parsed = this.parseArchitectureResponse(this.extractText(response));
+        } catch {
+          response = await this.client.messages.create({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 4096,
+            system:
+              ARCHITECTURE_DIAGRAM_PROMPT +
+              '\n\nCorrection: Your previous output was invalid. Respond with valid JSON only and include a valid SVG with viewBox="0 0 900 600".',
+            messages: [{ role: 'user', content: userPrompt }],
+          });
+
+          parsed = this.parseArchitectureResponse(this.extractText(response));
+        }
+
+        inputTokens = response.usage.input_tokens;
+        outputTokens = response.usage.output_tokens;
+        totalTokens = inputTokens + outputTokens;
+      } catch {
+        parsed = this.buildFallbackArchitectureResult(sanitizedMessage);
+        fallbackUsed = true;
       }
 
-      const inputTokens = response.usage.input_tokens;
-      const outputTokens = response.usage.output_tokens;
-      const totalTokens = inputTokens + outputTokens;
-
-      await this.consumeAiQuota(userId, totalTokens);
+      if (!fallbackUsed) {
+        await this.consumeAiQuota(userId, totalTokens);
+      }
 
       const docxBuffer = await this.docxGeneratorService.generateArchitectureReport({
         title: 'System Architecture Report',
@@ -284,7 +321,9 @@ export class AiService {
         generatedAt: new Date(),
       });
 
-      const estimatedCostUsd = this.estimateCostUsd(inputTokens, outputTokens);
+      const estimatedCostUsd = fallbackUsed
+        ? 0
+        : this.estimateCostUsd(inputTokens, outputTokens);
 
       await this.logAiAudit({
         feature: AiFeature.ARCHITECTURE_DIAGRAM,
@@ -300,6 +339,7 @@ export class AiService {
           hasFile: Boolean(file),
           mimeType: file?.mimetype,
           layers: parsed.layers,
+          fallbackUsed,
         },
       });
 
@@ -313,6 +353,7 @@ export class AiService {
           outputTokens,
           totalTokens,
           estimatedCostUsd: Number(estimatedCostUsd.toFixed(6)),
+          fallbackUsed,
         },
       };
     } catch (error) {

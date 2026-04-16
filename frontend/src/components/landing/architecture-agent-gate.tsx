@@ -9,6 +9,7 @@ import {
   useArchitectureAgent,
 } from "@/hooks/use-ai";
 import { AiParticleFormation } from "./ai-particle-formation";
+import api from "@/lib/api";
 
 const ALLOWED_FILE_TYPES =
   "image/png,image/jpeg,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.presentationml.presentation";
@@ -158,16 +159,22 @@ export function ArchitectureAgentGate({
     }
 
     if (requiresAuth) {
-      localStorage.setItem(
-        DRAFT_STORAGE_KEY,
-        JSON.stringify({
-          message: trimmed,
-          fileName: file?.name,
-          autoRun: true,
-        }),
-      );
-      setShowAuthDialog(true);
-      return;
+      try {
+        await api.get('/auth/me');
+        await generateArchitecture(trimmed, file ?? undefined);
+        return;
+      } catch {
+        localStorage.setItem(
+          DRAFT_STORAGE_KEY,
+          JSON.stringify({
+            message: trimmed,
+            fileName: file?.name,
+            autoRun: true,
+          }),
+        );
+        setShowAuthDialog(true);
+        return;
+      }
     }
 
     try {
