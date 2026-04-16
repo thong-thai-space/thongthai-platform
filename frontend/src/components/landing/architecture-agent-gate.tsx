@@ -211,6 +211,32 @@ export function ArchitectureAgentGate({
     }, 760);
   };
 
+  const extractApiErrorMessage = (err: unknown) => {
+    if (typeof err === "object" && err !== null && "response" in err) {
+      const data = (err as { response?: { status?: number; data?: unknown } }).response?.data as
+        | { message?: string | string[]; error?: string }
+        | undefined;
+
+      if (typeof data?.message === "string") {
+        return data.message;
+      }
+
+      if (Array.isArray(data?.message) && data.message.length > 0) {
+        return data.message.join("; ");
+      }
+
+      if (typeof data?.error === "string") {
+        return data.error;
+      }
+    }
+
+    if (err instanceof Error && err.message) {
+      return err.message;
+    }
+
+    return "Could not generate architecture diagram. Please try again.";
+  };
+
   const handleGenerate = async () => {
     setError("");
     setResult(null);
@@ -230,17 +256,8 @@ export function ArchitectureAgentGate({
     try {
       await generateArchitecture(trimmed, file ?? undefined);
     } catch (err: unknown) {
-      const messageFromApi =
-        typeof err === "object" &&
-        err !== null &&
-        "response" in err &&
-        typeof (err as { response?: { data?: { message?: string } } }).response
-          ?.data?.message === "string"
-          ? (err as { response?: { data?: { message?: string } } }).response?.data
-              ?.message
-            : "Could not generate architecture diagram. Please try again.";
-
-          setError(messageFromApi || "Could not generate architecture diagram. Please try again.");
+      const messageFromApi = extractApiErrorMessage(err);
+      setError(messageFromApi || "Could not generate architecture diagram. Please try again.");
     }
   };
 
@@ -257,15 +274,7 @@ export function ArchitectureAgentGate({
     setResult(null);
 
     void generateArchitecture(trimmed).catch((err: unknown) => {
-      const messageFromApi =
-        typeof err === "object" &&
-        err !== null &&
-        "response" in err &&
-        typeof (err as { response?: { data?: { message?: string } } }).response
-          ?.data?.message === "string"
-          ? (err as { response?: { data?: { message?: string } } }).response?.data
-              ?.message
-          : "Could not generate architecture diagram. Please try again.";
+      const messageFromApi = extractApiErrorMessage(err);
 
       setError(messageFromApi || "Could not generate architecture diagram. Please try again.");
     });

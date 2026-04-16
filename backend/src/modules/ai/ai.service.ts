@@ -226,11 +226,11 @@ export class AiService {
       .split(/\n\s*\n/g)
       .map((x) => x.trim())
       .filter(Boolean).length;
-    if (paragraphCount < 2 || description.length < 220) {
+    if (paragraphCount < 1 || description.length < 120) {
       throw new BadRequestException('Architecture description quality is too low');
     }
 
-    if (layers.length < 4) {
+    if (layers.length < 3) {
       throw new BadRequestException('Architecture layers are insufficient');
     }
 
@@ -238,13 +238,13 @@ export class AiService {
     const textCount = (svg.match(/<text\b/gi) || []).length;
     const arrowCount = (svg.match(/marker-end=|<line\b/gi) || []).length;
 
-    if (rectCount < 4 || textCount < 8 || arrowCount < 4) {
+    if (rectCount < 3 || textCount < 5 || arrowCount < 2) {
       throw new BadRequestException('Architecture SVG quality is too low');
     }
 
     if (
       /<script\b|<foreignObject\b|href="https?:\/\//i.test(svg) ||
-      svg.length < 1200 ||
+      svg.length < 500 ||
       svg.length > 120_000
     ) {
       throw new BadRequestException('Architecture SVG contains unsafe or invalid markup');
@@ -383,6 +383,10 @@ export class AiService {
 
             parsed = this.parseArchitectureResponse(this.extractText(response));
           } catch (retryError) {
+            if (retryError instanceof BadRequestException) {
+              throw retryError;
+            }
+
             if (!this.isProviderUnavailableError(retryError)) {
               throw new BadRequestException(
                 'AI returned invalid architecture output. Please refine your request and try again.',
