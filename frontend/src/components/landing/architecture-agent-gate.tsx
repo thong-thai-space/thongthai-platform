@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Download, FileUp, Lock, Plus, Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/auth";
@@ -8,6 +8,7 @@ import {
   type ArchitectureAgentResponse,
   useArchitectureAgent,
 } from "@/hooks/use-ai";
+import { AiParticleFormation } from "./ai-particle-formation";
 
 const ALLOWED_FILE_TYPES =
   "image/png,image/jpeg,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.presentationml.presentation";
@@ -29,9 +30,12 @@ export function ArchitectureAgentGate({
   const [message, setMessage] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<ArchitectureAgentResponse | null>(null);
+  const [showReviewFormation, setShowReviewFormation] = useState(false);
+  const [reviewFxKey, setReviewFxKey] = useState(0);
   const [error, setError] = useState("");
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const reviewFxTimerRef = useRef<number | null>(null);
 
   const requiresAuth = !loading && !user;
 
@@ -62,6 +66,14 @@ export function ArchitectureAgentGate({
 
     return () => window.clearTimeout(timer);
   }, [canRenderAgent]);
+
+  useEffect(() => {
+    return () => {
+      if (reviewFxTimerRef.current !== null) {
+        window.clearTimeout(reviewFxTimerRef.current);
+      }
+    };
+  }, []);
 
   const svgPreviewUrl = useMemo(() => {
     if (!result?.svg) return "";
@@ -100,7 +112,18 @@ export function ArchitectureAgentGate({
         message: trimmed,
         file: file ?? undefined,
       });
-      setResult(payload);
+
+      if (reviewFxTimerRef.current !== null) {
+        window.clearTimeout(reviewFxTimerRef.current);
+      }
+
+      setShowReviewFormation(true);
+      setReviewFxKey((prev) => prev + 1);
+      reviewFxTimerRef.current = window.setTimeout(() => {
+        setResult(payload);
+        setShowReviewFormation(false);
+        reviewFxTimerRef.current = null;
+      }, 760);
     } catch (err: unknown) {
       const messageFromApi =
         typeof err === "object" &&
@@ -174,6 +197,8 @@ export function ArchitectureAgentGate({
         }`}
       >
         <div className="ai-agent-shell rounded-3xl border border-white/20 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-md sm:p-5">
+          <AiParticleFormation active={isVisible} className="mb-3" />
+
           <div className="mb-2 flex justify-center">
             <div className="ai-agent-badge inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-200">
               <Sparkles className="h-3.5 w-3.5" />
@@ -225,6 +250,19 @@ export function ArchitectureAgentGate({
           </div>
 
           {error ? <p className="mt-2 text-xs text-rose-300">{error}</p> : null}
+
+          {showReviewFormation ? (
+            <div className="mt-3 rounded-2xl border border-cyan-400/25 bg-slate-900/75 p-3">
+              <p className="mb-2 text-xs font-medium text-cyan-200">
+                Synthesizing architecture review...
+              </p>
+              <AiParticleFormation
+                key={reviewFxKey}
+                active={showReviewFormation}
+                canvasClassName="h-20 w-full rounded-xl border border-cyan-400/20 bg-slate-950/70"
+              />
+            </div>
+          ) : null}
 
           {result ? (
             <div className="mt-3 rounded-2xl border border-white/10 bg-slate-900/70 p-3">
