@@ -8,6 +8,7 @@ import {
   TextRun,
 } from 'docx';
 import { Resvg } from '@resvg/resvg-js';
+import { existsSync } from 'node:fs';
 
 const SVG_FALLBACK_PNG_1X1 = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7Y7j8AAAAASUVORK5CYII=',
@@ -16,6 +17,28 @@ const SVG_FALLBACK_PNG_1X1 = Buffer.from(
 
 @Injectable()
 export class DocxGeneratorService {
+  private readonly preferredFontFiles = [
+    '/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf',
+    '/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf',
+    '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+    '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+    '/usr/share/fonts/TTF/DejaVuSans.ttf',
+    '/usr/share/fonts/TTF/DejaVuSans-Bold.ttf',
+    'C:/Windows/Fonts/arial.ttf',
+    'C:/Windows/Fonts/arialbd.ttf',
+  ];
+
+  private resolveFontFiles() {
+    return this.preferredFontFiles.filter((p) => existsSync(p));
+  }
+
+  private normalizeSvgFontStack(svg: string) {
+    return svg.replace(
+      /font-family="[^"]*"/gi,
+      'font-family="Noto Sans, DejaVu Sans, Arial, sans-serif"',
+    );
+  }
+
   async generateArchitectureReport(input: {
     title?: string;
     description: string;
@@ -23,13 +46,20 @@ export class DocxGeneratorService {
     generatedAt?: Date;
   }): Promise<Buffer> {
     const generatedAt = input.generatedAt ?? new Date();
+    const normalizedSvg = this.normalizeSvgFontStack(input.svg);
+    const fontFiles = this.resolveFontFiles();
     let pngBuffer: Buffer | null = null;
 
     try {
-      const resvg = new Resvg(input.svg, {
+      const resvg = new Resvg(normalizedSvg, {
         fitTo: {
           mode: 'width',
-          value: 900,
+          value: 1200,
+        },
+        font: {
+          loadSystemFonts: true,
+          fontFiles,
+          defaultFontFamily: 'Noto Sans',
         },
       });
       pngBuffer = resvg.render().asPng();
@@ -81,20 +111,20 @@ export class DocxGeneratorService {
                         type: 'png',
                         data: pngBuffer,
                         transformation: {
-                          width: 900,
-                          height: 600,
+                          width: 640,
+                          height: 420,
                         },
                       }
                     : {
                         type: 'svg',
-                        data: input.svg,
+                        data: normalizedSvg,
                         fallback: {
                           type: 'png',
                           data: SVG_FALLBACK_PNG_1X1,
                         },
                         transformation: {
-                          width: 900,
-                          height: 600,
+                          width: 640,
+                          height: 420,
                         },
                       },
                 ),

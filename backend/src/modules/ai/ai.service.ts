@@ -51,6 +51,18 @@ interface ArchitectureAgentResult {
   svg: string;
 }
 
+interface PublicBrandContext {
+  services: string[];
+  aboutSummary: string;
+  founderProfile: string;
+  showcaseProjects: Array<{
+    name: string;
+    category: string;
+    techStack: string[];
+    results: string;
+  }>;
+}
+
 @Injectable()
 export class AiService {
   private static readonly ARCHITECTURE_TRIAL_REQUEST_LIMIT = 4;
@@ -200,7 +212,67 @@ export class AiService {
       throw new BadRequestException('Architecture SVG is invalid');
     }
 
+    this.validateArchitectureQuality(description, layers, svg);
+
     return { description, layers, svg };
+  }
+
+  private validateArchitectureQuality(
+    description: string,
+    layers: string[],
+    svg: string,
+  ) {
+    const paragraphCount = description
+      .split(/\n\s*\n/g)
+      .map((x) => x.trim())
+      .filter(Boolean).length;
+    if (paragraphCount < 2 || description.length < 220) {
+      throw new BadRequestException('Architecture description quality is too low');
+    }
+
+    if (layers.length < 4) {
+      throw new BadRequestException('Architecture layers are insufficient');
+    }
+
+    const rectCount = (svg.match(/<rect\b/gi) || []).length;
+    const textCount = (svg.match(/<text\b/gi) || []).length;
+    const arrowCount = (svg.match(/marker-end=|<line\b/gi) || []).length;
+
+    if (rectCount < 4 || textCount < 8 || arrowCount < 4) {
+      throw new BadRequestException('Architecture SVG quality is too low');
+    }
+
+    if (
+      /<script\b|<foreignObject\b|href="https?:\/\//i.test(svg) ||
+      svg.length < 1200 ||
+      svg.length > 120_000
+    ) {
+      throw new BadRequestException('Architecture SVG contains unsafe or invalid markup');
+    }
+  }
+
+  private isProviderUnavailableError(error: unknown) {
+    if (!error || typeof error !== 'object') return false;
+
+    const anyError = error as {
+      status?: number;
+      statusCode?: number;
+      code?: string;
+      message?: string;
+    };
+
+    const status = anyError.status ?? anyError.statusCode;
+    if (status === 429 || (typeof status === 'number' && status >= 500)) {
+      return true;
+    }
+
+    const code = String(anyError.code || '').toUpperCase();
+    if (['ECONNRESET', 'ETIMEDOUT', 'ENOTFOUND', 'EAI_AGAIN', 'ECONNREFUSED'].includes(code)) {
+      return true;
+    }
+
+    const message = String(anyError.message || '').toLowerCase();
+    return /timeout|network|socket|temporarily unavailable|overloaded|rate limit/.test(message);
   }
 
   private buildFallbackArchitectureResult(message: string): ArchitectureAgentResult {
@@ -270,14 +342,15 @@ export class AiService {
 
       const userPrompt = userPromptParts.join('\n\n');
 
-      let parsed: ArchitectureAgentResult;
+          let parsed: ArchitectureAgentResult | null = null;
       let inputTokens = 0;
       let outputTokens = 0;
       let totalTokens = 0;
       let fallbackUsed = false;
 
+      let response: Anthropic.Messages.Message;
       try {
-        let response = await this.client.messages.create({
+        response = await this.client.messages.create({
           model: 'claude-sonnet-4-20250514',
           max_tokens: 4096,
           system:
@@ -286,32 +359,54 @@ export class AiService {
             this.roleDirective(role),
           messages: [{ role: 'user', content: userPrompt }],
         });
-
-        try {
-          parsed = this.parseArchitectureResponse(this.extractText(response));
-        } catch {
-          response = await this.client.messages.create({
-            model: 'claude-sonnet-4-20250514',
-            max_tokens: 4096,
-            system:
-              ARCHITECTURE_DIAGRAM_PROMPT +
-              '\n\nCorrection: Your previous output was invalid. Respond with valid JSON only and include a valid SVG with viewBox="0 0 900 600".',
-            messages: [{ role: 'user', content: userPrompt }],
-          });
-
-          parsed = this.parseArchitectureResponse(this.extractText(response));
+      } catch (providerError) {
+        if (!this.isProviderUnavailableError(providerError)) {
+          throw providerError;
         }
-
-        inputTokens = response.usage.input_tokens;
-        outputTokens = response.usage.output_tokens;
-        totalTokens = inputTokens + outputTokens;
-      } catch {
         parsed = this.buildFallbackArchitectureResult(sanitizedMessage);
         fallbackUsed = true;
       }
 
       if (!fallbackUsed) {
+        try {
+          parsed = this.parseArchitectureResponse(this.extractText(response!));
+        } catch {
+          try {
+            response = await this.client.messages.create({
+              model: 'claude-sonnet-4-20250514',
+              max_tokens: 4096,
+              system:
+                ARCHITECTURE_DIAGRAM_PROMPT +
+                '\n\nCorrection: Your previous output was invalid. Respond with valid JSON only and include a valid SVG with viewBox="0 0 900 600". Ensure labels are readable and arrows are present.',
+              messages: [{ role: 'user', content: userPrompt }],
+            });
+
+            parsed = this.parseArchitectureResponse(this.extractText(response));
+          } catch (retryError) {
+            if (!this.isProviderUnavailableError(retryError)) {
+              throw new BadRequestException(
+                'AI returned invalid architecture output. Please refine your request and try again.',
+              );
+            }
+
+            parsed = this.buildFallbackArchitectureResult(sanitizedMessage);
+            fallbackUsed = true;
+          }
+        }
+      }
+
+      if (!fallbackUsed) {
+        inputTokens = response!.usage.input_tokens;
+        outputTokens = response!.usage.output_tokens;
+        totalTokens = inputTokens + outputTokens;
+      }
+
+      if (!fallbackUsed) {
         await this.consumeAiQuota(userId, totalTokens);
+      }
+
+      if (!parsed) {
+        throw new InternalServerErrorException('Architecture result is empty');
       }
 
       const docxBuffer = await this.docxGeneratorService.generateArchitectureReport({
@@ -321,9 +416,7 @@ export class AiService {
         generatedAt: new Date(),
       });
 
-      const estimatedCostUsd = fallbackUsed
-        ? 0
-        : this.estimateCostUsd(inputTokens, outputTokens);
+      const estimatedCostUsd = fallbackUsed ? 0 : this.estimateCostUsd(inputTokens, outputTokens);
 
       await this.logAiAudit({
         feature: AiFeature.ARCHITECTURE_DIAGRAM,
@@ -664,7 +757,6 @@ export class AiService {
         model: 'claude-sonnet-4-20250514',
         success: true,
         inputTokens: response.usage.input_tokens,
-        outputTokens: response.usage.output_tokens,
         totalTokens: response.usage.input_tokens + response.usage.output_tokens,
         estimatedCostUsd: this.estimateCostUsd(
           response.usage.input_tokens,
@@ -1665,6 +1757,103 @@ export class AiService {
     };
   }
 
+  private async buildPublicBrandContext(): Promise<PublicBrandContext> {
+    const [siteContents, showcaseProjects] = await this.prisma.$transaction([
+      this.prisma.siteContent.findMany({
+        where: {
+          isActive: true,
+          section: {
+            in: ['about', 'services', 'portfolio', 'founder-profile', 'founder_cv'],
+          },
+        },
+        select: {
+          section: true,
+          data: true,
+        },
+      }),
+      this.prisma.project.findMany({
+        where: { isShowcase: true },
+        select: {
+          name: true,
+          showcaseCategory: true,
+          techStack: true,
+          showcaseResults: true,
+        },
+        orderBy: [{ showcaseOrder: 'asc' }, { updatedAt: 'desc' }],
+        take: 8,
+      }),
+    ]);
+
+    const getSectionData = (section: string) =>
+      siteContents.find((x) => x.section === section)?.data as
+        | Record<string, unknown>
+        | undefined;
+
+    const aboutData = getSectionData('about') || {};
+    const servicesData = getSectionData('services') || {};
+    const founderData = getSectionData('founder-profile') || getSectionData('founder_cv') || {};
+
+    const services = Array.isArray(servicesData['items'])
+      ? (servicesData['items'] as Array<Record<string, unknown>>)
+          .map((x) => String(x.title || x.name || '').trim())
+          .filter(Boolean)
+      : [];
+
+    const aboutSummary = String(
+      aboutData['summary'] || aboutData['description'] || aboutData['mission'] || '',
+    ).trim();
+
+    const founderProfileFromEnv = String(
+      this.configService.get<string>('FOUNDER_CV_PROFILE') ||
+        this.configService.get<string>('NGUYEN_HOANG_THAI_CV_PROFILE') ||
+        '',
+    ).trim();
+
+    const founderProfile = String(
+      founderData['summary'] ||
+        founderData['bio'] ||
+        founderData['overview'] ||
+        founderProfileFromEnv ||
+        '',
+    ).trim();
+
+    return {
+      services,
+      aboutSummary,
+      founderProfile,
+      showcaseProjects: showcaseProjects.map((p) => ({
+        name: p.name,
+        category: p.showcaseCategory || 'General',
+        techStack: p.techStack || [],
+        results: p.showcaseResults || '',
+      })),
+    };
+  }
+
+  private toPublicBrandContextText(context: PublicBrandContext) {
+    return [
+      'VERIFIED BRAND CONTEXT (REAL DATA):',
+      `- About: ${context.aboutSummary || 'Not available'}`,
+      `- Founder profile (Nguyen Hoang Thai): ${context.founderProfile || 'Not available in DB. Do not fabricate.'}`,
+      `- Services: ${context.services.length ? context.services.join(', ') : 'Not available'}`,
+      `- Portfolio projects: ${
+        context.showcaseProjects.length
+          ? context.showcaseProjects
+              .map(
+                (p) =>
+                  `${p.name} [${p.category}] | Tech: ${p.techStack.join(', ') || 'N/A'} | Results: ${p.results || 'N/A'}`,
+              )
+              .join(' || ')
+          : 'Not available'
+      }`,
+      '',
+      'GROUNDING RULES:',
+      '- Only use VERIFIED BRAND CONTEXT for company identity/capabilities.',
+      '- If founder profile is missing, explicitly say it is unavailable and ask user to provide/update profile data.',
+      '- Never invent achievements, clients, or founder background.',
+    ].join('\n');
+  }
+
   @Cron(CronExpression.EVERY_DAY_AT_2AM)
   async handleAuditRetentionCron() {
     const retentionFromEnv = Number(this.configService.get('AI_AUDIT_RETENTION_DAYS') || 90);
@@ -1681,10 +1870,13 @@ export class AiService {
     const sanitizedMessage = this.maskSensitiveData(message);
 
     try {
+      const brandContext = await this.buildPublicBrandContext();
+      const publicContext = this.toPublicBrandContextText(brandContext);
+
       const response = await this.client.messages.create({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1024,
-        system: PUBLIC_FAQ_PROMPT + PROFESSIONAL_OUTPUT_RULES,
+        system: PUBLIC_FAQ_PROMPT + PROFESSIONAL_OUTPUT_RULES + `\n\n${publicContext}`,
         messages: [{ role: 'user', content: sanitizedMessage }],
       });
 

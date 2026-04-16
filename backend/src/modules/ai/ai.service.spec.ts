@@ -331,17 +331,29 @@ describe('AiService', () => {
   });
 
   describe('generateArchitectureDiagram', () => {
+    const validArchitecturePayload = {
+      description:
+        'System architecture is organized into five layers to ensure scalability, maintainability, and secure operations for contract and delivery workflows. The client layer provides role-based dashboards for internal teams and clients, with clear visibility into milestones and financial indicators.\n\n' +
+        'The API and business layers orchestrate project lifecycle, invoicing, task execution, and notification workflows through modular services. This separation reduces coupling and allows independent evolution of core business capabilities.\n\n' +
+        'Data and integration layers centralize persistence, auditing, and external connectors such as payment providers, email services, and AI services. End-to-end observability and access control policies are applied to keep data quality and compliance at production level.',
+      layers: [
+        'Client Layer',
+        'API Layer',
+        'Business Logic Layer',
+        'Data Layer',
+        'External Integrations',
+      ],
+      svg:
+        '<svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg"><defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#334155"/></marker></defs><rect x="50" y="50" width="800" height="90" fill="#dbeafe"/><rect x="50" y="160" width="800" height="90" fill="#dcfce7"/><rect x="50" y="270" width="800" height="90" fill="#fff7ed"/><rect x="50" y="380" width="800" height="90" fill="#f5f3ff"/><rect x="50" y="490" width="800" height="70" fill="#ecfeff"/><text x="450" y="85">CLIENT LAYER</text><text x="450" y="110">Dashboard and client portal</text><text x="450" y="195">API LAYER</text><text x="450" y="220">Contract, task and invoice APIs</text><text x="450" y="305">BUSINESS LOGIC LAYER</text><text x="450" y="330">Workflow and rule processing</text><text x="450" y="415">DATA LAYER</text><text x="450" y="440">PostgreSQL and audit logs</text><text x="450" y="525">EXTERNAL INTEGRATIONS</text><line x1="450" y1="140" x2="450" y2="160" stroke="#334155" marker-end="url(#arrow)"/><line x1="450" y1="250" x2="450" y2="270" stroke="#334155" marker-end="url(#arrow)"/><line x1="450" y1="360" x2="450" y2="380" stroke="#334155" marker-end="url(#arrow)"/><line x1="450" y1="470" x2="450" y2="490" stroke="#334155" marker-end="url(#arrow)"/></svg>',
+    };
+
     it('should generate architecture payload and docx for valid input', async () => {
       mockFileParserService.parse.mockResolvedValue({ textContext: '' });
       mockCreate.mockResolvedValue({
         content: [
           {
             type: 'text',
-            text: JSON.stringify({
-              description: 'Architecture overview',
-              layers: ['Client', 'API', 'Data'],
-              svg: '<svg viewBox="0 0 900 600"></svg>',
-            }),
+            text: JSON.stringify(validArchitecturePayload),
           },
         ],
         usage: { input_tokens: 100, output_tokens: 200 },
@@ -356,7 +368,7 @@ describe('AiService', () => {
         'Design a SaaS platform',
       );
 
-      expect(result.description).toBe('Architecture overview');
+      expect(result.description).toContain('System architecture is organized into five layers');
       expect(result.docxBase64).toBe(Buffer.from('docx-content').toString('base64'));
       expect(result.usage.totalTokens).toBe(300);
       expect(mockPrisma.user.update).toHaveBeenCalled();
@@ -373,11 +385,7 @@ describe('AiService', () => {
         content: [
           {
             type: 'text',
-            text: JSON.stringify({
-              description: 'Architecture overview',
-              layers: ['Client', 'API', 'Data'],
-              svg: '<svg viewBox="0 0 900 600"></svg>',
-            }),
+            text: JSON.stringify(validArchitecturePayload),
           },
         ],
         usage: { input_tokens: 20, output_tokens: 20 },

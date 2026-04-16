@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Download, FileUp, Lock, Plus, Sparkles } from "lucide-react";
+import { Download, FileUp, Lock, Maximize2, Plus, Sparkles, X } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import {
   type ArchitectureAgentResponse,
@@ -44,6 +44,7 @@ export function ArchitectureAgentGate({
   const [isVisible, setIsVisible] = useState(false);
   const [generatingStepIndex, setGeneratingStepIndex] = useState(0);
   const [svgBlobUrl, setSvgBlobUrl] = useState("");
+  const [showFullDiagram, setShowFullDiagram] = useState(false);
   const reviewFxTimerRef = useRef<number | null>(null);
   const shouldAutoResumeRef = useRef(false);
   const hasAutoResumedRef = useRef(false);
@@ -404,11 +405,48 @@ export function ArchitectureAgentGate({
                   <FileUp className="h-3.5 w-3.5" />
                   Import to Portal
                 </button>
+
+                {svgPreviewUrl ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowFullDiagram(true)}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-sky-500/35 bg-sky-500/12 px-2.5 py-1 text-xs font-medium text-sky-700 hover:bg-sky-500/18 dark:border-sky-400/30 dark:bg-sky-500/15 dark:text-sky-200 dark:hover:bg-sky-500/25"
+                  >
+                    <Maximize2 className="h-3.5 w-3.5" />
+                    Open full diagram
+                  </button>
+                ) : null}
               </div>
             </div>
           ) : null}
         </div>
       </div>
+
+      {showFullDiagram && svgPreviewUrl ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-3 sm:p-6">
+          <div className="relative h-[90vh] w-full max-w-6xl rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl dark:border-white/15 dark:bg-slate-950">
+            <button
+              type="button"
+              onClick={() => setShowFullDiagram(false)}
+              className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-100 dark:border-white/20 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800"
+            >
+              <X className="h-3.5 w-3.5" />
+              Close
+            </button>
+
+            <div className="h-full overflow-auto rounded-xl border border-slate-200 bg-white p-2 pt-10 dark:border-white/10 dark:bg-slate-900">
+              <object
+                data={svgPreviewUrl}
+                type="image/svg+xml"
+                aria-label="Full architecture diagram"
+                className="h-full min-h-[640px] w-full"
+              >
+                <p className="p-3 text-sm text-slate-500">Full diagram preview is unavailable in this browser.</p>
+              </object>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {showAuthDialog ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
