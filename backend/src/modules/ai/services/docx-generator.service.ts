@@ -117,7 +117,7 @@ export class DocxGeneratorService {
                       }
                     : {
                         type: 'svg',
-                        data: normalizedSvg,
+                        data: Buffer.from(normalizedSvg, 'utf-8'),
                         fallback: {
                           type: 'png',
                           data: SVG_FALLBACK_PNG_1X1,
