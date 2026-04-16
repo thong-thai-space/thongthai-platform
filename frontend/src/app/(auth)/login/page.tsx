@@ -21,6 +21,7 @@ export default function LoginPage() {
   const { login, loginWithGoogle } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirectTo") || undefined;
   const [error, setError] = useState("");
   const [resendMessage, setResendMessage] = useState("");
   const [isResending, setIsResending] = useState(false);
@@ -114,7 +115,7 @@ export default function LoginPage() {
         <div className="rounded-xl border border-border bg-background p-6 shadow-sm">
           <button
             type="button"
-            onClick={loginWithGoogle}
+            onClick={() => loginWithGoogle(redirectTo)}
             className="mb-4 flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-background py-2.5 text-sm font-medium transition-colors hover:bg-muted"
           >
             <svg

@@ -19,7 +19,7 @@ interface AuthContextType {
     password: string,
     turnstileToken?: string,
   ) => Promise<void>;
-  loginWithGoogle: () => void;
+  loginWithGoogle: (redirectTo?: string) => void;
   register: (
     name: string,
     email: string,
@@ -35,6 +35,7 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
+const POST_AUTH_REDIRECT_KEY = 'tts_post_auth_redirect';
 
 function shouldProbeSession() {
   if (typeof window === 'undefined') return true;
@@ -89,7 +90,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const loginWithGoogle = useCallback(() => {
+  const loginWithGoogle = useCallback((redirectTo?: string) => {
+    if (typeof window !== 'undefined' && redirectTo) {
+      localStorage.setItem(POST_AUTH_REDIRECT_KEY, redirectTo);
+    }
+
     const baseUrl = String(api.defaults.baseURL || API_BASE_URL);
     window.location.href = `${baseUrl}/auth/google`;
   }, []);

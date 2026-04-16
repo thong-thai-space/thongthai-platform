@@ -113,7 +113,7 @@ export default function RegisterPage() {
         <div className="rounded-xl border border-border bg-background p-6 shadow-sm">
           <button
             type="button"
-            onClick={loginWithGoogle}
+            onClick={() => loginWithGoogle(redirectTo || undefined)}
             className="mb-4 flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-background py-2.5 text-sm font-medium transition-colors hover:bg-muted"
           >
             <svg
