@@ -11,6 +11,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import Anthropic from '@anthropic-ai/sdk';
+import { Resvg } from '@resvg/resvg-js';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
   AiFeature,
@@ -198,7 +199,8 @@ export class AiService {
     const layers = Array.isArray(parsed.layers)
       ? parsed.layers.filter((layer) => typeof layer === 'string').map((layer) => layer.trim())
       : [];
-    const svg = typeof parsed.svg === 'string' ? parsed.svg.trim() : '';
+    const svgRaw = typeof parsed.svg === 'string' ? parsed.svg.trim() : '';
+    const svg = this.sanitizeArchitectureSvg(svgRaw);
 
     if (!description) {
       throw new BadRequestException('Architecture description is missing');
@@ -215,6 +217,23 @@ export class AiService {
     this.validateArchitectureQuality(description, layers, svg);
 
     return { description, layers, svg };
+  }
+
+  private sanitizeArchitectureSvg(svg: string) {
+    // Normalize XML head and remove null bytes/control chars.
+    let sanitized = svg
+      .replace(/^\uFEFF/, '')
+      .replace(/<\?xml[^>]*\?>/gi, '')
+      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
+      .trim();
+
+    // Escape bare ampersands that break XML parser.
+    sanitized = sanitized.replace(
+      /&(?!(amp|lt|gt|quot|apos|#\d+|#x[0-9a-fA-F]+);)/g,
+      '&amp;',
+    );
+
+    return sanitized;
   }
 
   private validateArchitectureQuality(
@@ -248,6 +267,16 @@ export class AiService {
       svg.length > 120_000
     ) {
       throw new BadRequestException('Architecture SVG contains unsafe or invalid markup');
+    }
+
+    // Validate final SVG parse/render to prevent malformed XML from reaching UI.
+    try {
+      const resvg = new Resvg(svg, {
+        fitTo: { mode: 'width', value: 900 },
+      });
+      resvg.render();
+    } catch {
+      throw new BadRequestException('Architecture SVG is malformed and cannot be rendered');
     }
   }
 
