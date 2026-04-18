@@ -80,12 +80,16 @@ function CustomCursor({ motionEnabled }: { motionEnabled: boolean }) {
 export function AnimationProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotionSafe = prefersReducedMotion ?? false;
   const [motionPreference, setMotionPreference] = useState<MotionPreference>('system');
   const [direction, setDirection] = useState<1 | -1>(1);
   const [lowEndMode, setLowEndMode] = useState(false);
   const lastHistoryIdxRef = useRef<number>(0);
 
-  const motionEnabled = resolveMotionEnabled(motionPreference, prefersReducedMotion);
+  const motionEnabled = resolveMotionEnabled(
+    motionPreference,
+    prefersReducedMotionSafe,
+  );
   const highFidelityMotion = motionEnabled && !lowEndMode;
 
   useEffect(() => {
