@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from 'react';
 import { Bot, X, Send, Minimize2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePublicAiChat } from '@/hooks/use-ai';
+import { useSectionContent } from '@/hooks/use-content';
+import { parseAiUiContent } from '@/lib/ai-ui-content';
 import { MarkdownContent } from '@/components/ui/markdown-content';
 
 function TypingIndicator() {
@@ -28,6 +30,8 @@ export function PublicAiChatWidget() {
     Array<{ role: 'user' | 'assistant'; content: string }>
   >([]);
   const chatMutation = usePublicAiChat();
+  const { data: aiUiSection } = useSectionContent('ai-ui');
+  const aiUi = parseAiUiContent(aiUiSection?.data);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -94,8 +98,8 @@ export function PublicAiChatWidget() {
                   }}
                   className="max-w-60 rounded-2xl border border-primary/20 bg-background px-3 py-2 text-left text-xs shadow-lg"
                 >
-                  <p className="font-medium text-foreground">AI Assistant is online</p>
-                  <p className="mt-0.5 text-muted-foreground">Need help? Ask me anything about our services.</p>
+                  <p className="font-medium text-foreground">{aiUi.publicChatOnlineTitle}</p>
+                  <p className="mt-0.5 text-muted-foreground">{aiUi.publicChatOnlineSubtitle}</p>
                 </motion.button>
               )}
             </AnimatePresence>
@@ -136,8 +140,8 @@ export function PublicAiChatWidget() {
               <div className="flex items-center gap-2">
                 <Bot className="h-5 w-5" />
                 <div>
-                  <span className="text-sm font-semibold">Thong Thai Space</span>
-                  <p className="text-[10px] text-primary-foreground/80">AI Assistant</p>
+                  <span className="text-sm font-semibold">{aiUi.publicChatHeaderTitle}</span>
+                  <p className="text-[10px] text-primary-foreground/80">{aiUi.publicChatHeaderSubtitle}</p>
                 </div>
               </div>
               <div className="flex gap-1">
@@ -165,8 +169,8 @@ export function PublicAiChatWidget() {
                   transition={{ delay: 0.2 }}
                   className="space-y-2 text-center text-sm text-muted-foreground"
                 >
-                  <p className="font-medium">Hello!</p>
-                  <p>I&apos;m the AI assistant of Thong Thai Space. Do you have any questions about our services?</p>
+                  <p className="font-medium">{aiUi.publicChatWelcomeTitle}</p>
+                  <p>{aiUi.publicChatWelcomeBody}</p>
                 </motion.div>
               )}
               {messages.map((msg, i) => (
@@ -208,7 +212,7 @@ export function PublicAiChatWidget() {
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask about our services..."
+                placeholder={aiUi.publicChatInputPlaceholder}
                 className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               />
               <button

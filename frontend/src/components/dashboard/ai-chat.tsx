@@ -1,10 +1,12 @@
 'use client';
 
 import { useAiChat } from '@/hooks/use-ai';
+import { useSectionContent } from '@/hooks/use-content';
 import { chatStore } from '@/stores/chat-store';
 import { MarkdownContent } from '@/components/ui/markdown-content';
+import { parseAiUiContent } from '@/lib/ai-ui-content';
 import { Bot, Send, User, Loader2 } from 'lucide-react';
-import { useRef, useEffect, useSyncExternalStore, useState } from 'react';
+import { useRef, useEffect, useSyncExternalStore, useState, useMemo } from 'react';
 
 export function AiChat() {
   const state = useSyncExternalStore(
@@ -14,6 +16,8 @@ export function AiChat() {
   );
   const [input, setInput] = useState('');
   const chatMutation = useAiChat();
+  const { data: aiUiSection } = useSectionContent('ai-ui');
+  const aiUi = useMemo(() => parseAiUiContent(aiUiSection?.data), [aiUiSection?.data]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -84,7 +88,7 @@ export function AiChat() {
           <div className="flex h-full flex-col items-center justify-center text-center">
             <Bot className="mb-3 h-10 w-10 text-muted-foreground/40" />
             <p className="text-sm text-muted-foreground">
-              Ask the AI assistant a question. I can help you with coding, project consulting, code review...
+              {aiUi.dashboardAiChatEmptyState}
 </p>
           </div>
         )}
@@ -141,7 +145,7 @@ export function AiChat() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type a message... (Enter to send, Shift+Enter for new line)"
+            placeholder={aiUi.dashboardAiChatInputPlaceholder}
             rows={1}
             className="max-h-32 min-h-10 flex-1 resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />

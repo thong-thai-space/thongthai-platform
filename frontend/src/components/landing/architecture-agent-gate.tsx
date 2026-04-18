@@ -8,6 +8,8 @@ import {
   type ArchitectureAgentResponse,
   useArchitectureAgent,
 } from "@/hooks/use-ai";
+import { useSectionContent } from "@/hooks/use-content";
+import { parseAiUiContent } from "@/lib/ai-ui-content";
 import { AiParticleFormation } from "./ai-particle-formation";
 
 const ALLOWED_FILE_TYPES =
@@ -16,12 +18,6 @@ const ALLOWED_FILE_TYPES =
 const DRAFT_STORAGE_KEY = "tts_architecture_agent_draft";
 const POST_AUTH_REDIRECT_KEY = "tts_post_auth_redirect";
 const MAX_PERSISTABLE_FILE_BYTES = 2_500_000;
-const GENERATING_STEPS = [
-  "Analyzing project requirements...",
-  "Designing system layers and data flow...",
-  "Rendering architecture diagram...",
-];
-
 interface ArchitectureAgentGateProps {
   canRenderAgent: boolean;
 }
@@ -32,6 +28,9 @@ export function ArchitectureAgentGate({
   const router = useRouter();
   const { user, loading } = useAuth();
   const architectureAgent = useArchitectureAgent();
+  const { data: aiUiSection } = useSectionContent('ai-ui');
+  const aiUi = useMemo(() => parseAiUiContent(aiUiSection?.data), [aiUiSection?.data]);
+  const generatingSteps = aiUi.architectureAgentGeneratingSteps;
 
   const [message, setMessage] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -172,11 +171,11 @@ export function ArchitectureAgentGate({
     }
 
     const timer = window.setInterval(() => {
-      setGeneratingStepIndex((prev) => (prev + 1) % GENERATING_STEPS.length);
+      setGeneratingStepIndex((prev) => (prev + 1) % generatingSteps.length);
     }, 1200);
 
     return () => window.clearInterval(timer);
-  }, [architectureAgent.isPending]);
+  }, [architectureAgent.isPending, generatingSteps.length]);
 
   const goToAuth = (mode: "login" | "register") => {
     const redirectPath = "/?openArchitectureAgent=1";
@@ -318,7 +317,7 @@ export function ArchitectureAgentGate({
           <div className="mb-2 flex justify-center">
             <div className="ai-agent-badge inline-flex items-center gap-2 rounded-full border border-cyan-400/35 bg-cyan-500/12 px-3 py-1 text-xs font-medium text-cyan-700 dark:text-cyan-200">
               <Sparkles className="h-3.5 w-3.5" />
-              Architecture Agent
+              {aiUi.architectureAgentBadge}
             </div>
           </div>
 
@@ -326,7 +325,7 @@ export function ArchitectureAgentGate({
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             rows={3}
-            placeholder="How can I help your project today? Describe your requirements, upload a file, then click View Architecture..."
+            placeholder={aiUi.architectureAgentInputPlaceholder}
             className={`w-full resize-none rounded-2xl border border-slate-200 bg-white/74 px-4 py-3 text-sm text-slate-800 placeholder:text-slate-500 focus:border-cyan-500/60 focus:outline-none dark:border-white/15 dark:bg-slate-900/70 dark:text-white dark:placeholder:text-slate-400 dark:focus:border-cyan-400/70 ${
               isVisible ? "ai-agent-stagger-1" : ""
             }`}
@@ -370,7 +369,9 @@ export function ArchitectureAgentGate({
                 disabled={architectureAgent.isPending}
                 className="rounded-xl bg-cyan-400 px-4 py-1.5 text-xs font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:opacity-60"
               >
-                {architectureAgent.isPending ? "Generating..." : "View Architecture"}
+                {architectureAgent.isPending
+                  ? aiUi.architectureAgentGeneratingLabel
+                  : aiUi.architectureAgentCtaLabel}
               </button>
             </div>
           </div>
@@ -380,7 +381,7 @@ export function ArchitectureAgentGate({
           {architectureAgent.isPending && !showReviewFormation ? (
             <div className="mt-3 rounded-2xl border border-cyan-300/40 bg-cyan-50/70 p-3 dark:border-cyan-400/25 dark:bg-slate-900/70">
               <p className="text-xs font-medium text-cyan-700 dark:text-cyan-200">
-                {GENERATING_STEPS[generatingStepIndex]}
+                {generatingSteps[generatingStepIndex]}
               </p>
               <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-cyan-100 dark:bg-slate-800">
                 <div className="ai-agent-progress-bar h-full w-1/3 rounded-full bg-cyan-500" />
@@ -391,7 +392,7 @@ export function ArchitectureAgentGate({
           {showReviewFormation ? (
             <div className="mt-3 rounded-2xl border border-cyan-300/40 bg-white/70 p-3 dark:border-cyan-400/25 dark:bg-slate-900/75">
               <p className="mb-2 text-xs font-medium text-cyan-700 dark:text-cyan-200">
-                Synthesizing architecture review...
+                {aiUi.architectureAgentSynthesizingLabel}
               </p>
               <AiParticleFormation
                 key={reviewFxKey}
@@ -463,7 +464,7 @@ export function ArchitectureAgentGate({
                 data={svgPreviewUrl}
                 type="image/svg+xml"
                 aria-label="Full architecture diagram"
-                className="h-full min-h-[640px] w-full"
+                className="h-full min-h-160 w-full"
               >
                 <p className="p-3 text-sm text-slate-500">Full diagram preview is unavailable in this browser.</p>
               </object>

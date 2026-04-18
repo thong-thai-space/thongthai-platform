@@ -15,6 +15,7 @@ import {
   useUploadPortfolioThumbnail,
 } from '@/hooks/use-projects';
 import { getApiOrigin } from '@/lib/asset-url';
+import { AI_UI_DEFAULTS } from '@/lib/ai-ui-content';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { Save, RefreshCw, Check, Trash2, Plus, Upload, Sparkles } from 'lucide-react';
@@ -28,7 +29,34 @@ const SECTIONS = [
   { key: 'testimonials', label: 'Testimonials' },
   { key: 'portfolio', label: 'Portfolio' },
   { key: 'footer', label: 'Footer' },
+  { key: 'ai-prompts', label: 'AI Prompts' },
+  { key: 'ai-ui', label: 'AI UI Text' },
 ];
+
+const AI_PROMPTS_DEFAULTS = {
+  generalAssistant:
+    'You are the AI assistant for "Thong Thai Space". Provide concise, practical, and actionable guidance. Match user language (VI/EN).',
+  clientAssistant:
+    'You are the AI assistant for clients. Focus on project status, progress, timeline, and deliverables in client-friendly language.',
+  publicFaq:
+    'You are the public website AI assistant. Only answer questions related to company services, process, stack, and onboarding.',
+  proposal:
+    'Generate a professional project proposal with scope, timeline, deliverables, team, and pricing assumptions.',
+  taskBreakdown:
+    'Break down the project into practical milestones and tasks in strict JSON format.',
+  codeReview:
+    'Review code for security, performance, quality, and bugs. Prioritize findings by severity.',
+  estimate:
+    'Estimate timeline and cost ranges realistically. Return strict JSON.',
+  progressReport:
+    'Generate a professional progress report using project and task data.',
+  strategicPlan:
+    'Generate a strategic plan with execution priorities, risk matrix, and delivery plan in strict JSON.',
+  architectureDiagram:
+    'Generate architecture description, layers, and SVG diagram in strict JSON format.',
+  professionalOutputRules:
+    'Keep output clear and practical. Include executive summary, recommendations, risks, and next actions when relevant.',
+};
 
 type FeaturedProjectItem = {
   title: string;
@@ -160,6 +188,8 @@ const SECTION_DEFAULTS: Record<string, unknown> = {
   process: PROCESS_DEFAULTS,
   testimonials: TESTIMONIALS_DEFAULTS,
   footer: FOOTER_DEFAULTS,
+  'ai-prompts': AI_PROMPTS_DEFAULTS,
+  'ai-ui': AI_UI_DEFAULTS,
 };
 
 type AboutSectionData = {

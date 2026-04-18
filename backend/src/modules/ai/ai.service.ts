@@ -64,6 +64,20 @@ interface PublicBrandContext {
   }>;
 }
 
+interface AiPromptConfig {
+  generalAssistant: string;
+  clientAssistant: string;
+  publicFaq: string;
+  proposal: string;
+  taskBreakdown: string;
+  codeReview: string;
+  estimate: string;
+  progressReport: string;
+  strategicPlan: string;
+  architectureDiagram: string;
+  professionalOutputRules: string;
+}
+
 @Injectable()
 export class AiService {
   private static readonly ARCHITECTURE_TRIAL_REQUEST_LIMIT = 4;
@@ -145,6 +159,58 @@ export class AiService {
   private roleDirective(role?: UserRole) {
     if (!role) return '';
     return ROLE_PROMPT_MAP[role] || '';
+  }
+
+  private defaultPromptConfig(): AiPromptConfig {
+    return {
+      generalAssistant: GENERAL_ASSISTANT_PROMPT,
+      clientAssistant: CLIENT_ASSISTANT_PROMPT,
+      publicFaq: PUBLIC_FAQ_PROMPT,
+      proposal: PROPOSAL_PROMPT,
+      taskBreakdown: TASK_BREAKDOWN_PROMPT,
+      codeReview: CODE_REVIEW_PROMPT,
+      estimate: ESTIMATE_PROMPT,
+      progressReport: PROGRESS_REPORT_PROMPT,
+      strategicPlan: STRATEGIC_PLAN_PROMPT,
+      architectureDiagram: ARCHITECTURE_DIAGRAM_PROMPT,
+      professionalOutputRules: PROFESSIONAL_OUTPUT_RULES,
+    };
+  }
+
+  private getPromptString(input: unknown, fallback: string) {
+    return typeof input === 'string' && input.trim().length > 0 ? input : fallback;
+  }
+
+  private async getPromptConfig(): Promise<AiPromptConfig> {
+    const defaults = this.defaultPromptConfig();
+
+    const promptSection = await this.prisma.siteContent.findUnique({
+      where: { section: 'ai-prompts' },
+      select: { isActive: true, data: true },
+    });
+
+    if (!promptSection?.isActive || !promptSection.data || typeof promptSection.data !== 'object') {
+      return defaults;
+    }
+
+    const data = promptSection.data as Record<string, unknown>;
+
+    return {
+      generalAssistant: this.getPromptString(data.generalAssistant, defaults.generalAssistant),
+      clientAssistant: this.getPromptString(data.clientAssistant, defaults.clientAssistant),
+      publicFaq: this.getPromptString(data.publicFaq, defaults.publicFaq),
+      proposal: this.getPromptString(data.proposal, defaults.proposal),
+      taskBreakdown: this.getPromptString(data.taskBreakdown, defaults.taskBreakdown),
+      codeReview: this.getPromptString(data.codeReview, defaults.codeReview),
+      estimate: this.getPromptString(data.estimate, defaults.estimate),
+      progressReport: this.getPromptString(data.progressReport, defaults.progressReport),
+      strategicPlan: this.getPromptString(data.strategicPlan, defaults.strategicPlan),
+      architectureDiagram: this.getPromptString(data.architectureDiagram, defaults.architectureDiagram),
+      professionalOutputRules: this.getPromptString(
+        data.professionalOutputRules,
+        defaults.professionalOutputRules,
+      ),
+    };
   }
 
   private toTaskPriority(impact?: string): TaskPriority {
@@ -352,6 +418,7 @@ export class AiService {
     message: string,
     file?: Express.Multer.File,
   ) {
+    const promptConfig = await this.getPromptConfig();
     const sanitizedMessage = this.maskSensitiveData(message);
     const startedAt = Date.now();
 
@@ -383,8 +450,8 @@ export class AiService {
           model: 'claude-sonnet-4-20250514',
           max_tokens: 4096,
           system:
-            ARCHITECTURE_DIAGRAM_PROMPT +
-            PROFESSIONAL_OUTPUT_RULES +
+            promptConfig.architectureDiagram +
+            promptConfig.professionalOutputRules +
             this.roleDirective(role),
           messages: [{ role: 'user', content: userPrompt }],
         });
@@ -405,7 +472,7 @@ export class AiService {
               model: 'claude-sonnet-4-20250514',
               max_tokens: 4096,
               system:
-                ARCHITECTURE_DIAGRAM_PROMPT +
+                promptConfig.architectureDiagram +
                 '\n\nCorrection: Your previous output was invalid. Respond with valid JSON only and include a valid SVG with viewBox="0 0 900 600". Ensure labels are readable and arrows are present.',
               messages: [{ role: 'user', content: userPrompt }],
             });
@@ -606,6 +673,7 @@ export class AiService {
   // ==================== CHAT ====================
 
   async chat(userId: string, message: string, conversationId?: string, userRole?: UserRole) {
+    const promptConfig = await this.getPromptConfig();
     const sanitizedMessage = this.maskSensitiveData(message);
 
     let conversation = null;
@@ -684,8 +752,8 @@ export class AiService {
     const accessDirective = `\n\nACCESS DIRECTIVE:\n- You DO have direct access to current system data via the provided snapshots.\n- Do NOT claim you cannot access the system/database when snapshot data exists.\n- If user asks for KPI report, answer with exact numbers from snapshots first, then recommendations.`;
 
     const systemPrompt =
-      (userRole === 'CLIENT' ? CLIENT_ASSISTANT_PROMPT : GENERAL_ASSISTANT_PROMPT) +
-      PROFESSIONAL_OUTPUT_RULES +
+      (userRole === 'CLIENT' ? promptConfig.clientAssistant : promptConfig.generalAssistant) +
+      promptConfig.professionalOutputRules +
       this.roleDirective(userRole) +
       projectContext +
       operationsContext +
@@ -763,6 +831,7 @@ export class AiService {
     locale: Language = Language.VI,
     budget?: string,
   ) {
+    const promptConfig = await this.getPromptConfig();
     const langNote =
       locale === Language.EN
         ? '\n\nPlease write the proposal in English.'
@@ -775,7 +844,10 @@ export class AiService {
         model: 'claude-sonnet-4-20250514',
         max_tokens: 4096,
         system:
-          PROPOSAL_PROMPT + PROFESSIONAL_OUTPUT_RULES + this.roleDirective(role) + langNote,
+          promptConfig.proposal +
+          promptConfig.professionalOutputRules +
+          this.roleDirective(role) +
+          langNote,
         messages: [
           {
             role: 'user',
@@ -820,13 +892,17 @@ export class AiService {
     projectDescription: string,
     techStack: string[],
   ) {
+    const promptConfig = await this.getPromptConfig();
     const startedAt = Date.now();
 
     try {
       const response = await this.client.messages.create({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 4096,
-        system: TASK_BREAKDOWN_PROMPT + PROFESSIONAL_OUTPUT_RULES + this.roleDirective(role),
+        system:
+          promptConfig.taskBreakdown +
+          promptConfig.professionalOutputRules +
+          this.roleDirective(role),
         messages: [
           {
             role: 'user',
@@ -872,13 +948,17 @@ export class AiService {
     language: string,
     context?: string,
   ) {
+    const promptConfig = await this.getPromptConfig();
     const startedAt = Date.now();
 
     try {
       const response = await this.client.messages.create({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 4096,
-        system: CODE_REVIEW_PROMPT + PROFESSIONAL_OUTPUT_RULES + this.roleDirective(role),
+        system:
+          promptConfig.codeReview +
+          promptConfig.professionalOutputRules +
+          this.roleDirective(role),
         messages: [
           {
             role: 'user',
@@ -924,6 +1004,7 @@ export class AiService {
     requirements: string,
     locale: Language = Language.VI,
   ) {
+    const promptConfig = await this.getPromptConfig();
     const langNote =
       locale === Language.EN
         ? '\n\nRespond in English.'
@@ -935,7 +1016,11 @@ export class AiService {
       const response = await this.client.messages.create({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 2048,
-        system: ESTIMATE_PROMPT + PROFESSIONAL_OUTPUT_RULES + this.roleDirective(role) + langNote,
+        system:
+          promptConfig.estimate +
+          promptConfig.professionalOutputRules +
+          this.roleDirective(role) +
+          langNote,
         messages: [{ role: 'user', content: this.maskSensitiveData(requirements) }],
       });
 
@@ -977,6 +1062,7 @@ export class AiService {
     projectId: string,
     locale: Language = Language.VI,
   ) {
+    const promptConfig = await this.getPromptConfig();
     const project = await this.prisma.project.findUnique({
       where: { id: projectId },
       include: {
@@ -1006,8 +1092,8 @@ export class AiService {
         model: 'claude-sonnet-4-20250514',
         max_tokens: 2048,
         system:
-          PROGRESS_REPORT_PROMPT +
-          PROFESSIONAL_OUTPUT_RULES +
+          promptConfig.progressReport +
+          promptConfig.professionalOutputRules +
           this.roleDirective(role) +
           langNote,
         messages: [
@@ -1056,6 +1142,7 @@ export class AiService {
     role: UserRole,
     dto: StrategicPlanDto,
   ) {
+    const promptConfig = await this.getPromptConfig();
     const locale = dto.locale ?? Language.VI;
 
     const project = dto.projectId
@@ -1140,7 +1227,9 @@ export class AiService {
         model: 'claude-sonnet-4-20250514',
         max_tokens: 4096,
         system:
-          STRATEGIC_PLAN_PROMPT + PROFESSIONAL_OUTPUT_RULES + this.roleDirective(role),
+          promptConfig.strategicPlan +
+          promptConfig.professionalOutputRules +
+          this.roleDirective(role),
         messages: [
           {
             role: 'user',
@@ -1903,13 +1992,17 @@ export class AiService {
     const sanitizedMessage = this.maskSensitiveData(message);
 
     try {
+      const promptConfig = await this.getPromptConfig();
       const brandContext = await this.buildPublicBrandContext();
       const publicContext = this.toPublicBrandContextText(brandContext);
 
       const response = await this.client.messages.create({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1024,
-        system: PUBLIC_FAQ_PROMPT + PROFESSIONAL_OUTPUT_RULES + `\n\n${publicContext}`,
+        system:
+          promptConfig.publicFaq +
+          promptConfig.professionalOutputRules +
+          `\n\n${publicContext}`,
         messages: [{ role: 'user', content: sanitizedMessage }],
       });
 
