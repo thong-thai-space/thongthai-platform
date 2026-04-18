@@ -7,3 +7,4 @@ export { ProcessSection } from './process-section';
 export { TestimonialsSection } from './testimonials-section';
 export { CtaSection } from './cta-section';
 export { ArchitectureAgentGate } from './architecture-agent-gate';
+export { SectionDivider } from './section-divider';

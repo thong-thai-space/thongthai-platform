@@ -92,48 +92,46 @@ export function HeroSection({
       ) : null}
 
       {/* Hero content block - separate section below video */}
-      <section className="bg-linear-to-br from-slate-50 via-white to-blue-50/60 dark:from-background dark:via-background dark:to-primary/5">
-        <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-6">
+      <section className="tts-premium-hero relative overflow-hidden bg-linear-to-br from-slate-50 via-white to-sky-50/70 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute -left-24 top-10 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+          <div className="absolute right-0 top-1/3 h-72 w-72 rounded-full bg-cyan-300/20 blur-3xl dark:bg-cyan-500/10" />
+          <div className="absolute bottom-0 left-1/3 h-56 w-56 rounded-full bg-amber-200/30 blur-3xl dark:bg-amber-400/10" />
+        </div>
+
+        <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8 lg:py-10">
           <div className="flex justify-center">
-            <div className="max-w-3xl rounded-2xl border border-slate-200/80 bg-white/90 p-5 text-center shadow-xl backdrop-blur-md sm:p-7 dark:border-white/15 dark:bg-slate-950/35 dark:shadow-2xl">
+            <div className="max-w-4xl rounded-3xl border border-slate-200/80 bg-white/80 p-6 text-center shadow-[0_30px_90px_-45px_rgba(15,23,42,0.45)] backdrop-blur-xl sm:p-8 dark:border-white/15 dark:bg-slate-950/45">
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
                 <Sparkles className="h-4 w-4" />
                 {c.badge}
               </div>
 
-              {/* <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl">
-                {c.title}{' '}
-                <span className="bg-linear-to-r from-primary to-accent bg-clip-text text-transparent">
-                  {c.titleHighlight}
-                </span>{' '}
-                {c.titleEnd}
-              </h1> */}
-
               <h1
-                className={`${syne.className} text-xl tracking-tight text-slate-900 sm:text-2xl lg:text-3xl dark:text-white`}
+                className={`${syne.className} tts-landing-display text-3xl tracking-tight text-slate-900 sm:text-4xl lg:text-5xl dark:text-white`}
               >
                 {c.title}{" "}
-                <span className="bg-linear-to-r from-primary to-accent bg-clip-text text-transparent">
+                <span className="bg-linear-to-r from-primary via-sky-500 to-accent bg-clip-text text-transparent">
                   {c.titleHighlight}
                 </span>{" "}
                 {c.titleEnd}
               </h1>
 
-              <p className="mt-6 text-lg leading-8 text-slate-700 sm:text-xl dark:text-slate-200">
+              <p className="tts-landing-subtitle mx-auto mt-6 max-w-3xl text-base leading-8 text-slate-700 sm:text-lg dark:text-slate-200">
                 {c.subtitle}
               </p>
 
               <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
                 <Link
                   href={c.primaryCta.href}
-                  className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30"
+                  className="tts-conversion-strong inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 text-sm font-medium text-primary-foreground shadow-[0_14px_36px_color-mix(in_srgb,var(--primary)_38%,transparent)] transition-all hover:-translate-y-0.5 hover:bg-primary/90"
                 >
                   {c.primaryCta.text}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
                   href={c.secondaryCta.href}
-                  className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-6 py-3 text-sm font-medium text-slate-800 transition-colors hover:bg-slate-100 dark:border-white/25 dark:bg-white/5 dark:text-white dark:hover:bg-white/15"
+                  className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-7 py-3 text-sm font-medium text-slate-800 transition-colors hover:bg-slate-100 dark:border-white/25 dark:bg-white/5 dark:text-white dark:hover:bg-white/15"
                 >
                   {c.secondaryCta.text}
                 </Link>
@@ -142,10 +140,10 @@ export function HeroSection({
           </div>
 
           {/* Stats strip */}
-          <div className="mx-auto mt-6 max-w-4xl rounded-2xl border border-slate-200/80 bg-white/90 p-5 shadow-lg backdrop-blur-sm sm:p-6 dark:border-white/15 dark:bg-slate-950/25 dark:shadow-xl">
+          <div className="mx-auto mt-8 max-w-5xl rounded-2xl border border-slate-200/80 bg-white/80 p-5 shadow-lg backdrop-blur-md sm:p-6 dark:border-white/15 dark:bg-slate-950/30 dark:shadow-xl">
             <div className="grid grid-cols-2 gap-6 text-center sm:grid-cols-4">
               {c.stats.map((stat) => (
-                <div key={stat.label}>
+                <div key={stat.label} className="rounded-xl border border-slate-200/60 bg-white/70 p-3 dark:border-white/10 dark:bg-white/5">
                   <div className="text-2xl font-bold text-primary sm:text-3xl">
                     {stat.value}
                   </div>

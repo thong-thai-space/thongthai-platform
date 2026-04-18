@@ -46,6 +46,44 @@ interface MotionCardProps extends HTMLAttributes<HTMLDivElement> {
   delay?: number;
 }
 
+interface MotionSectionProps {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+}
+
+export function MotionSection({
+  children,
+  className,
+  delay = 0,
+}: MotionSectionProps) {
+  const prefersReducedMotion = useReducedMotion();
+
+  return (
+    <motion.section
+      className={className}
+      initial={
+        prefersReducedMotion
+          ? false
+          : { opacity: 0.92, y: 26, scale: 0.988, filter: 'blur(4px)' }
+      }
+      whileInView={
+        prefersReducedMotion
+          ? { opacity: 1 }
+          : { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }
+      }
+      viewport={{ once: false, amount: 0.12 }}
+      transition={{
+        duration: prefersReducedMotion ? 0 : 0.72,
+        delay,
+        ease: [0.22, 1, 0.36, 1],
+      }}
+    >
+      {children}
+    </motion.section>
+  );
+}
+
 export function MotionCard({
   children,
   className,

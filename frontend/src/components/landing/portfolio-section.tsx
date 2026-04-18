@@ -7,7 +7,7 @@ import { useSectionContent } from '@/hooks/use-content';
 import { useShowcaseProjects } from '@/hooks/use-projects';
 import type { Project } from '@/types';
 import { resolveBackendAssetUrl } from '@/lib/asset-url';
-import { MotionCard, MotionReveal } from '@/components/motion/motion-primitives';
+import { MotionCard, MotionReveal, MotionSection } from '@/components/motion/motion-primitives';
 
 const defaults = {
   title: 'Featured Projects',
@@ -43,13 +43,17 @@ export function PortfolioSection() {
   const items = showcaseProjects.slice(0, 3).map((project) => mapProjectToFeaturedCard(project));
 
   return (
-    <section id="portfolio" className="py-20 sm:py-28">
+    <MotionSection id="portfolio" className="tts-landing-section relative overflow-hidden py-20 sm:py-28">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-8 top-10 h-72 w-72 rounded-full bg-sky-200/35 blur-3xl dark:bg-sky-500/10" />
+        <div className="absolute right-0 bottom-0 h-80 w-80 rounded-full bg-primary/15 blur-3xl" />
+      </div>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <MotionReveal className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+          <h2 className="tts-landing-title text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
             {c.title}
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
+          <p className="tts-landing-subtitle mt-4 text-lg text-slate-600 dark:text-slate-300">
             {c.subtitle}
           </p>
         </MotionReveal>
@@ -66,7 +70,7 @@ export function PortfolioSection() {
               <MotionCard
                 key={`${project.title}-${project.client}`}
                 delay={0.08 * index}
-                className="group overflow-hidden rounded-xl border border-border bg-background transition-all hover:border-primary/30 hover:shadow-lg"
+                className="group overflow-hidden rounded-2xl border border-slate-200/80 bg-white/85 shadow-sm backdrop-blur-sm transition-all hover:border-primary/35 hover:shadow-[0_22px_55px_-30px_rgba(37,99,235,0.45)] dark:border-white/10 dark:bg-white/5"
               >
                 <div className={`flex h-48 items-center justify-center overflow-hidden ${project.thumbnailUrl ? '' : 'bg-linear-to-br from-primary/10 to-accent/10'}`}>
                   {project.thumbnailUrl ? (
@@ -82,25 +86,25 @@ export function PortfolioSection() {
 
                 <div className="p-6">
                   <div className="flex items-center justify-between gap-3">
-                    <div className="text-xs font-medium text-primary">{project.client}</div>
+                    <div className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">{project.client}</div>
                     {project.liveUrl && (
                       <a
                         href={project.liveUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-xs font-medium text-muted-foreground hover:text-primary"
+                        className="text-xs font-medium text-slate-500 hover:text-primary dark:text-slate-300"
                       >
                         Visit
                       </a>
                     )}
                   </div>
-                  <h3 className="mt-1 text-lg font-semibold">{project.title}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{project.description}</p>
+                  <h3 className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">{project.title}</h3>
+                  <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{project.description}</p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {project.techStack.map((tech) => (
                       <span
                         key={tech}
-                        className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
+                        className="rounded-full border border-slate-200/80 bg-white px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300"
                       >
                         {tech}
                       </span>
@@ -115,14 +119,14 @@ export function PortfolioSection() {
         <MotionReveal className="mt-12 text-center" delay={0.12}>
           <Link
             href="/portfolio"
-            className="inline-flex items-center gap-2 text-sm font-medium text-primary transition-colors hover:text-primary/80"
+            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-primary transition-colors hover:bg-slate-50 dark:border-white/10 dark:bg-white/5"
           >
             {c.viewAllText || 'View all projects'}
             <ArrowRight className="h-4 w-4" />
           </Link>
         </MotionReveal>
       </div>
-    </section>
+    </MotionSection>
   );
 }
 

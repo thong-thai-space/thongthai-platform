@@ -71,9 +71,158 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
+.tts-landing-display {
+  letter-spacing: -0.045em;
+  line-height: 1.04;
+}
+
+.tts-landing-title {
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.tts-landing-subtitle {
+  line-height: 1.72;
+}
+
+.tts-landing-section {
+  position: relative;
+}
+
+.tts-landing-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--primary) 20%, transparent),
+    transparent
+  );
+  opacity: 0.55;
+}
+
+.tts-section-divider {
+  position: relative;
+  height: 64px;
+  margin: -6px auto -8px;
+  pointer-events: none;
+  max-width: 1200px;
+  z-index: 1;
+}
+
+.tts-section-divider-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.tts-divider-path {
+  stroke-dasharray: 14 9;
+  animation: tts-divider-drift 9s linear infinite;
+}
+
+.tts-divider-beam-primary {
+  opacity: 0.9;
+}
+
+.tts-divider-beam-accent {
+  opacity: 0.7;
+  animation-duration: 12s;
+}
+
+@keyframes tts-divider-drift {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -220;
+  }
+}
+
+@keyframes tts-cta-breathe {
+  0%,
+  100% {
+    transform: translateY(0);
+    box-shadow: 0 10px 26px color-mix(in srgb, var(--primary) 22%, transparent);
+  }
+  50% {
+    transform: translateY(-1.5px);
+    box-shadow: 0 16px 34px color-mix(in srgb, var(--primary) 32%, transparent);
+  }
+}
+
+.tts-conversion-strong {
+  animation: tts-cta-breathe 2.8s ease-in-out infinite;
+}
+
+.tts-conversion-soft {
+  animation: tts-cta-breathe 4.6s ease-in-out infinite;
+  animation-delay: 0.4s;
+}
+
 .tts-route-shell {
   min-height: 100dvh;
   will-change: opacity, transform, filter;
+}
+
+.tts-premium-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.24;
+  background-image:
+    linear-gradient(rgba(37, 99, 235, 0.14) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(14, 165, 233, 0.12) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: radial-gradient(circle at 50% 20%, black 20%, transparent 78%);
+}
+
+@media (max-width: 768px) {
+  .tts-landing-section {
+    padding-top: 4.2rem !important;
+    padding-bottom: 4.4rem !important;
+  }
+
+  .tts-landing-display {
+    font-size: clamp(1.95rem, 8.2vw, 2.5rem) !important;
+    letter-spacing: -0.04em;
+    line-height: 1.06;
+  }
+
+  .tts-landing-title {
+    font-size: clamp(1.65rem, 7.2vw, 2.1rem) !important;
+    letter-spacing: -0.035em;
+    line-height: 1.12;
+  }
+
+  .tts-landing-subtitle {
+    font-size: 0.98rem !important;
+    line-height: 1.75 !important;
+  }
+
+  .tts-premium-hero .rounded-3xl {
+    border-radius: 1.15rem;
+    padding: 1.15rem;
+  }
+
+  .tts-premium-hero .inline-flex {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .tts-premium-hero .grid {
+    gap: 0.75rem;
+  }
+
+  .tts-section-divider {
+    height: 44px;
+    margin-top: -4px;
+    margin-bottom: -6px;
+  }
 }
 
 .tts-page-sweep {
@@ -593,6 +742,12 @@ button:active,
     box-shadow: none !important;
   }
 
+  .tts-divider-path,
+  .tts-conversion-strong,
+  .tts-conversion-soft {
+    animation: none !important;
+  }
+
   .ai-agent-enter {
     animation: none;
     transform: none;
@@ -624,5 +779,40 @@ button:active,
     animation: none;
     transform: none;
     width: 60%;
+  }
+}
+
+html[data-tts-low-end-motion='1'] .tts-page-sweep,
+html[data-tts-low-end-motion='1'] .tts-premium-hero::after {
+  display: none;
+}
+
+html[data-tts-low-end-motion='1'] .tts-section-divider,
+html[data-tts-low-end-motion='1'] .tts-conversion-strong,
+html[data-tts-low-end-motion='1'] .tts-conversion-soft {
+  animation: none !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  .tts-page-sweep {
+    opacity: 0.55;
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--primary) 48%, #0b1220),
+      color-mix(in srgb, var(--accent) 28%, #0b1220)
+    );
+  }
+
+  .tts-motion-card::before {
+    background: radial-gradient(
+      circle at var(--mx) var(--my),
+      color-mix(in srgb, var(--primary) 12%, transparent),
+      transparent 62%
+    );
+  }
+
+  .tts-conversion-strong,
+  .tts-conversion-soft {
+    animation-duration: 5.4s;
   }
 }

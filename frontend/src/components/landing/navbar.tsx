@@ -33,22 +33,23 @@ export function Navbar() {
   const navLinks = c.navLinks?.length ? c.navLinks : defaultHeader.navLinks;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/70 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/60">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         {/* Logo */}
-        <Link href="/" className="flex items-center">
-          <span className="text-xl font-bold tracking-tight">
-            Thong Thai<span className="text-primary"> Space</span>
+        <Link href="/" className="flex items-center gap-2">
+          <span className="inline-block h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_18px_color-mix(in_srgb,var(--primary)_45%,transparent)]" />
+          <span className="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+            Thong Thai <span className="text-primary">Space</span>
           </span>
         </Link>
 
         {/* Desktop nav */}
-        <div className="hidden items-center gap-8 md:flex">
+        <div className="hidden items-center gap-2 rounded-full border border-slate-200/70 bg-white/80 px-2 py-1 shadow-sm backdrop-blur-sm md:flex dark:border-white/10 dark:bg-white/5">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              className="rounded-full px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white"
             >
               {link.label}
             </Link>
@@ -74,13 +75,13 @@ export function Navbar() {
             <>
               <Link
                 href="/login"
-                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
               >
                 {c.signInText || defaultHeader.signInText}
               </Link>
               <Link
                 href="/contact"
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-[0_10px_30px_color-mix(in_srgb,var(--primary)_35%,transparent)] transition-all hover:-translate-y-0.5 hover:bg-primary/90"
               >
                 {c.ctaText || defaultHeader.ctaText}
               </Link>
@@ -101,22 +102,22 @@ export function Navbar() {
       {/* Mobile menu */}
       <div
         className={cn(
-          'overflow-hidden border-t border-border transition-all duration-300 md:hidden',
+          'overflow-hidden border-t border-slate-200/70 transition-all duration-300 md:hidden dark:border-white/10',
           mobileOpen ? 'max-h-96' : 'max-h-0 border-t-0',
         )}
       >
-        <div className="space-y-1 px-4 py-3">
+        <div className="space-y-1 bg-white/90 px-4 py-3 backdrop-blur-md dark:bg-slate-950/90">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               onClick={() => setMobileOpen(false)}
-              className="block rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className="block rounded-md px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white"
             >
               {link.label}
             </Link>
           ))}
-          <div className="border-t border-border pt-3">
+          <div className="border-t border-slate-200 pt-3 dark:border-white/10">
             {user ? (
               <Link
                 href={

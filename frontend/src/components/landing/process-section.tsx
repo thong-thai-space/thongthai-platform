@@ -2,7 +2,7 @@
 
 import { MessageSquare, Lightbulb, Code, Rocket } from 'lucide-react';
 import { useSectionContent } from '@/hooks/use-content';
-import { MotionReveal } from '@/components/motion/motion-primitives';
+import { MotionReveal, MotionSection } from '@/components/motion/motion-primitives';
 
 const iconMap: Record<string, any> = { MessageSquare, Lightbulb, Code, Rocket };
 
@@ -46,13 +46,16 @@ export function ProcessSection() {
   const c = (data?.data as typeof defaults) || defaults;
 
   return (
-    <section className="bg-muted/30 py-20 sm:py-28">
+    <MotionSection className="tts-landing-section relative overflow-hidden bg-linear-to-b from-slate-50 to-white py-20 sm:py-28 dark:from-slate-950 dark:to-slate-900">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute right-10 top-16 h-72 w-72 rounded-full bg-amber-200/30 blur-3xl dark:bg-amber-500/10" />
+      </div>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <MotionReveal className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+          <h2 className="tts-landing-title text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
             {c.title}
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
+          <p className="tts-landing-subtitle mt-4 text-lg text-slate-600 dark:text-slate-300">
             {c.subtitle}
           </p>
         </MotionReveal>
@@ -61,23 +64,25 @@ export function ProcessSection() {
           {c.steps.map((item, idx) => {
             const Icon = iconMap[item.icon];
             return (
-              <MotionReveal key={item.step} delay={idx * 0.08} className="relative text-center">
+              <MotionReveal key={item.step} delay={idx * 0.08} className="relative">
                 {/* Connector line */}
                 {idx < c.steps.length - 1 && (
-                  <div className="absolute left-1/2 top-8 hidden h-0.5 w-full bg-border lg:block" />
+                  <div className="absolute left-[55%] top-10 hidden h-0.5 w-full bg-linear-to-r from-primary/35 to-transparent lg:block" />
                 )}
 
-                <div className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 border-primary bg-background text-primary">
-                  {Icon && <Icon className="h-7 w-7" />}
+                <div className="rounded-2xl border border-slate-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-white/5">
+                  <div className="relative mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-primary">
+                    {Icon && <Icon className="h-6 w-6" />}
+                  </div>
+                  <div className="mt-3 text-center text-xs font-bold tracking-wide text-primary">{item.step}</div>
+                  <h3 className="mt-2 text-center text-lg font-semibold text-slate-900 dark:text-white">{item.title}</h3>
+                  <p className="mt-2 text-center text-sm text-slate-600 dark:text-slate-300">{item.description}</p>
                 </div>
-                <div className="mt-2 text-xs font-bold text-primary">{item.step}</div>
-                <h3 className="mt-2 text-lg font-semibold">{item.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{item.description}</p>
               </MotionReveal>
             );
           })}
         </div>
       </div>
-    </section>
+    </MotionSection>
   );
 }

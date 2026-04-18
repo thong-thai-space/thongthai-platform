@@ -7,6 +7,7 @@ import {
   ServicesSection,
   PortfolioSection,
   ProcessSection,
+  SectionDivider,
   TestimonialsSection,
   CtaSection,
 } from '@/components/landing';
@@ -36,10 +37,15 @@ export default function Home() {
             <ArchitectureAgentGate canRenderAgent={canRenderArchitectureAgent} />
           }
         />
+        <SectionDivider tone="primary" />
         <ServicesSection />
+        <SectionDivider tone="accent" />
         <PortfolioSection />
+        <SectionDivider tone="primary" />
         <ProcessSection />
+        <SectionDivider tone="accent" />
         <TestimonialsSection />
+        <SectionDivider tone="primary" />
         <CtaSection />
       </main>
       <Footer />

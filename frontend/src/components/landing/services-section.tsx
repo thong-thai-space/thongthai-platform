@@ -2,7 +2,7 @@
 
 import { Globe, Smartphone, Brain, MessageSquare } from 'lucide-react';
 import { useSectionContent } from '@/hooks/use-content';
-import { MotionCard, MotionReveal } from '@/components/motion/motion-primitives';
+import { MotionCard, MotionReveal, MotionSection } from '@/components/motion/motion-primitives';
 
 const iconMap: Record<string, any> = { Globe, Smartphone, Brain, MessageSquare };
 
@@ -46,13 +46,16 @@ export function ServicesSection() {
   const c = (data?.data as typeof defaults) || defaults;
 
   return (
-    <section id="services" className="bg-muted/30 py-20 sm:py-28">
+    <MotionSection id="services" className="tts-landing-section relative overflow-hidden bg-linear-to-b from-white to-slate-50 py-20 sm:py-28 dark:from-slate-950 dark:to-slate-900">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-16 right-0 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+      </div>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <MotionReveal className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+          <h2 className="tts-landing-title text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
             {c.title}
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
+          <p className="tts-landing-subtitle mt-4 text-lg text-slate-600 dark:text-slate-300">
             {c.subtitle}
           </p>
         </MotionReveal>
@@ -64,16 +67,16 @@ export function ServicesSection() {
               <MotionCard
                 key={service.title}
                 delay={0.06 * c.items.indexOf(service)}
-                className="group rounded-xl border border-border bg-background p-6 transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
+                className="group rounded-2xl border border-slate-200/80 bg-white/85 p-6 shadow-sm backdrop-blur-sm transition-all hover:border-primary/35 hover:shadow-[0_20px_45px_-28px_rgba(37,99,235,0.45)] dark:border-white/10 dark:bg-white/5"
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                   {Icon && <Icon className="h-6 w-6" />}
                 </div>
-                <h3 className="mt-4 text-lg font-semibold">{service.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{service.description}</p>
+                <h3 className="mt-4 text-lg font-semibold text-slate-900 dark:text-white">{service.title}</h3>
+                <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{service.description}</p>
                 <ul className="mt-4 space-y-1">
                   {service.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <li key={f} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
                       <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                       {f}
                     </li>
@@ -84,6 +87,6 @@ export function ServicesSection() {
           })}
         </div>
       </div>
-    </section>
+    </MotionSection>
   );
 }

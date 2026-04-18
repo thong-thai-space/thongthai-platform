@@ -2,7 +2,7 @@
 
 import { Star } from 'lucide-react';
 import { useSectionContent } from '@/hooks/use-content';
-import { MotionCard, MotionReveal } from '@/components/motion/motion-primitives';
+import { MotionCard, MotionReveal, MotionSection } from '@/components/motion/motion-primitives';
 
 const defaults = {
   title: 'What our clients say',
@@ -37,13 +37,17 @@ export function TestimonialsSection() {
   const c = (data?.data as typeof defaults) || defaults;
 
   return (
-    <section className="py-20 sm:py-28">
+    <MotionSection className="tts-landing-section relative overflow-hidden py-20 sm:py-28">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-0 top-24 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute right-6 bottom-6 h-64 w-64 rounded-full bg-cyan-200/35 blur-3xl dark:bg-cyan-500/10" />
+      </div>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <MotionReveal className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+          <h2 className="tts-landing-title text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
             {c.title}
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
+          <p className="tts-landing-subtitle mt-4 text-lg text-slate-600 dark:text-slate-300">
             {c.subtitle}
           </p>
         </MotionReveal>
@@ -53,7 +57,7 @@ export function TestimonialsSection() {
             <MotionCard
               key={t.name}
               delay={index * 0.08}
-              className="rounded-xl border border-border bg-background p-6"
+              className="rounded-2xl border border-slate-200/80 bg-white/85 p-6 shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-white/5"
             >
               <div className="flex gap-1">
                 {Array.from({ length: t.rating }).map((_, i) => (
@@ -63,17 +67,17 @@ export function TestimonialsSection() {
                   />
                 ))}
               </div>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+              <p className="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
                 &ldquo;{t.content}&rdquo;
               </p>
-              <div className="mt-4 border-t border-border pt-4">
-                <div className="text-sm font-semibold">{t.name}</div>
-                <div className="text-xs text-muted-foreground">{t.role}</div>
+              <div className="mt-4 border-t border-slate-200/80 pt-4 dark:border-white/10">
+                <div className="text-sm font-semibold text-slate-900 dark:text-white">{t.name}</div>
+                <div className="text-xs text-slate-500 dark:text-slate-300">{t.role}</div>
               </div>
             </MotionCard>
           ))}
         </div>
       </div>
-    </section>
+    </MotionSection>
   );
 }
