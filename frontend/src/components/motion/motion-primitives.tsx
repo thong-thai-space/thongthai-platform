@@ -46,7 +46,7 @@ interface MotionCardProps extends HTMLAttributes<HTMLDivElement> {
   delay?: number;
 }
 
-interface MotionSectionProps {
+interface MotionSectionProps extends HTMLAttributes<HTMLElement> {
   children: ReactNode;
   className?: string;
   delay?: number;
@@ -56,11 +56,13 @@ export function MotionSection({
   children,
   className,
   delay = 0,
+  ...props
 }: MotionSectionProps) {
   const prefersReducedMotion = useReducedMotion();
 
   return (
     <motion.section
+      {...props}
       className={className}
       initial={
         prefersReducedMotion
