@@ -91,6 +91,7 @@ export function AnimationProvider({ children }: { children: ReactNode }) {
     prefersReducedMotionSafe,
   );
   const highFidelityMotion = motionEnabled && !lowEndMode;
+  const enableExperimentalFx = highFidelityMotion && motionPreference === 'on';
 
   useEffect(() => {
     const syncPreference = () => {
@@ -171,7 +172,7 @@ export function AnimationProvider({ children }: { children: ReactNode }) {
   }, [lowEndMode]);
 
   useEffect(() => {
-    if (!highFidelityMotion) return;
+    if (!enableExperimentalFx) return;
 
     const lenis = new Lenis({
       duration: 1.05,
@@ -194,13 +195,13 @@ export function AnimationProvider({ children }: { children: ReactNode }) {
       window.cancelAnimationFrame(rafId);
       lenis.destroy();
     };
-  }, [highFidelityMotion]);
+  }, [enableExperimentalFx]);
 
   return (
     <>
-      <CustomCursor motionEnabled={highFidelityMotion} />
+      <CustomCursor motionEnabled={enableExperimentalFx} />
 
-      {motionEnabled && (
+      {enableExperimentalFx && (
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={`sweep-${pathname}`}
@@ -226,24 +227,22 @@ export function AnimationProvider({ children }: { children: ReactNode }) {
             motionEnabled
               ? {
                   opacity: 0,
-                  x: direction * (highFidelityMotion ? 22 : 12),
-                  y: 8,
-                  filter: highFidelityMotion ? 'blur(5px)' : 'blur(0px)',
+                  x: direction * 8,
+                  y: 2,
                 }
               : false
           }
-          animate={motionEnabled ? { opacity: 1, x: 0, y: 0, filter: 'blur(0px)' } : { opacity: 1 }}
+          animate={motionEnabled ? { opacity: 1, x: 0, y: 0 } : { opacity: 1 }}
           exit={
             motionEnabled
               ? {
                   opacity: 0,
-                  x: direction * -(highFidelityMotion ? 20 : 10),
-                  y: -4,
-                  filter: highFidelityMotion ? 'blur(4px)' : 'blur(0px)',
+                  x: direction * -6,
+                  y: -1,
                 }
               : { opacity: 1 }
           }
-          transition={{ duration: motionEnabled ? (highFidelityMotion ? 0.42 : 0.22) : 0, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: motionEnabled ? 0.2 : 0, ease: [0.22, 1, 0.36, 1] }}
         >
           {children}
         </motion.div>

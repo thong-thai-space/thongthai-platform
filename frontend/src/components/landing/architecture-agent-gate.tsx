@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from 'react-dom';
 import { useRouter } from "next/navigation";
 import { Download, Lock, Maximize2, Plus, Sparkles, X } from "lucide-react";
 import { useAuth } from "@/lib/auth";
@@ -25,6 +26,7 @@ interface ArchitectureAgentGateProps {
 export function ArchitectureAgentGate({
   canRenderAgent,
 }: ArchitectureAgentGateProps) {
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const { user, loading } = useAuth();
   const architectureAgent = useArchitectureAgent();
@@ -127,6 +129,10 @@ export function ArchitectureAgentGate({
 
     void restoreDraft();
   }, [message]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!canRenderAgent) {
@@ -447,7 +453,8 @@ export function ArchitectureAgentGate({
         </div>
       </div>
 
-      {showFullDiagram && svgPreviewUrl ? (
+      {mounted && showFullDiagram && svgPreviewUrl
+        ? createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-3 sm:p-6">
           <div className="relative h-[90vh] w-full max-w-6xl rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl dark:border-white/15 dark:bg-slate-950">
             <button
@@ -471,9 +478,11 @@ export function ArchitectureAgentGate({
             </div>
           </div>
         </div>
-      ) : null}
+        , document.body)
+        : null}
 
-      {showAuthDialog ? (
+      {mounted && showAuthDialog
+        ? createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 text-slate-900 shadow-2xl dark:border-white/15 dark:bg-slate-950 dark:text-white">
             <p className="inline-flex items-center gap-2 text-sm font-medium text-amber-600 dark:text-amber-200">
@@ -510,7 +519,8 @@ export function ArchitectureAgentGate({
             </div>
           </div>
         </div>
-      ) : null}
+        , document.body)
+        : null}
     </>
   );
 }

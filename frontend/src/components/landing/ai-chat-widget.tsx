@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Bot, X, Send, Minimize2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
 import { usePublicAiChat } from '@/hooks/use-ai';
 import { useSectionContent } from '@/hooks/use-content';
 import { parseAiUiContent } from '@/lib/ai-ui-content';
@@ -23,6 +24,7 @@ function TypingIndicator() {
 }
 
 export function PublicAiChatWidget() {
+  const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [showWelcomeNudge, setShowWelcomeNudge] = useState(false);
   const [input, setInput] = useState('');
@@ -33,6 +35,10 @@ export function PublicAiChatWidget() {
   const { data: aiUiSection } = useSectionContent('ai-ui');
   const aiUi = parseAiUiContent(aiUiSection?.data);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -80,7 +86,7 @@ export function PublicAiChatWidget() {
     }
   };
 
-  return (
+  const content = (
     <>
       <AnimatePresence>
         {!isOpen && (
@@ -133,7 +139,7 @@ export function PublicAiChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="fixed bottom-6 right-6 z-50 flex h-120 w-90 flex-col rounded-2xl border border-border bg-background shadow-2xl"
+            className="fixed bottom-6 right-6 z-50 flex h-[30rem] w-[min(22.5rem,calc(100vw-1.25rem))] flex-col rounded-2xl border border-border bg-background shadow-2xl"
           >
             {/* Header */}
             <div className="flex items-center justify-between rounded-t-2xl bg-primary px-4 py-3 text-primary-foreground">
@@ -228,4 +234,7 @@ export function PublicAiChatWidget() {
       </AnimatePresence>
     </>
   );
+
+  if (!mounted) return null;
+  return createPortal(content, document.body);
 }

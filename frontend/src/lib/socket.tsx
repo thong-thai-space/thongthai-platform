@@ -9,8 +9,10 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { usePathname } from 'next/navigation';
 import { io, type Socket } from 'socket.io-client';
 import { API_BASE_URL } from './api';
+import { useAuth } from './auth';
 
 const resolveSocketUrl = () => {
   const fromEnv = process.env.NEXT_PUBLIC_SOCKET_URL?.trim();
@@ -32,11 +34,32 @@ const SocketContext = createContext<SocketContextType>({
 });
 
 export function SocketProvider({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const { user, loading } = useAuth();
   const [isConnected, setIsConnected] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const getSocket = useCallback(() => socketRef.current, []);
 
+  const isProtectedPath =
+    pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/member') ||
+    pathname.startsWith('/portal');
+
+  const hasSessionHint =
+    typeof window !== 'undefined' && localStorage.getItem('tts_has_session') === '1';
+
+  const shouldConnect = Boolean(user) || (!loading && (isProtectedPath || hasSessionHint));
+
   useEffect(() => {
+    if (!shouldConnect) {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
+      setIsConnected(false);
+      return;
+    }
+
     const socketUrl = resolveSocketUrl();
 
     const s = io(socketUrl, {
@@ -57,7 +80,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       socketRef.current = null;
       setIsConnected(false);
     };
-  }, []);
+  }, [shouldConnect]);
 
   return (
     <SocketContext.Provider value={{ getSocket, isConnected }}>

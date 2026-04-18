@@ -479,16 +479,11 @@ export class AiService {
 
             parsed = this.parseArchitectureResponse(this.extractText(response));
           } catch (retryError) {
-            if (retryError instanceof BadRequestException) {
-              throw retryError;
-            }
-
             if (!this.isProviderUnavailableError(retryError)) {
-              throw new BadRequestException(
-                'AI returned invalid architecture output. Please refine your request and try again.',
+              this.logger.warn(
+                'Architecture output invalid after retry, falling back to template result',
               );
             }
-
             parsed = this.buildFallbackArchitectureResult(sanitizedMessage);
             fallbackUsed = true;
           }
