@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion';
 import { type HTMLAttributes, type ReactNode } from 'react';
+import type { HTMLMotionProps } from 'framer-motion';
 
 interface MotionRevealProps {
   children: ReactNode;
@@ -46,9 +47,8 @@ interface MotionCardProps extends HTMLAttributes<HTMLDivElement> {
   delay?: number;
 }
 
-interface MotionSectionProps extends HTMLAttributes<HTMLElement> {
+interface MotionSectionProps extends Omit<HTMLMotionProps<'section'>, 'children'> {
   children: ReactNode;
-  className?: string;
   delay?: number;
 }
 
