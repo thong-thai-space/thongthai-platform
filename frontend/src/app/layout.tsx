@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
 import { QueryProvider } from "@/lib/query-provider";
 import { SocketProvider } from "@/lib/socket";
+import { AnimationProvider } from "@/components/motion/animation-provider";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://thongthaispace.com";
 
@@ -49,7 +50,9 @@ export default function RootLayout({
       >
         <QueryProvider>
           <AuthProvider>
-            <SocketProvider>{children}</SocketProvider>
+            <SocketProvider>
+              <AnimationProvider>{children}</AnimationProvider>
+            </SocketProvider>
           </AuthProvider>
         </QueryProvider>
       </body>

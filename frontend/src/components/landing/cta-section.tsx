@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { useSectionContent } from '@/hooks/use-content';
+import { MotionReveal } from '@/components/motion/motion-primitives';
 
 const defaults = {
   title: 'Ready to start your project?',
@@ -18,7 +19,7 @@ export function CtaSection() {
 
   return (
     <section className="bg-primary py-20 sm:py-28">
-      <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+      <MotionReveal className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
         <Sparkles className="mx-auto h-10 w-10 text-primary-foreground/80" />
         <h2 className="mt-4 text-3xl font-bold tracking-tight text-primary-foreground sm:text-4xl">
           {c.title}
@@ -41,7 +42,7 @@ export function CtaSection() {
             {c.secondaryCta.text}
           </Link>
         </div>
-      </div>
+      </MotionReveal>
     </section>
   );
 }

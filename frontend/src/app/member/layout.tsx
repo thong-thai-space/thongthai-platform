@@ -35,11 +35,11 @@ export default function MemberLayout({
   if (!user || user.role !== 'MEMBER') return null;
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="tts-workspace-shell flex h-screen overflow-hidden">
       <MemberSidebar />
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="tts-workspace flex flex-1 flex-col overflow-hidden" data-role="MEMBER">
         <PushNotificationPrompt />
-        {children}
+        <div className="tts-workspace-content flex flex-1 flex-col overflow-hidden">{children}</div>
       </div>
     </div>
   );

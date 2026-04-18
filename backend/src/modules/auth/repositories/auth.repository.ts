@@ -10,6 +10,7 @@ type AuthUserRecord = Pick<
   | 'phone'
   | 'avatar'
   | 'role'
+  | 'motionPreference'
   | 'password'
   | 'isActive'
   | 'emailVerified'
@@ -43,6 +44,7 @@ export class AuthRepository {
           phone: true,
           avatar: true,
           role: true,
+          motionPreference: true,
           password: true,
           isActive: true,
           emailVerified: true,
@@ -73,6 +75,7 @@ export class AuthRepository {
           phone: true,
           avatar: true,
           role: true,
+          motionPreference: true,
           password: true,
           isActive: true,
           emailVerified: true,

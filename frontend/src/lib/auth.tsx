@@ -11,6 +11,10 @@ import {
 import { usePathname } from 'next/navigation';
 import api, { API_BASE_URL } from './api';
 import type { User } from '@/types';
+import {
+  fromBackendMotionPreference,
+  MOTION_PREFERENCE_KEY,
+} from './motion-settings';
 
 interface AuthContextType {
   user: User | null;
@@ -69,6 +73,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(data);
         if (typeof window !== 'undefined') {
           localStorage.setItem('tts_has_session', '1');
+          localStorage.setItem(
+            MOTION_PREFERENCE_KEY,
+            fromBackendMotionPreference(data?.motionPreference),
+          );
+          window.dispatchEvent(new CustomEvent('tts-motion-preference-change'));
         }
       })
       .catch(() => {
@@ -142,6 +151,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { data } = await api.get('/auth/me');
       setUser(data);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(
+          MOTION_PREFERENCE_KEY,
+          fromBackendMotionPreference(data?.motionPreference),
+        );
+        window.dispatchEvent(new CustomEvent('tts-motion-preference-change'));
+      }
     } catch {
       // silently fail
     }

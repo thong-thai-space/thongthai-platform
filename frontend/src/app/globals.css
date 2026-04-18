@@ -71,6 +71,279 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
+.tts-route-shell {
+  min-height: 100dvh;
+  will-change: opacity, transform, filter;
+}
+
+.tts-page-sweep {
+  position: fixed;
+  inset: 0;
+  z-index: 9997;
+  pointer-events: none;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 80%, #fff), color-mix(in srgb, var(--accent) 85%, #fff));
+  opacity: 0.98;
+}
+
+.tts-cursor-dot,
+.tts-cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 9998;
+  border-radius: 999px;
+  transform: translate3d(-50%, -50%, 0);
+}
+
+.tts-cursor-dot {
+  width: 11px;
+  height: 11px;
+  background: color-mix(in srgb, var(--primary) 90%, #fff);
+  mix-blend-mode: screen;
+  transition: width 0.25s ease, height 0.25s ease, background 0.25s ease;
+}
+
+.tts-cursor-ring {
+  width: 42px;
+  height: 42px;
+  border: 1.5px solid color-mix(in srgb, var(--primary) 75%, transparent);
+  transition: width 0.28s ease, height 0.28s ease, border-color 0.28s ease;
+}
+
+body:has(a:hover) .tts-cursor-dot,
+body:has(button:hover) .tts-cursor-dot,
+body:has([role='button']:hover) .tts-cursor-dot {
+  width: 18px;
+  height: 18px;
+}
+
+body:has(a:hover) .tts-cursor-ring,
+body:has(button:hover) .tts-cursor-ring,
+body:has([role='button']:hover) .tts-cursor-ring {
+  width: 60px;
+  height: 60px;
+  border-color: color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+.tts-motion-card {
+  position: relative;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  --mx: 50%;
+  --my: 50%;
+}
+
+.tts-motion-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background:
+    radial-gradient(
+      circle at var(--mx) var(--my),
+      color-mix(in srgb, var(--primary) 18%, transparent),
+      transparent 58%
+    );
+}
+
+.tts-motion-card:hover::before {
+  opacity: 1;
+}
+
+a,
+button,
+[role='button'],
+input,
+textarea,
+select {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+button:active,
+[role='button']:active {
+  transform: scale(0.985);
+}
+
+@keyframes tts-workspace-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.tts-workspace-content main {
+  animation: tts-workspace-fade-up var(--tts-motion-speed, 0.45s) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.tts-workspace-content .grid > *,
+.tts-workspace-content .space-y-3 > *,
+.tts-workspace-content .space-y-4 > *,
+.tts-workspace-content .space-y-6 > *,
+.tts-workspace-content .space-y-8 > *,
+.tts-workspace-content section,
+.tts-workspace-content article,
+.tts-workspace-content .rounded-xl,
+.tts-workspace-content .rounded-2xl {
+  animation: tts-workspace-fade-up var(--tts-item-motion-speed, 0.5s) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.tts-workspace-content .grid > *:nth-child(1),
+.tts-workspace-content .space-y-3 > *:nth-child(1),
+.tts-workspace-content .space-y-4 > *:nth-child(1),
+.tts-workspace-content .space-y-6 > *:nth-child(1),
+.tts-workspace-content .space-y-8 > *:nth-child(1) {
+  animation-delay: 0.04s;
+}
+
+.tts-workspace-content .grid > *:nth-child(2),
+.tts-workspace-content .space-y-3 > *:nth-child(2),
+.tts-workspace-content .space-y-4 > *:nth-child(2),
+.tts-workspace-content .space-y-6 > *:nth-child(2),
+.tts-workspace-content .space-y-8 > *:nth-child(2) {
+  animation-delay: 0.08s;
+}
+
+.tts-workspace-content .grid > *:nth-child(3),
+.tts-workspace-content .space-y-3 > *:nth-child(3),
+.tts-workspace-content .space-y-4 > *:nth-child(3),
+.tts-workspace-content .space-y-6 > *:nth-child(3),
+.tts-workspace-content .space-y-8 > *:nth-child(3) {
+  animation-delay: 0.12s;
+}
+
+.tts-workspace-content .grid > *:nth-child(4),
+.tts-workspace-content .space-y-3 > *:nth-child(4),
+.tts-workspace-content .space-y-4 > *:nth-child(4),
+.tts-workspace-content .space-y-6 > *:nth-child(4),
+.tts-workspace-content .space-y-8 > *:nth-child(4) {
+  animation-delay: 0.16s;
+}
+
+.tts-workspace-content table tbody tr {
+  transition: transform 0.18s ease, background-color 0.18s ease;
+}
+
+.tts-workspace-content table tbody tr:hover {
+  transform: translateX(2px);
+}
+
+.tts-data-table thead th {
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.tts-data-table tbody tr {
+  animation: tts-workspace-fade-up 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.tts-data-table tbody tr:nth-child(1) { animation-delay: 0.02s; }
+.tts-data-table tbody tr:nth-child(2) { animation-delay: 0.04s; }
+.tts-data-table tbody tr:nth-child(3) { animation-delay: 0.06s; }
+.tts-data-table tbody tr:nth-child(4) { animation-delay: 0.08s; }
+.tts-data-table tbody tr:nth-child(5) { animation-delay: 0.1s; }
+.tts-data-table tbody tr:nth-child(6) { animation-delay: 0.12s; }
+
+.tts-data-table tbody td {
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.tts-data-table tbody tr:hover td {
+  background-color: color-mix(in srgb, var(--muted) 75%, transparent);
+}
+
+.tts-workspace-content .rounded-xl:hover,
+.tts-workspace-content .rounded-2xl:hover {
+  transform: translateY(var(--tts-hover-lift, -2px));
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--primary) var(--tts-shadow-alpha, 12%), transparent);
+}
+
+.tts-workspace-content .rounded-xl,
+.tts-workspace-content .rounded-2xl {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.tts-workspace {
+  --tts-motion-speed: 0.45s;
+  --tts-item-motion-speed: 0.5s;
+  --tts-hover-lift: -2px;
+  --tts-shadow-alpha: 12%;
+}
+
+.tts-workspace[data-role='OWNER'] {
+  --tts-motion-speed: 0.52s;
+  --tts-item-motion-speed: 0.58s;
+  --tts-hover-lift: -3px;
+  --tts-shadow-alpha: 16%;
+}
+
+.tts-workspace[data-role='ADMIN'] {
+  --tts-motion-speed: 0.48s;
+  --tts-item-motion-speed: 0.54s;
+  --tts-hover-lift: -2.5px;
+  --tts-shadow-alpha: 14%;
+}
+
+.tts-workspace[data-role='MEMBER'] {
+  --tts-motion-speed: 0.4s;
+  --tts-item-motion-speed: 0.46s;
+  --tts-hover-lift: -2px;
+  --tts-shadow-alpha: 11%;
+}
+
+.tts-workspace[data-role='CLIENT'] {
+  --tts-motion-speed: 0.34s;
+  --tts-item-motion-speed: 0.4s;
+  --tts-hover-lift: -1.5px;
+  --tts-shadow-alpha: 9%;
+}
+
+.tts-form-shell {
+  position: relative;
+}
+
+.tts-form-shell .tts-form-field {
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.tts-form-shell .tts-form-field:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent);
+}
+
+@keyframes tts-skeleton-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.tts-skeleton {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--muted) 100%, transparent) 15%,
+    color-mix(in srgb, var(--foreground) 6%, var(--muted) 94%) 45%,
+    color-mix(in srgb, var(--muted) 100%, transparent) 75%
+  );
+  background-size: 220% 100%;
+  animation: tts-skeleton-shimmer 1.5s linear infinite;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
@@ -273,6 +546,53 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .tts-route-shell,
+  .tts-page-sweep,
+  .tts-cursor-dot,
+  .tts-cursor-ring,
+  .tts-motion-card {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .tts-motion-card::before {
+    display: none;
+  }
+
+  .tts-workspace-content main,
+  .tts-workspace-content .grid > *,
+  .tts-workspace-content .space-y-3 > *,
+  .tts-workspace-content .space-y-4 > *,
+  .tts-workspace-content .space-y-6 > *,
+  .tts-workspace-content .space-y-8 > *,
+  .tts-workspace-content section,
+  .tts-workspace-content article,
+  .tts-workspace-content .rounded-xl,
+  .tts-workspace-content .rounded-2xl {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .tts-data-table tbody tr,
+  .tts-data-table tbody td,
+  .tts-data-table thead th {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+
+  .tts-form-shell .tts-form-field,
+  .tts-skeleton {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
   .ai-agent-enter {
     animation: none;
     transform: none;

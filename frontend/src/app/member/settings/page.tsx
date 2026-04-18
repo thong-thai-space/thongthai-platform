@@ -6,6 +6,7 @@ import { AvatarUpload } from '@/components/avatar-upload';
 import api from '@/lib/api';
 import { useState } from 'react';
 import { User, Settings } from 'lucide-react';
+import { MotionPreferences } from '@/components/settings/motion-preferences';
 
 type Tab = 'profile' | 'password';
 
@@ -45,6 +46,10 @@ export default function MemberSettingsPage() {
 
         {activeTab === 'profile' && <ProfileForm />}
         {activeTab === 'password' && <PasswordForm />}
+
+        <div className="mt-8 max-w-md">
+          <MotionPreferences />
+        </div>
       </main>
     </>
   );

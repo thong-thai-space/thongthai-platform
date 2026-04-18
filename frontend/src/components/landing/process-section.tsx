@@ -2,6 +2,7 @@
 
 import { MessageSquare, Lightbulb, Code, Rocket } from 'lucide-react';
 import { useSectionContent } from '@/hooks/use-content';
+import { MotionReveal } from '@/components/motion/motion-primitives';
 
 const iconMap: Record<string, any> = { MessageSquare, Lightbulb, Code, Rocket };
 
@@ -47,20 +48,20 @@ export function ProcessSection() {
   return (
     <section className="bg-muted/30 py-20 sm:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
+        <MotionReveal className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             {c.title}
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
             {c.subtitle}
           </p>
-        </div>
+        </MotionReveal>
 
         <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {c.steps.map((item, idx) => {
             const Icon = iconMap[item.icon];
             return (
-              <div key={item.step} className="relative text-center">
+              <MotionReveal key={item.step} delay={idx * 0.08} className="relative text-center">
                 {/* Connector line */}
                 {idx < c.steps.length - 1 && (
                   <div className="absolute left-1/2 top-8 hidden h-0.5 w-full bg-border lg:block" />
@@ -72,7 +73,7 @@ export function ProcessSection() {
                 <div className="mt-2 text-xs font-bold text-primary">{item.step}</div>
                 <h3 className="mt-2 text-lg font-semibold">{item.title}</h3>
                 <p className="mt-2 text-sm text-muted-foreground">{item.description}</p>
-              </div>
+              </MotionReveal>
             );
           })}
         </div>

@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
+import { MotionReveal } from '@/components/motion/motion-primitives';
 
 export default function PortalProjectEditPage() {
   const params = useParams();
@@ -97,16 +98,19 @@ export default function PortalProjectEditPage() {
     <>
       <PortalHeader title="Edit Project" />
       <main className="flex-1 overflow-y-auto p-6">
-        <Link
-          href={`/portal/projects/${id}`}
-          className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back
-        </Link>
+        <MotionReveal delay={0.02}>
+          <Link
+            href={`/portal/projects/${id}`}
+            className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Link>
+        </MotionReveal>
 
-        <form onSubmit={handleSubmit} className="mx-auto max-w-2xl space-y-6">
-          <div>
+        <form onSubmit={handleSubmit} className="tts-form-shell mx-auto max-w-2xl space-y-6">
+          <MotionReveal delay={0.06}>
+            <div>
             <label className="text-sm font-medium">
               Project Name <span className="text-destructive">*</span>
             </label>
@@ -114,28 +118,31 @@ export default function PortalProjectEditPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="mt-1 w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+              className="tts-form-field mt-1 w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
             />
           </div>
+          </MotionReveal>
 
-          <div>
+          <MotionReveal delay={0.1}>
+            <div>
             <label className="text-sm font-medium">Description</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
-              className="mt-1 w-full resize-none rounded-lg border border-border bg-background px-4 py-2.5 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+              className="tts-form-field mt-1 w-full resize-none rounded-lg border border-border bg-background px-4 py-2.5 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
             />
           </div>
+          </MotionReveal>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <MotionReveal delay={0.14} className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="text-sm font-medium">Budget</label>
               <input
                 type="number"
                 value={budget}
                 onChange={(e) => setBudget(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                className="tts-form-field mt-1 w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
               />
             </div>
             <div>
@@ -143,33 +150,37 @@ export default function PortalProjectEditPage() {
               <select
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                className="tts-form-field mt-1 w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
               >
                 <option value="VND">VND</option>
                 <option value="USD">USD</option>
               </select>
             </div>
-          </div>
+          </MotionReveal>
 
-          <div>
+          <MotionReveal delay={0.18}>
+            <div>
             <label className="text-sm font-medium">Deadline</label>
             <input
               type="date"
               value={deadline}
               onChange={(e) => setDeadline(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+              className="tts-form-field mt-1 w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
             />
           </div>
+          </MotionReveal>
 
-          <div>
+          <MotionReveal delay={0.22}>
+            <div>
             <label className="text-sm font-medium">Technologies (comma-separated)</label>
             <input
               value={techStack}
               onChange={(e) => setTechStack(e.target.value)}
               placeholder="React, Node.js, PostgreSQL"
-              className="mt-1 w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+              className="tts-form-field mt-1 w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
             />
           </div>
+          </MotionReveal>
 
           {error && (
             <div className="rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -177,14 +188,16 @@ export default function PortalProjectEditPage() {
             </div>
           )}
 
-          <button
-            type="submit"
-            disabled={!name.trim() || updateProject.isPending}
-            className="inline-flex items-center gap-2 rounded-lg bg-accent px-6 py-2.5 text-sm font-medium text-accent-foreground hover:bg-accent/90 disabled:opacity-50"
-          >
-            <Save className="h-4 w-4" />
-            {updateProject.isPending ? 'Saving...' : 'Save Changes'}
-          </button>
+          <MotionReveal delay={0.26}>
+            <button
+              type="submit"
+              disabled={!name.trim() || updateProject.isPending}
+              className="inline-flex items-center gap-2 rounded-lg bg-accent px-6 py-2.5 text-sm font-medium text-accent-foreground hover:bg-accent/90 disabled:opacity-50"
+            >
+              <Save className="h-4 w-4" />
+              {updateProject.isPending ? 'Saving...' : 'Save Changes'}
+            </button>
+          </MotionReveal>
         </form>
       </main>
     </>

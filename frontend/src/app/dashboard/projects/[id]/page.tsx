@@ -29,6 +29,7 @@ import {
   X,
 } from 'lucide-react';
 import type { TaskStatus, TaskPriority, ProjectStatus, Message } from '@/types';
+import { MotionReveal } from '@/components/motion/motion-primitives';
 
 const projectStatusConfig: Record<ProjectStatus, { label: string; color: string }> = {
   DRAFT: { label: 'Draft', color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' },
@@ -88,7 +89,7 @@ export default function ProjectDetailPage() {
       <DashboardHeader title={project.name} />
       <main className="flex-1 overflow-y-auto p-6">
         {/* Project status */}
-        <div className="mb-6 flex items-center gap-3">
+        <MotionReveal className="mb-6 flex items-center gap-3" delay={0.04}>
           <span className="text-sm font-medium text-muted-foreground">Status:</span>
           <select
             value={project.status}
@@ -96,7 +97,7 @@ export default function ProjectDetailPage() {
               updateProject.mutate({ id: project.id, status: e.target.value as ProjectStatus })
             }
             disabled={updateProject.isPending}
-            className={`rounded-lg border border-border px-3 py-1.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50 ${projectStatusConfig[project.status as ProjectStatus]?.color || ''}`}
+            className={`tts-form-field rounded-lg border border-border px-3 py-1.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50 ${projectStatusConfig[project.status as ProjectStatus]?.color || ''}`}
           >
             {Object.entries(projectStatusConfig).map(([value, { label }]) => (
               <option key={value} value={value}>
@@ -107,11 +108,11 @@ export default function ProjectDetailPage() {
           {updateProject.isPending && (
             <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
           )}
-        </div>
+        </MotionReveal>
 
         {/* Client request banner */}
         {project.status === 'DRAFT' && project.clientId && (
-          <div className="mb-6 flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950">
+          <MotionReveal className="mb-6 flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950" delay={0.08}>
             <div>
               <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-200">
                 Project request from client
@@ -128,11 +129,11 @@ export default function ProjectDetailPage() {
               <CheckCircle className="h-4 w-4" />
               {acceptRequest.isPending ? 'Processing...' : 'Accept'}
             </button>
-          </div>
+          </MotionReveal>
         )}
 
         {/* Info cards */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <MotionReveal className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" delay={0.12}>
           {project.deadline && (
             <div className="flex items-center gap-3 rounded-lg border border-border bg-background p-4">
               <Calendar className="h-5 w-5 text-muted-foreground" />
@@ -174,23 +175,23 @@ export default function ProjectDetailPage() {
               </div>
             </a>
           )}
-        </div>
+        </MotionReveal>
 
         {project.description && (
-          <div className="mt-6 rounded-lg border border-border bg-background p-5">
+          <MotionReveal className="mt-6 rounded-lg border border-border bg-background p-5" delay={0.16}>
             <h3 className="text-sm font-semibold">Description</h3>
             <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{project.description}</p>
-          </div>
+          </MotionReveal>
         )}
 
         {/* Kanban Board */}
-        <div className="mt-8 flex items-center justify-between">
+        <MotionReveal className="mt-8 flex items-center justify-between" delay={0.2}>
           <h3 className="text-base font-semibold">
             Tasks ({tasks.length})
           </h3>
           <AddTaskButton projectId={id} />
-        </div>
-        <div className="mt-4 grid gap-4 lg:grid-cols-4">
+        </MotionReveal>
+        <MotionReveal className="mt-4 grid gap-4 lg:grid-cols-4" delay={0.24}>
           {columns.map((col) => {
             const colTasks = tasks.filter((t) => t.status === col.status);
             return (
@@ -227,7 +228,7 @@ export default function ProjectDetailPage() {
               </div>
             );
           })}
-        </div>
+        </MotionReveal>
 
         {/* Project Chat */}
         {project.clientId && (
@@ -280,7 +281,7 @@ function AddTaskButton({ projectId }: { projectId: string }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="grid w-full gap-2 rounded-lg border border-border bg-background p-3 sm:grid-cols-2 lg:grid-cols-6">
+    <form onSubmit={handleSubmit} className="tts-form-shell grid w-full gap-2 rounded-lg border border-border bg-background p-3 sm:grid-cols-2 lg:grid-cols-6">
       <div className="sm:col-span-2 lg:col-span-2">
         <input
           value={title}
@@ -288,7 +289,7 @@ function AddTaskButton({ projectId }: { projectId: string }) {
           placeholder="Task name"
           required
           autoFocus
-          className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </div>
       <div className="sm:col-span-2 lg:col-span-2">
@@ -297,13 +298,13 @@ function AddTaskButton({ projectId }: { projectId: string }) {
           onChange={(e) => setDescription(e.target.value)}
           rows={2}
           placeholder="Detailed task description for assignee"
-          className="w-full resize-y rounded-lg border border-border bg-background px-3 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="tts-form-field w-full resize-y rounded-lg border border-border bg-background px-3 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </div>
       <select
         value={priority}
         onChange={(e) => setPriority(e.target.value as TaskPriority)}
-        className="rounded-lg border border-border bg-background px-2 py-1.5 text-sm lg:col-span-1"
+        className="tts-form-field rounded-lg border border-border bg-background px-2 py-1.5 text-sm lg:col-span-1"
       >
         <option value="LOW">Low</option>
         <option value="MEDIUM">Medium</option>
@@ -313,7 +314,7 @@ function AddTaskButton({ projectId }: { projectId: string }) {
       <select
         value={assigneeId}
         onChange={(e) => setAssigneeId(e.target.value)}
-        className="rounded-lg border border-border bg-background px-2 py-1.5 text-sm lg:col-span-1"
+        className="tts-form-field rounded-lg border border-border bg-background px-2 py-1.5 text-sm lg:col-span-1"
       >
         <option value="">Unassigned</option>
         {team
@@ -326,7 +327,7 @@ function AddTaskButton({ projectId }: { projectId: string }) {
         type="date"
         value={dueDate}
         onChange={(e) => setDueDate(e.target.value)}
-        className="rounded-lg border border-border bg-background px-2 py-1.5 text-sm lg:col-span-1"
+        className="tts-form-field rounded-lg border border-border bg-background px-2 py-1.5 text-sm lg:col-span-1"
       />
       <div className="flex items-center gap-2 lg:col-span-1">
         <button

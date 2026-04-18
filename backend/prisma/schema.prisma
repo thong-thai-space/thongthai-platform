@@ -65,6 +65,12 @@ enum Language {
   EN
 }
 
+enum MotionPreference {
+  SYSTEM
+  ON
+  OFF
+}
+
 enum Currency {
   VND
   USD
@@ -106,6 +112,7 @@ model User {
   phone            String?
   role             UserRole  @default(CLIENT)
   locale           Language  @default(EN)
+  motionPreference MotionPreference @default(SYSTEM)
   isActive         Boolean   @default(true)
   refreshTokenHash String?
   lastLoginAt      DateTime?

@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { UserAvatar } from '@/components/user-avatar';
+import { motion, useReducedMotion } from 'framer-motion';
 const navItems = [
   { href: '/member', icon: LayoutDashboard, label: 'Overview' },
   { href: '/member/tasks', icon: CheckSquare, label: 'My Tasks' },
@@ -26,9 +27,13 @@ export function MemberSidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
 
   return (
-    <aside
+    <motion.aside
+      initial={prefersReducedMotion ? false : { opacity: 0, x: -18 }}
+      animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
+      transition={{ duration: prefersReducedMotion ? 0 : 0.42, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
         'flex h-screen flex-col border-r border-border bg-sidebar text-sidebar-foreground transition-all duration-300',
         collapsed ? 'w-16' : 'w-64',
@@ -59,7 +64,12 @@ export function MemberSidebar() {
                 : pathname.startsWith(item.href);
 
             return (
-              <li key={item.href}>
+              <motion.li
+                key={item.href}
+                initial={prefersReducedMotion ? false : { opacity: 0, x: -10 }}
+                animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
+                transition={{ delay: prefersReducedMotion ? 0 : 0.03 * navItems.indexOf(item), duration: 0.3 }}
+              >
                 <Link
                   href={item.href}
                   className={cn(
@@ -74,7 +84,7 @@ export function MemberSidebar() {
                   <item.icon className="h-5 w-5 shrink-0" />
                   {!collapsed && <span className="flex-1">{item.label}</span>}
                 </Link>
-              </li>
+              </motion.li>
             );
           })}
         </ul>
@@ -103,6 +113,6 @@ export function MemberSidebar() {
           {!collapsed && <span>Sign out</span>}
         </button>
       </div>
-    </aside>
+    </motion.aside>
   );
 }

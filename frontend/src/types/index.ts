@@ -41,6 +41,7 @@ export interface User {
   phone?: string;
   role: UserRole;
   locale: Language;
+  motionPreference?: 'SYSTEM' | 'ON' | 'OFF';
   isActive: boolean;
   lastLoginAt?: string;
   createdAt: string;

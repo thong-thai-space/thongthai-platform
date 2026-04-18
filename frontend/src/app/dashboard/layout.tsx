@@ -36,12 +36,14 @@ export default function DashboardLayout({
 
   if (!user || user.role === 'CLIENT' || user.role === 'MEMBER') return null;
 
+  const roleMotion = user.role === 'OWNER' ? 'OWNER' : 'ADMIN';
+
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="tts-workspace-shell flex h-screen overflow-hidden">
       <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="tts-workspace flex flex-1 flex-col overflow-hidden" data-role={roleMotion}>
         <PushNotificationPrompt />
-        {children}
+        <div className="tts-workspace-content flex flex-1 flex-col overflow-hidden">{children}</div>
       </div>
     </div>
   );

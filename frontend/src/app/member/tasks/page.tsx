@@ -81,13 +81,13 @@ export default function MemberTasksPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search tasks..."
-                className="rounded-lg border border-border bg-background py-2 pl-9 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                className="tts-form-field rounded-lg border border-border bg-background py-2 pl-9 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              className="tts-form-field rounded-lg border border-border bg-background px-3 py-2 text-sm"
             >
               <option value="ALL">All statuses</option>
               {Object.entries(statusLabels).map(([k, v]) => (
@@ -97,7 +97,7 @@ export default function MemberTasksPage() {
             <select
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
-              className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              className="tts-form-field rounded-lg border border-border bg-background px-3 py-2 text-sm"
             >
               <option value="ALL">All priorities</option>
               {Object.entries(priorityLabels).map(([k, v]) => (
@@ -130,7 +130,7 @@ export default function MemberTasksPage() {
         ) : view === 'list' ? (
           /* List view */
           <div className="mt-6 overflow-x-auto rounded-lg border border-border">
-            <table className="w-full min-w-160 text-sm">
+            <table className="tts-data-table w-full min-w-160 text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/50 text-left">
                   <th className="px-4 py-3 font-medium">Title</th>

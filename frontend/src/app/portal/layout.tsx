@@ -35,11 +35,11 @@ export default function PortalLayout({
   if (!user || user.role !== 'CLIENT') return null;
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="tts-workspace-shell flex h-screen overflow-hidden">
       <PortalSidebar />
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="tts-workspace flex flex-1 flex-col overflow-hidden" data-role="CLIENT">
         <PushNotificationPrompt />
-        {children}
+        <div className="tts-workspace-content flex flex-1 flex-col overflow-hidden">{children}</div>
       </div>
       <AiChatWidget />
     </div>

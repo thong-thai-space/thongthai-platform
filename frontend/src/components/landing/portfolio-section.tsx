@@ -7,6 +7,7 @@ import { useSectionContent } from '@/hooks/use-content';
 import { useShowcaseProjects } from '@/hooks/use-projects';
 import type { Project } from '@/types';
 import { resolveBackendAssetUrl } from '@/lib/asset-url';
+import { MotionCard, MotionReveal } from '@/components/motion/motion-primitives';
 
 const defaults = {
   title: 'Featured Projects',
@@ -44,14 +45,14 @@ export function PortfolioSection() {
   return (
     <section id="portfolio" className="py-20 sm:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
+        <MotionReveal className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             {c.title}
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
             {c.subtitle}
           </p>
-        </div>
+        </MotionReveal>
 
         {items.length === 0 ? (
           <div className="mt-16 rounded-xl border border-dashed border-border p-10 text-center">
@@ -61,9 +62,10 @@ export function PortfolioSection() {
           </div>
         ) : (
           <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {items.map((project) => (
-              <div
+            {items.map((project, index) => (
+              <MotionCard
                 key={`${project.title}-${project.client}`}
+                delay={0.08 * index}
                 className="group overflow-hidden rounded-xl border border-border bg-background transition-all hover:border-primary/30 hover:shadow-lg"
               >
                 <div className={`flex h-48 items-center justify-center overflow-hidden ${project.thumbnailUrl ? '' : 'bg-linear-to-br from-primary/10 to-accent/10'}`}>
@@ -105,12 +107,12 @@ export function PortfolioSection() {
                     ))}
                   </div>
                 </div>
-              </div>
+              </MotionCard>
             ))}
           </div>
         )}
 
-        <div className="mt-12 text-center">
+        <MotionReveal className="mt-12 text-center" delay={0.12}>
           <Link
             href="/portfolio"
             className="inline-flex items-center gap-2 text-sm font-medium text-primary transition-colors hover:text-primary/80"
@@ -118,7 +120,7 @@ export function PortfolioSection() {
             {c.viewAllText || 'View all projects'}
             <ArrowRight className="h-4 w-4" />
           </Link>
-        </div>
+        </MotionReveal>
       </div>
     </section>
   );

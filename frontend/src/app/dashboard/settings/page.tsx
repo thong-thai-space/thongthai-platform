@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/auth';
 import { useState } from 'react';
 import api from '@/lib/api';
 import { User, Lock } from 'lucide-react';
+import { MotionPreferences } from '@/components/settings/motion-preferences';
 
 export default function SettingsPage() {
   const { user, refreshUser } = useAuth();
@@ -187,6 +188,10 @@ export default function SettingsPage() {
               </button>
             </form>
           )}
+
+          <div className="mt-8">
+            <MotionPreferences />
+          </div>
         </div>
       </main>
     </>

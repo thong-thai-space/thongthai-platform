@@ -1,5 +1,5 @@
 import { IsString, IsOptional, IsEnum } from 'class-validator';
-import { Language } from '@prisma/client';
+import { Language, MotionPreference } from '@prisma/client';
 
 export class UpdateProfileDto {
   @IsOptional()
@@ -17,4 +17,8 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsEnum(Language)
   locale?: Language;
+
+  @IsOptional()
+  @IsEnum(MotionPreference)
+  motionPreference?: MotionPreference;
 }

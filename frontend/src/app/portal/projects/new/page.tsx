@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Send } from 'lucide-react';
 import Link from 'next/link';
+import { MotionReveal } from '@/components/motion/motion-primitives';
 
 const ARCHITECTURE_IMPORT_STORAGE_KEY = 'tts_project_request_import';
 
@@ -94,22 +95,25 @@ export default function PortalNewProjectPage() {
       <PortalHeader title="Request New Project" />
       <main className="flex-1 overflow-y-auto p-6">
         <div className="mx-auto max-w-2xl">
-          <Link
-            href="/portal/projects"
-            className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to project list
-          </Link>
+          <MotionReveal delay={0.02}>
+            <Link
+              href="/portal/projects"
+              className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to project list
+            </Link>
+          </MotionReveal>
 
-          <div className="rounded-xl border border-border bg-card p-6">
+          <MotionReveal delay={0.06} className="rounded-xl border border-border bg-card p-6">
             <h2 className="mb-1 text-lg font-semibold">Submit Project Request</h2>
             <p className="mb-6 text-sm text-muted-foreground">
-              Describe the project you'd like to build. The Thong Thai Space team will review and contact you.
+              Describe the project you&apos;d like to build. The Thong Thai Space team will review and contact you.
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
+            <form onSubmit={handleSubmit} className="tts-form-shell space-y-4">
+              <MotionReveal delay={0.1}>
+                <div>
                 <label className="mb-1 block text-sm font-medium">
                   Project Name <span className="text-red-500">*</span>
                 </label>
@@ -118,22 +122,25 @@ export default function PortalNewProjectPage() {
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder="E.g.: Online store website"
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                  className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                 />
               </div>
+              </MotionReveal>
 
-              <div>
+              <MotionReveal delay={0.14}>
+                <div>
                 <label className="mb-1 block text-sm font-medium">Detailed Description</label>
                 <textarea
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                   rows={4}
                   placeholder="Describe requirements, desired features, target users..."
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                  className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                 />
               </div>
+              </MotionReveal>
 
-              <div className="grid grid-cols-2 gap-4">
+              <MotionReveal delay={0.18} className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="mb-1 block text-sm font-medium">Estimated Budget</label>
                   <input
@@ -141,7 +148,7 @@ export default function PortalNewProjectPage() {
                     value={form.budget}
                     onChange={(e) => setForm({ ...form, budget: e.target.value })}
                     placeholder="0"
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                    className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                   />
                 </div>
                 <div>
@@ -149,48 +156,54 @@ export default function PortalNewProjectPage() {
                   <select
                     value={form.currency}
                     onChange={(e) => setForm({ ...form, currency: e.target.value as 'VND' | 'USD' })}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                    className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                   >
                     <option value="VND">VND</option>
                     <option value="USD">USD</option>
                   </select>
                 </div>
-              </div>
+              </MotionReveal>
 
-              <div>
+              <MotionReveal delay={0.22}>
+                <div>
                 <label className="mb-1 block text-sm font-medium">Desired Deadline</label>
                 <input
                   type="date"
                   value={form.deadline}
                   onChange={(e) => setForm({ ...form, deadline: e.target.value })}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                  className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                 />
               </div>
+              </MotionReveal>
 
-              <div>
+              <MotionReveal delay={0.26}>
+                <div>
                 <label className="mb-1 block text-sm font-medium">Required Technologies</label>
                 <input
                   type="text"
                   value={form.techStack}
                   onChange={(e) => setForm({ ...form, techStack: e.target.value })}
                   placeholder="React, Node.js, PostgreSQL... (comma-separated)"
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                  className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                 />
               </div>
+              </MotionReveal>
 
               {error && <p className="text-sm text-red-600">{error}</p>}
               {successMessage && <p className="text-sm text-emerald-600">{successMessage}</p>}
 
-              <button
-                type="submit"
-                disabled={createRequest.isPending || Boolean(successMessage)}
-                className="inline-flex items-center gap-2 rounded-lg bg-accent px-6 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent/90 disabled:opacity-50"
-              >
-                <Send className="h-4 w-4" />
-                {createRequest.isPending ? 'Submitting...' : 'Submit Request'}
-              </button>
+              <MotionReveal delay={0.3}>
+                <button
+                  type="submit"
+                  disabled={createRequest.isPending || Boolean(successMessage)}
+                  className="inline-flex items-center gap-2 rounded-lg bg-accent px-6 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent/90 disabled:opacity-50"
+                >
+                  <Send className="h-4 w-4" />
+                  {createRequest.isPending ? 'Submitting...' : 'Submit Request'}
+                </button>
+              </MotionReveal>
             </form>
-          </div>
+          </MotionReveal>
         </div>
       </main>
     </>

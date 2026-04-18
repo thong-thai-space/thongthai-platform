@@ -2,6 +2,7 @@
 
 import { Star } from 'lucide-react';
 import { useSectionContent } from '@/hooks/use-content';
+import { MotionCard, MotionReveal } from '@/components/motion/motion-primitives';
 
 const defaults = {
   title: 'What our clients say',
@@ -38,19 +39,20 @@ export function TestimonialsSection() {
   return (
     <section className="py-20 sm:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
+        <MotionReveal className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             {c.title}
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
             {c.subtitle}
           </p>
-        </div>
+        </MotionReveal>
 
         <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {c.items.map((t) => (
-            <div
+          {c.items.map((t, index) => (
+            <MotionCard
               key={t.name}
+              delay={index * 0.08}
               className="rounded-xl border border-border bg-background p-6"
             >
               <div className="flex gap-1">
@@ -68,7 +70,7 @@ export function TestimonialsSection() {
                 <div className="text-sm font-semibold">{t.name}</div>
                 <div className="text-xs text-muted-foreground">{t.role}</div>
               </div>
-            </div>
+            </MotionCard>
           ))}
         </div>
       </div>
