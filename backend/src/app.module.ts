@@ -23,6 +23,7 @@ import { MessageModule } from './modules/message/message.module';
 import { ContactModule } from './modules/contact/contact.module';
 import { ContentModule } from './modules/content/content.module';
 import { HealthModule } from './modules/health/health.module';
+import { SecurityModule } from './modules/security/security.module';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { HealthModule } from './modules/health/health.module';
     ContactModule,
     ContentModule,
     HealthModule,
+    SecurityModule,
   ],
   controllers: [AppController],
   providers: [AppService],
