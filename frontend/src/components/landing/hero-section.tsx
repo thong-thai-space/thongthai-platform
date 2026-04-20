@@ -59,7 +59,7 @@ export function HeroSection({
   return (
     <>
       {/* Video block - separate section on top */}
-      <section className="relative h-[34vh] overflow-hidden bg-transparent sm:h-[42vh] lg:h-[56vh]">
+      <section className="relative mx-auto h-[34vh] w-[calc(100%-1.5rem)] max-w-6xl overflow-hidden rounded-4xl bg-transparent sm:h-[42vh] sm:w-[calc(100%-2.5rem)] lg:h-[56vh]">
         <video
           autoPlay
           muted
