@@ -59,8 +59,8 @@ export function HeroSection({
   return (
     <>
       {/* Video block - separate section on top */}
-      <section className="relative mx-auto h-[34vh] w-[calc(100%-1.5rem)] max-w-6xl sm:h-[42vh] sm:w-[calc(100%-2.5rem)] lg:h-[56vh]">
-        <div className="relative h-full w-full overflow-hidden rounded-4xl border border-slate-300/45 bg-transparent shadow-[0_10px_24px_rgba(15,23,42,0.16)] dark:border-white/10 dark:shadow-[0_10px_24px_rgba(2,6,23,0.4)]">
+      <section className="relative mx-auto h-[34vh] w-[calc(100%-3rem)] max-w-5xl sm:h-[42vh] sm:w-[calc(100%-6rem)] lg:h-[56vh] lg:w-[calc(100%-10rem)]">
+        <div className="relative h-full w-full overflow-hidden rounded-4xl border border-slate-300/45 bg-black shadow-[0_10px_24px_rgba(15,23,42,0.16)] dark:border-white/10 dark:shadow-[0_10px_24px_rgba(2,6,23,0.4)]">
           <video
             autoPlay
             muted
@@ -88,7 +88,7 @@ export function HeroSection({
       </section>
 
       {architectureOverlay ? (
-        <div className="relative z-20 -mt-2 pb-4 sm:-mt-3 sm:pb-5 lg:-mt-4 lg:pb-6">
+        <div className="relative z-20 mt-2 pb-4 sm:mt-3 sm:pb-5 lg:mt-4 lg:pb-6">
           {architectureOverlay}
         </div>
       ) : null}
