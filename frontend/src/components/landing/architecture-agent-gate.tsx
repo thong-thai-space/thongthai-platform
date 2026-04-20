@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from 'react-dom';
 import { useRouter } from "next/navigation";
-import { Download, Lock, Maximize2, Plus, Sparkles, X } from "lucide-react";
+import { Download, Lock, Maximize2, Plus, X } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import {
   type ArchitectureAgentResponse,
@@ -128,7 +128,7 @@ export function ArchitectureAgentGate({
     };
 
     void restoreDraft();
-  }, [message]);
+  }, [file, message]);
 
   useEffect(() => {
     setMounted(true);
@@ -197,7 +197,7 @@ export function ArchitectureAgentGate({
     return "/dashboard";
   };
 
-  const generateArchitecture = async (requestMessage: string, attachedFile?: File) => {
+  const generateArchitecture = useCallback(async (requestMessage: string, attachedFile?: File) => {
     const payload = await architectureAgent.mutateAsync({
       message: requestMessage,
       file: attachedFile,
@@ -214,7 +214,7 @@ export function ArchitectureAgentGate({
       setShowReviewFormation(false);
       reviewFxTimerRef.current = null;
     }, 760);
-  };
+  }, [architectureAgent]);
 
   const extractApiErrorMessage = (err: unknown) => {
     if (typeof err === "object" && err !== null && "response" in err) {
@@ -283,7 +283,7 @@ export function ArchitectureAgentGate({
 
       setError(messageFromApi || "Could not generate architecture diagram. Please try again.");
     });
-  }, [loading, user, canRenderAgent, message]);
+  }, [loading, user, canRenderAgent, message, generateArchitecture]);
 
   const handleDownloadDocx = () => {
     if (!result?.docxBase64) return;
@@ -319,13 +319,6 @@ export function ArchitectureAgentGate({
       >
         <div className="ai-agent-shell rounded-3xl border border-sky-200/80 bg-white/86 p-4 text-slate-900 shadow-[0_18px_45px_rgba(2,6,23,0.14)] backdrop-blur-md sm:p-5 dark:border-white/20 dark:bg-slate-950/80 dark:text-white dark:shadow-2xl">
           {/* <AiParticleFormation active={isVisible} className="mb-3" /> */}
-
-          <div className="mb-2 flex justify-center">
-            <div className="ai-agent-badge inline-flex items-center gap-2 rounded-full border border-cyan-400/35 bg-cyan-500/12 px-3 py-1 text-xs font-medium text-cyan-700 dark:text-cyan-200">
-              <Sparkles className="h-3.5 w-3.5" />
-              {aiUi.architectureAgentBadge}
-            </div>
-          </div>
 
           <textarea
             value={message}
