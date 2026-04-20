@@ -8,17 +8,17 @@ import { useState } from 'react';
 
 const statusLabels: Record<string, string> = {
   DRAFT: 'Draft',
-          <div className="tts-workspace-surface p-4">
+  SENT: 'Sent',
   PAID: 'Paid',
   OVERDUE: 'Overdue',
   CANCELLED: 'Cancelled',
-          <div className="tts-workspace-surface p-4">
+};
 
 const statusColors: Record<string, string> = {
   DRAFT: 'bg-gray-100 text-gray-700',
   SENT: 'bg-blue-100 text-blue-700',
   PAID: 'bg-green-100 text-green-700',
-          <div className="tts-workspace-surface p-4">
+  OVERDUE: 'bg-red-100 text-red-700',
   CANCELLED: 'bg-gray-100 text-gray-500',
 };
 
@@ -69,7 +69,7 @@ export default function PortalInvoicesPage() {
           </div>
         </div>
 
-          <div className="tts-workspace-surface overflow-x-auto">
+        {/* Filters */}
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
