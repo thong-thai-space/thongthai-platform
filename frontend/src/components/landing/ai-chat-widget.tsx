@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Bot, X, Send, Minimize2 } from 'lucide-react';
+import { X, Send, Minimize2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import { usePublicAiChat } from '@/hooks/use-ai';
 import { useSectionContent } from '@/hooks/use-content';
 import { parseAiUiContent } from '@/lib/ai-ui-content';
 import { MarkdownContent } from '@/components/ui/markdown-content';
+import { ChatFaceAvatar } from '@/components/landing/chat-face-avatar';
 
 function TypingIndicator() {
   return (
@@ -125,7 +126,7 @@ export function PublicAiChatWidget() {
               {showWelcomeNudge && (
                 <span className="absolute -inset-1 -z-10 rounded-full bg-primary/30 animate-ping" />
               )}
-              <Bot className="h-7 w-7" />
+              <ChatFaceAvatar size={30} />
             </motion.button>
           </div>
         )}
@@ -139,12 +140,12 @@ export function PublicAiChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="fixed bottom-6 right-6 z-50 flex h-[30rem] w-[min(22.5rem,calc(100vw-1.25rem))] flex-col rounded-2xl border border-border bg-background shadow-2xl"
+            className="fixed bottom-6 right-6 z-50 flex h-120 w-[min(22.5rem,calc(100vw-1.25rem))] flex-col rounded-2xl border border-border bg-background shadow-2xl"
           >
             {/* Header */}
             <div className="flex items-center justify-between rounded-t-2xl bg-primary px-4 py-3 text-primary-foreground">
               <div className="flex items-center gap-2">
-                <Bot className="h-5 w-5" />
+                <ChatFaceAvatar size={20} />
                 <div>
                   <span className="text-sm font-semibold">{aiUi.publicChatHeaderTitle}</span>
                   <p className="text-[10px] text-primary-foreground/80">{aiUi.publicChatHeaderSubtitle}</p>
