@@ -121,12 +121,17 @@ export function PublicAiChatWidget() {
                 setIsOpen(true);
                 setShowWelcomeNudge(false);
               }}
-              className="relative flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 hover:bg-primary/90"
+              className="relative flex h-24 w-24 items-end justify-center rounded-full bg-transparent text-primary-foreground transition-transform hover:scale-105"
             >
+              <span className="pointer-events-none absolute bottom-1 left-1/2 -z-10 h-4 w-14 -translate-x-1/2 rounded-full bg-primary/35 blur-md" />
               {showWelcomeNudge && (
                 <span className="absolute -inset-1 -z-10 rounded-full bg-primary/30 animate-ping" />
               )}
-              <ChatFaceAvatar size={30} />
+              <ChatFaceAvatar
+                size={110}
+                variant="fullbody"
+                className="pointer-events-none drop-shadow-[0_14px_24px_rgba(37,99,235,0.34)]"
+              />
             </motion.button>
           </div>
         )}
