@@ -111,7 +111,7 @@ export default function PortalProjectsPage() {
                 <Link
                   key={project.id}
                   href={`/portal/projects/${project.id}`}
-                  className="group rounded-xl border border-border bg-card p-5 transition-shadow hover:shadow-md"
+                  className="tts-workspace-surface group p-5 transition-shadow hover:shadow-md"
                 >
                   <div className="mb-3 flex items-start justify-between">
                     <h3 className="flex items-center gap-2 font-semibold group-hover:text-accent">

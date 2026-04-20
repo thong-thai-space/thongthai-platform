@@ -58,7 +58,7 @@ export default function AiAssistantPage() {
       <DashboardHeader title="AI Assistant" />
       <main className="flex flex-1 overflow-hidden">
         {/* Tool sidebar */}
-        <div className="flex w-20 flex-col items-center gap-1 border-r border-border bg-muted/30 py-3">
+        <div className="tts-workspace-surface ml-2 mr-2 mt-2 flex w-20 flex-col items-center gap-1 border-r border-border bg-muted/30 py-3">
           {tools.map((tool) => (
             <button
               key={tool.key}
@@ -78,7 +78,7 @@ export default function AiAssistantPage() {
         </div>
 
         {/* Content — keep all mounted, hide inactive to preserve state */}
-        <div className="flex-1 overflow-hidden">
+        <div className="tts-workspace-surface mr-2 mt-2 flex-1 overflow-hidden">
           <div className={activeTool === 'chat' ? 'h-full' : 'hidden'}><AiChat /></div>
           <div className={activeTool === 'proposal' ? 'h-full' : 'hidden'}><AiProposal initialProjectId={initialProjectId} /></div>
           <div className={activeTool === 'breakdown' ? 'h-full' : 'hidden'}><AiTaskBreakdown initialProjectId={initialProjectId} /></div>

@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
+import { createHash } from 'crypto';
 import { EmailService } from '../email/email.service';
 import { AuthRepository } from './repositories/auth.repository';
 import { RegisterDto } from './dto/register.dto';
@@ -19,6 +20,7 @@ import { TurnstileService } from '../../common/turnstile/turnstile.service';
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
+  private readonly resetPasswordExpiresIn = '30m';
 
   constructor(
     private authRepository: AuthRepository,
@@ -156,6 +158,96 @@ export class AuthService {
     await this.emailService.sendVerificationEmail(user.email, user.name, verifyToken);
 
     return { message: 'If that email is registered and unverified, a new link has been sent.' };
+  }
+
+  private passwordFingerprint(passwordHash: string): string {
+    return createHash('sha256').update(passwordHash).digest('hex');
+  }
+
+  private async createResetPasswordToken(userId: string, passwordHash: string) {
+    const secret =
+      this.configService.get<string>('JWT_RESET_PASSWORD_SECRET') ||
+      this.configService.getOrThrow<string>('JWT_SECRET');
+
+    return this.jwtService.signAsync(
+      {
+        sub: userId,
+        type: 'reset_password',
+        fp: this.passwordFingerprint(passwordHash),
+      },
+      {
+        secret,
+        expiresIn: this.resetPasswordExpiresIn,
+      },
+    );
+  }
+
+  async forgotPassword(
+    email: string,
+    remoteIp?: string,
+    turnstileToken?: string,
+  ) {
+    await this.ensureTurnstile(turnstileToken, remoteIp);
+
+    const user = await this.authRepository.findByEmail(email);
+    if (!user || !user.isActive || !user.password) {
+      return {
+        message:
+          'If that email is registered, you will receive password reset instructions shortly.',
+      };
+    }
+
+    const resetToken = await this.createResetPasswordToken(user.id, user.password);
+    await this.emailService.sendPasswordResetEmail(user.email, user.name, resetToken);
+
+    return {
+      message:
+        'If that email is registered, you will receive password reset instructions shortly.',
+    };
+  }
+
+  async resetPassword(
+    token: string,
+    newPassword: string,
+    remoteIp?: string,
+    turnstileToken?: string,
+  ) {
+    await this.ensureTurnstile(turnstileToken, remoteIp);
+
+    const secret =
+      this.configService.get<string>('JWT_RESET_PASSWORD_SECRET') ||
+      this.configService.getOrThrow<string>('JWT_SECRET');
+
+    let payload: { sub: string; type: string; fp?: string };
+    try {
+      payload = await this.jwtService.verifyAsync(token, { secret });
+    } catch {
+      throw new BadRequestException('Reset link is invalid or expired');
+    }
+
+    if (!payload?.sub || payload.type !== 'reset_password' || !payload.fp) {
+      throw new BadRequestException('Reset link is invalid or expired');
+    }
+
+    const user = await this.authRepository.findByIdWithProfile(payload.sub);
+    if (!user || !user.isActive || !user.password) {
+      throw new BadRequestException('Reset link is invalid or expired');
+    }
+
+    if (this.passwordFingerprint(user.password) !== payload.fp) {
+      throw new BadRequestException('Reset link is invalid or expired');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    await this.authRepository.update(user.id, {
+      password: hashedPassword,
+      refreshTokenHash: null,
+      lastLoginAt: new Date(),
+    });
+
+    return {
+      message: 'Password has been reset successfully. Please sign in with your new password.',
+    };
   }
 
   async login(dto: LoginDto, remoteIp?: string) {

@@ -66,7 +66,7 @@ export default function DashboardMessagesPage() {
       <DashboardHeader title="Messages" />
       <main className="flex flex-1 overflow-hidden">
         {/* Conversation list */}
-        <div className="w-80 shrink-0 border-r border-border overflow-y-auto">
+        <div className="tts-workspace-surface w-80 shrink-0 overflow-y-auto border-r border-border">
           <div className="p-4">
             <h3 className="text-sm font-semibold text-muted-foreground">Conversations</h3>
           </div>
@@ -110,7 +110,7 @@ export default function DashboardMessagesPage() {
         </div>
 
         {/* Message area */}
-        <div className="flex flex-1 flex-col">
+        <div className="tts-workspace-surface ml-4 flex flex-1 flex-col">
           {!selectedUserId ? (
             <div className="flex flex-1 items-center justify-center text-muted-foreground">
               <div className="text-center">
@@ -167,7 +167,7 @@ export default function DashboardMessagesPage() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Type a message..."
-                  className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="tts-form-field flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
                 <button
                   type="submit"

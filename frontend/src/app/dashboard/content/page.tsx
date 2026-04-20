@@ -302,7 +302,7 @@ function PrimitiveEditor({
           type="number"
           value={Number.isFinite(value) ? value : 0}
           onChange={(e) => onChange(Number(e.target.value || 0))}
-          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </label>
     );
@@ -317,7 +317,7 @@ function PrimitiveEditor({
           value=""
           onChange={(e) => onChange(e.target.value)}
           placeholder="null"
-          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </label>
     );
@@ -334,14 +334,14 @@ function PrimitiveEditor({
           value={stringValue}
           onChange={(e) => onChange(e.target.value)}
           rows={4}
-          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
       ) : (
         <input
           type="text"
           value={stringValue}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
       )}
     </label>
@@ -594,7 +594,7 @@ function AboutVisualEditor({
           <input
             value={data.hero.title}
             onChange={(e) => updateHero('title', e.target.value)}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </label>
         <label className="space-y-1.5 md:col-span-2">
@@ -603,7 +603,7 @@ function AboutVisualEditor({
             value={data.hero.subtitle}
             onChange={(e) => updateHero('subtitle', e.target.value)}
             rows={3}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </label>
         <label className="space-y-1.5">
@@ -611,7 +611,7 @@ function AboutVisualEditor({
           <input
             value={data.valuesTitle}
             onChange={(e) => onChange({ ...data, valuesTitle: e.target.value })}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </label>
         <label className="space-y-1.5">
@@ -619,7 +619,7 @@ function AboutVisualEditor({
           <input
             value={data.teamTitle}
             onChange={(e) => onChange({ ...data, teamTitle: e.target.value })}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </label>
         <label className="space-y-1.5 md:col-span-2">
@@ -627,7 +627,7 @@ function AboutVisualEditor({
           <input
             value={data.teamSubtitle}
             onChange={(e) => onChange({ ...data, teamSubtitle: e.target.value })}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </label>
       </div>
@@ -641,19 +641,19 @@ function AboutVisualEditor({
                 value={item.icon}
                 onChange={(e) => updateValue(index, { icon: e.target.value })}
                 placeholder="Icon (Target/Users/Heart/Award)"
-                className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                className="tts-form-field rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               />
               <input
                 value={item.title}
                 onChange={(e) => updateValue(index, { title: e.target.value })}
                 placeholder="Title"
-                className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                className="tts-form-field rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               />
               <input
                 value={item.description}
                 onChange={(e) => updateValue(index, { description: e.target.value })}
                 placeholder="Description"
-                className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                className="tts-form-field rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
           ))}
@@ -692,13 +692,13 @@ function AboutVisualEditor({
                     value={member.name}
                     onChange={(e) => updateTeam(index, { name: e.target.value })}
                     placeholder="Name"
-                    className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="tts-form-field rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                   <input
                     value={member.role}
                     onChange={(e) => updateTeam(index, { role: e.target.value })}
                     placeholder="Role"
-                    className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="tts-form-field rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                   <textarea
                     value={member.bio}
@@ -728,7 +728,7 @@ function AboutVisualEditor({
                         value={member.avatar ?? ''}
                         onChange={(e) => updateTeam(index, { avatar: e.target.value })}
                         placeholder="Avatar URL"
-                        className="min-w-72 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                        className="tts-form-field min-w-72 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                       />
                     </div>
                   </div>
@@ -795,7 +795,7 @@ function PortfolioFeaturedProjectsEditor({
           <input
             value={data.title}
             onChange={(e) => updateRoot('title', e.target.value)}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </label>
         <label className="space-y-1.5 md:col-span-2">
@@ -804,7 +804,7 @@ function PortfolioFeaturedProjectsEditor({
             value={data.subtitle}
             onChange={(e) => updateRoot('subtitle', e.target.value)}
             rows={2}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </label>
         <label className="space-y-1.5">
@@ -812,7 +812,7 @@ function PortfolioFeaturedProjectsEditor({
           <input
             value={data.viewAllText}
             onChange={(e) => updateRoot('viewAllText', e.target.value)}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </label>
       </div>
@@ -854,7 +854,7 @@ function PortfolioFeaturedProjectsEditor({
                     <input
                       value={item.title}
                       onChange={(e) => updateItem(index, { title: e.target.value })}
-                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                      className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                   </label>
                   <label className="space-y-1.5">
@@ -862,7 +862,7 @@ function PortfolioFeaturedProjectsEditor({
                     <input
                       value={item.client}
                       onChange={(e) => updateItem(index, { client: e.target.value })}
-                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                      className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                   </label>
                   <label className="space-y-1.5 md:col-span-2">
@@ -871,7 +871,7 @@ function PortfolioFeaturedProjectsEditor({
                       value={item.description}
                       onChange={(e) => updateItem(index, { description: e.target.value })}
                       rows={2}
-                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                      className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                   </label>
                   <label className="space-y-1.5 md:col-span-2">
@@ -886,7 +886,7 @@ function PortfolioFeaturedProjectsEditor({
                             .filter(Boolean),
                         })
                       }
-                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                      className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                   </label>
                 </div>
@@ -952,7 +952,7 @@ function PortfolioDatabaseManager({ contentValue }: { contentValue: unknown }) {
             </div>
           ) : (
             showcaseProjects.map((project) => (
-              <div key={project.id} className="rounded-xl border border-border bg-background p-4">
+              <div key={project.id} className="tts-workspace-surface p-4">
               <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                 <div>
                   <div className="flex items-center gap-2">
@@ -996,7 +996,7 @@ function PortfolioDatabaseManager({ contentValue }: { contentValue: unknown }) {
                     type="number"
                     value={project.showcaseOrder ?? ''}
                     onChange={(e) => handlePatch(project.id, { showcaseOrder: Number(e.target.value || 0) })}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </label>
 
@@ -1006,7 +1006,7 @@ function PortfolioDatabaseManager({ contentValue }: { contentValue: unknown }) {
                     list={`portfolio-categories-${project.id}`}
                     value={project.showcaseCategory ?? ''}
                     onChange={(e) => handlePatch(project.id, { showcaseCategory: e.target.value })}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                   <datalist id={`portfolio-categories-${project.id}`}>
                     {categories.map((category) => (
@@ -1020,7 +1020,7 @@ function PortfolioDatabaseManager({ contentValue }: { contentValue: unknown }) {
                   <input
                     value={project.liveUrl ?? ''}
                     onChange={(e) => handlePatch(project.id, { liveUrl: e.target.value })}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </label>
 
@@ -1029,7 +1029,7 @@ function PortfolioDatabaseManager({ contentValue }: { contentValue: unknown }) {
                   <input
                     value={project.repoUrl ?? ''}
                     onChange={(e) => handlePatch(project.id, { repoUrl: e.target.value })}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </label>
 
@@ -1038,7 +1038,7 @@ function PortfolioDatabaseManager({ contentValue }: { contentValue: unknown }) {
                   <input
                     value={project.figmaUrl ?? ''}
                     onChange={(e) => handlePatch(project.id, { figmaUrl: e.target.value })}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </label>
 
@@ -1048,7 +1048,7 @@ function PortfolioDatabaseManager({ contentValue }: { contentValue: unknown }) {
                     value={project.showcaseResults ?? ''}
                     onChange={(e) => handlePatch(project.id, { showcaseResults: e.target.value })}
                     rows={2}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </label>
 
@@ -1081,7 +1081,7 @@ function PortfolioDatabaseManager({ contentValue }: { contentValue: unknown }) {
                         value={project.thumbnailUrl ?? ''}
                         onChange={(e) => handlePatch(project.id, { thumbnailUrl: e.target.value })}
                         placeholder="Or paste image URL"
-                        className="min-w-72 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                        className="tts-form-field min-w-72 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                       />
                     </div>
                   </div>
@@ -1467,3 +1467,4 @@ export default function ContentPage() {
     </>
   );
 }
+

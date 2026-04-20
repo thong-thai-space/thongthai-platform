@@ -103,7 +103,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
+    <div className="tts-brand-grid flex min-h-screen items-center justify-center bg-muted/30 px-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 text-center">
@@ -117,7 +117,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <div className="rounded-xl border border-border bg-background p-6 shadow-sm">
+        <div className="tts-brand-surface p-6">
           <button
             type="button"
             onClick={() => loginWithGoogle(redirectTo)}
@@ -169,7 +169,7 @@ export default function LoginPage() {
                 })}
                 type="email"
                 autoComplete="email"
-                className="mt-1 w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                className="tts-form-field mt-1 w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 placeholder="email@company.com"
               />
               {errors.email && (
@@ -188,7 +188,7 @@ export default function LoginPage() {
                   })}
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
-                  className="w-full rounded-lg border border-border bg-background px-4 py-2.5 pr-10 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="tts-form-field w-full rounded-lg border border-border bg-background px-4 py-2.5 pr-10 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   placeholder="••••••••"
                 />
                 <button
@@ -208,6 +208,11 @@ export default function LoginPage() {
                   {errors.password.message}
                 </p>
               )}
+              <div className="mt-1 text-right">
+                <Link href="/forgot-password" className="text-xs font-medium text-primary hover:text-primary/80">
+                  Forgot password?
+                </Link>
+              </div>
             </div>
 
             {error && (

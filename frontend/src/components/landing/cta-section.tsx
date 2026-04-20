@@ -21,12 +21,12 @@ export function CtaSection() {
     <MotionSection className="tts-landing-section relative overflow-hidden py-20 sm:py-28">
       <div className="absolute inset-0 bg-linear-to-br from-primary/10 via-sky-100/60 to-amber-100/40 dark:from-primary/20 dark:via-slate-900 dark:to-amber-500/10" />
       <MotionReveal className="relative mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-        <div className="rounded-3xl border border-slate-200/70 bg-white/85 p-8 shadow-[0_25px_70px_-40px_rgba(15,23,42,0.45)] backdrop-blur-xl sm:p-12 dark:border-white/10 dark:bg-slate-950/55">
+        <div className="tts-brand-surface tts-brand-grid rounded-3xl p-8 sm:p-12">
           <Sparkles className="mx-auto h-10 w-10 text-primary" />
           <h2 className="tts-landing-title mt-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
             {c.title}
           </h2>
-          <p className="tts-landing-subtitle mx-auto mt-4 max-w-2xl text-lg text-slate-600 dark:text-slate-300">
+          <p className="tts-landing-subtitle tts-brand-body mx-auto mt-4 max-w-2xl text-lg">
             {c.subtitle}
           </p>
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">

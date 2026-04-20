@@ -191,7 +191,7 @@ export default function DashboardPage() {
             <Link
               key={stat.label}
               href={stat.href}
-              className="group rounded-xl border border-border bg-background p-5 transition-all hover:border-primary/30 hover:shadow-md"
+              className="tts-workspace-surface group p-5 transition-all hover:border-primary/30 hover:shadow-md"
             >
               <div className="flex items-center justify-between">
                 <div className={`rounded-lg p-2.5 ${stat.color}`}>
@@ -207,7 +207,7 @@ export default function DashboardPage() {
 
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
           {/* Recent Projects */}
-          <div className="rounded-xl border border-border bg-background p-5">
+          <div className="tts-workspace-surface p-5">
             <div className="flex items-center justify-between">
               <h2 className="font-semibold">Recent Projects</h2>
               <Link
@@ -243,7 +243,7 @@ export default function DashboardPage() {
           </div>
 
           {/* My Tasks */}
-          <div className="rounded-xl border border-border bg-background p-5">
+          <div className="tts-workspace-surface p-5">
             <div className="flex items-center justify-between">
               <h2 className="font-semibold">Pending Tasks</h2>
               <Link
@@ -287,7 +287,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Quick Actions */}
-          <div className="rounded-xl border border-border bg-background p-5">
+          <div className="tts-workspace-surface p-5">
             <h2 className="font-semibold">Quick Actions</h2>
             <div className="mt-4 grid grid-cols-2 gap-3">
               {[
@@ -309,7 +309,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Alerts */}
-          <div className="rounded-xl border border-border bg-background p-5">
+          <div className="tts-workspace-surface p-5">
             <h2 className="font-semibold">Alerts</h2>
             <div className="mt-4 space-y-3">
               {alerts.map((alert) => {

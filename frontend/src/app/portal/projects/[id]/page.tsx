@@ -195,7 +195,7 @@ export default function PortalProjectDetailPage() {
         </div>
 
         {/* Overall progress bar */}
-        <div className="mb-8 rounded-xl border border-border bg-card p-5">
+        <div className="tts-workspace-surface mb-8 p-5">
           <div className="mb-2 flex items-center justify-between text-sm">
             <span className="font-medium">Overall Progress</span>
             <span className="font-bold text-accent">{progress}%</span>
@@ -210,7 +210,7 @@ export default function PortalProjectDetailPage() {
 
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Milestones */}
-          <section className="rounded-xl border border-border bg-card p-5">
+          <section className="tts-workspace-surface p-5">
             <h3 className="mb-4 text-base font-semibold">Milestones</h3>
             {!project.milestones || project.milestones.length === 0 ? (
               <p className="text-sm text-muted-foreground">No milestones yet.</p>
@@ -248,7 +248,7 @@ export default function PortalProjectDetailPage() {
           </section>
 
           {/* Tasks */}
-          <section className="rounded-xl border border-border bg-card p-5">
+          <section className="tts-workspace-surface p-5">
             <h3 className="mb-4 text-base font-semibold">
               Task List ({totalTasks})
             </h3>
@@ -292,7 +292,7 @@ export default function PortalProjectDetailPage() {
 
         {/* Tech Stack */}
         {project.techStack && project.techStack.length > 0 && (
-          <section className="mt-6 rounded-xl border border-border bg-card p-5">
+          <section className="tts-workspace-surface mt-6 p-5">
             <h3 className="mb-3 text-base font-semibold">Technologies Used</h3>
             <div className="flex flex-wrap gap-2">
               {project.techStack.map((tech) => (
@@ -323,7 +323,7 @@ function InfoCard({
   value: string;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
+    <div className="tts-workspace-surface p-4">
       <div className="mb-2 flex items-center gap-2">
         {icon}
         <span className="text-xs text-muted-foreground">{label}</span>
@@ -391,7 +391,7 @@ function ProjectChat({ projectId }: { projectId: string }) {
   };
 
   return (
-    <section className="mt-6 rounded-xl border border-border bg-card">
+    <section className="tts-workspace-surface mt-6">
       <button
         onClick={() => setOpen(!open)}
         className="flex w-full items-center justify-between p-5"

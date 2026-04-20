@@ -33,7 +33,7 @@ export function Navbar() {
   const navLinks = c.navLinks?.length ? c.navLinks : defaultHeader.navLinks;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/70 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/60">
+    <header className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/72 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/66">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
@@ -44,7 +44,7 @@ export function Navbar() {
         </Link>
 
         {/* Desktop nav */}
-        <div className="hidden items-center gap-2 rounded-full border border-slate-200/70 bg-white/80 px-2 py-1 shadow-sm backdrop-blur-sm md:flex dark:border-white/10 dark:bg-white/5">
+        <div className="hidden items-center gap-1.5 rounded-full border border-slate-200/70 bg-white/84 px-2 py-1 shadow-sm backdrop-blur-sm md:flex dark:border-white/10 dark:bg-white/5">
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -81,7 +81,7 @@ export function Navbar() {
               </Link>
               <Link
                 href="/contact"
-                className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-[0_10px_30px_color-mix(in_srgb,var(--primary)_35%,transparent)] transition-all hover:-translate-y-0.5 hover:bg-primary/90"
+                className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-[0_10px_30px_color-mix(in_srgb,var(--primary)_35%,transparent)] transition-all hover:-translate-y-0.5 hover:bg-primary/90"
               >
                 {c.ctaText || defaultHeader.ctaText}
               </Link>

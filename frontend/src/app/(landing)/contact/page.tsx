@@ -5,6 +5,12 @@ import { useForm } from 'react-hook-form';
 import { Mail, Phone, MapPin, Send, CheckCircle } from 'lucide-react';
 import api from '@/lib/api';
 import { useSectionContent } from '@/hooks/use-content';
+import {
+  BrandContainer,
+  BrandHeroContainer,
+  BrandSection,
+  BrandSurface,
+} from '@/components/brand/brand-primitives';
 
 interface ContactForm {
   name: string;
@@ -104,14 +110,14 @@ export default function ContactPage() {
 
   if (submitted) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center px-4">
-        <div className="text-center">
+      <div className="flex min-h-[60vh] items-center justify-center px-4 py-16">
+        <BrandSurface className="w-full max-w-xl p-8 text-center">
           <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
           <h2 className="mt-4 text-2xl font-bold">{c.form.successTitle}</h2>
-          <p className="mt-2 text-muted-foreground">
+          <p className="tts-brand-body mt-2">
             {c.form.successSubtitle}
           </p>
-        </div>
+        </BrandSurface>
       </div>
     );
   }
@@ -119,9 +125,9 @@ export default function ContactPage() {
   return (
     <div>
       {/* Hero */}
-      <section className="bg-linear-to-br from-background via-background to-primary/5 py-20">
-        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+      <BrandSection className="tts-brand-grid bg-linear-to-br from-background via-background to-primary/5 py-20">
+        <BrandHeroContainer>
+          <h1 className="tts-landing-display text-4xl font-bold tracking-tight sm:text-5xl">
             {c.hero.titleHighlight && c.hero.title.includes(c.hero.titleHighlight) ? (
               <>
                 {c.hero.title.split(c.hero.titleHighlight)[0]}
@@ -132,14 +138,14 @@ export default function ContactPage() {
               c.hero.title
             )}
           </h1>
-          <p className="mt-6 text-lg text-muted-foreground">
+          <p className="tts-brand-body mt-6 text-lg">
             {c.hero.subtitle}
           </p>
-        </div>
-      </section>
+        </BrandHeroContainer>
+      </BrandSection>
 
-      <section className="py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <BrandSection>
+        <BrandContainer>
           <div className="grid gap-12 lg:grid-cols-3">
             {/* Contact info */}
             <div>
@@ -149,31 +155,31 @@ export default function ContactPage() {
                   <Mail className="mt-0.5 h-5 w-5 text-primary" />
                   <div>
                     <div className="text-sm font-medium">{c.info.emailLabel}</div>
-                    <div className="text-sm text-muted-foreground">{c.info.email}</div>
+                    <div className="tts-brand-body text-sm">{c.info.email}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <Phone className="mt-0.5 h-5 w-5 text-primary" />
                   <div>
                     <div className="text-sm font-medium">{c.info.phoneLabel}</div>
-                    <div className="text-sm text-muted-foreground">{c.info.phone}</div>
+                    <div className="tts-brand-body text-sm">{c.info.phone}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <MapPin className="mt-0.5 h-5 w-5 text-primary" />
                   <div>
                     <div className="text-sm font-medium">{c.info.addressLabel}</div>
-                    <div className="text-sm text-muted-foreground">{c.info.address}</div>
+                    <div className="tts-brand-body text-sm">{c.info.address}</div>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-8 rounded-xl bg-primary/5 p-6">
+              <BrandSurface className="mt-8 bg-primary/5 p-6">
                 <h3 className="font-semibold">{c.responseCard.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
+                <p className="tts-brand-body mt-2 text-sm">
                   {c.responseCard.body}
                 </p>
-              </div>
+              </BrandSurface>
             </div>
 
             {/* Form */}
@@ -288,8 +294,8 @@ export default function ContactPage() {
               </form>
             </div>
           </div>
-        </div>
-      </section>
+        </BrandContainer>
+      </BrandSection>
     </div>
   );
 }

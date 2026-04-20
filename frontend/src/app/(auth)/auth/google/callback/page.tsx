@@ -54,8 +54,8 @@ export default function GoogleAuthCallbackPage() {
     : error;
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
-      <div className="w-full max-w-md rounded-xl border border-border bg-background p-6 text-center shadow-sm">
+    <main className="tts-brand-grid flex min-h-screen items-center justify-center bg-muted/30 px-4">
+      <div className="tts-brand-surface w-full max-w-md p-6 text-center">
         {displayError ? (
           <>
             <h1 className="text-lg font-semibold">Authentication Failed</h1>

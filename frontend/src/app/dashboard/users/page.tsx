@@ -88,7 +88,7 @@ function AddUserModal({ onClose }: { onClose: () => void }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-md rounded-xl border border-border bg-background p-6 shadow-xl"
+        className="tts-workspace-surface w-full max-w-md p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">
@@ -107,7 +107,7 @@ function AddUserModal({ onClose }: { onClose: () => void }) {
             value={form.name}
             onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
             placeholder="Name *"
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+            className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
           />
           <input
             required
@@ -115,7 +115,7 @@ function AddUserModal({ onClose }: { onClose: () => void }) {
             value={form.email}
             onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
             placeholder="Email *"
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+            className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
           />
           <input
             required
@@ -124,18 +124,18 @@ function AddUserModal({ onClose }: { onClose: () => void }) {
             value={form.password}
             onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
             placeholder="Password *"
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+            className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
           />
           <input
             value={form.phone}
             onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
             placeholder="Phone"
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+            className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
           />
           <select
             value={form.role}
             onChange={(e) => setForm((prev) => ({ ...prev, role: e.target.value as UserRole }))}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+            className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
           >
             <option value="MEMBER">Member</option>
             <option value="ADMIN">Admin</option>
@@ -203,7 +203,7 @@ function EditUserModal({ user, onClose }: { user: User; onClose: () => void }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-md rounded-xl border border-border bg-background p-6 shadow-xl"
+        className="tts-workspace-surface w-full max-w-md p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">
@@ -221,18 +221,18 @@ function EditUserModal({ user, onClose }: { user: User; onClose: () => void }) {
             minLength={2}
             value={form.name}
             onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+            className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
           />
           <input
             value={form.phone}
             onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
             placeholder="Phone"
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+            className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
           />
           <select
             value={form.role}
             onChange={(e) => setForm((prev) => ({ ...prev, role: e.target.value as UserRole }))}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+            className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
           >
             <option value="OWNER">Owner</option>
             <option value="ADMIN">Admin</option>
@@ -296,7 +296,7 @@ function DeleteUserModal({ user, onClose }: { user: User; onClose: () => void })
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
       <div
-        className="w-full max-w-sm rounded-xl border border-border bg-background p-6 shadow-xl"
+        className="tts-workspace-surface w-full max-w-sm p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-lg font-semibold">Deactivate User</h2>
@@ -379,13 +379,13 @@ export default function UsersPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search users..."
-                className="rounded-lg border border-border bg-background py-2 pl-9 pr-4 text-sm"
+                className="tts-form-field rounded-lg border border-border bg-background py-2 pl-9 pr-4 text-sm"
               />
             </div>
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value as UserRole | 'ALL')}
-              className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              className="tts-form-field rounded-lg border border-border bg-background px-3 py-2 text-sm"
             >
               <option value="ALL">All roles</option>
               <option value="OWNER">Owner</option>
@@ -396,7 +396,7 @@ export default function UsersPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as 'ALL' | 'ACTIVE' | 'INACTIVE')}
-              className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              className="tts-form-field rounded-lg border border-border bg-background px-3 py-2 text-sm"
             >
               <option value="ALL">All statuses</option>
               <option value="ACTIVE">Active</option>
@@ -423,31 +423,31 @@ export default function UsersPage() {
         </div>
 
         <div className="mb-4 grid gap-3 sm:grid-cols-3 lg:grid-cols-7">
-          <div className="rounded-lg border border-border bg-background px-3 py-2">
+          <div className="tts-workspace-surface px-3 py-2">
             <p className="text-xs text-muted-foreground">Total</p>
             <p className="text-sm font-semibold">{roleSummary.total}</p>
           </div>
-          <div className="rounded-lg border border-border bg-background px-3 py-2">
+          <div className="tts-workspace-surface px-3 py-2">
             <p className="text-xs text-muted-foreground">Active</p>
             <p className="text-sm font-semibold text-green-600">{roleSummary.active}</p>
           </div>
-          <div className="rounded-lg border border-border bg-background px-3 py-2">
+          <div className="tts-workspace-surface px-3 py-2">
             <p className="text-xs text-muted-foreground">Inactive</p>
             <p className="text-sm font-semibold text-red-600">{roleSummary.inactive}</p>
           </div>
-          <div className="rounded-lg border border-border bg-background px-3 py-2">
+          <div className="tts-workspace-surface px-3 py-2">
             <p className="text-xs text-muted-foreground">Owner</p>
             <p className="text-sm font-semibold">{roleSummary.owner}</p>
           </div>
-          <div className="rounded-lg border border-border bg-background px-3 py-2">
+          <div className="tts-workspace-surface px-3 py-2">
             <p className="text-xs text-muted-foreground">Admin</p>
             <p className="text-sm font-semibold">{roleSummary.admin}</p>
           </div>
-          <div className="rounded-lg border border-border bg-background px-3 py-2">
+          <div className="tts-workspace-surface px-3 py-2">
             <p className="text-xs text-muted-foreground">Member</p>
             <p className="text-sm font-semibold">{roleSummary.member}</p>
           </div>
-          <div className="rounded-lg border border-border bg-background px-3 py-2">
+          <div className="tts-workspace-surface px-3 py-2">
             <p className="text-xs text-muted-foreground">Client</p>
             <p className="text-sm font-semibold">{roleSummary.client}</p>
           </div>
@@ -462,7 +462,7 @@ export default function UsersPage() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((entry) => (
-              <div key={entry.id} className="rounded-xl border border-border bg-background p-5">
+              <div key={entry.id} className="tts-workspace-surface p-5">
                 <div className="flex items-center gap-3">
                   <UserAvatar name={entry.name} avatar={entry.avatar} size="lg" />
                   <div className="min-w-0 flex-1">

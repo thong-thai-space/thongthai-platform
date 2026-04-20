@@ -2,9 +2,10 @@ import Link from 'next/link';
 
 export default function PrivacyPolicyPage() {
   return (
-    <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
-      <h1 className="text-3xl font-bold tracking-tight text-foreground">Privacy Policy</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Last updated: March 19, 2026</p>
+    <main className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="tts-brand-surface p-7 sm:p-9">
+        <h1 className="tts-landing-title text-3xl font-bold tracking-tight text-foreground">Privacy Policy</h1>
+        <p className="tts-brand-body mt-2 text-sm">Last updated: March 19, 2026</p>
 
       <div className="mt-8 space-y-6 text-sm leading-7 text-muted-foreground">
         <section>
@@ -134,6 +135,7 @@ export default function PrivacyPolicyPage() {
           Terms and Conditions
         </Link>
         .
+      </div>
       </div>
     </main>
   );

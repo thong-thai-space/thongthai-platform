@@ -8,6 +8,12 @@ import { useShowcaseProjects } from '@/hooks/use-projects';
 import type { Project } from '@/types';
 import { useMemo, useState } from 'react';
 import { resolveBackendAssetUrl } from '@/lib/asset-url';
+import {
+  BrandContainer,
+  BrandHeroContainer,
+  BrandSection,
+  BrandSurface,
+} from '@/components/brand/brand-primitives';
 
 type PortfolioContent = {
   hero: {
@@ -138,9 +144,9 @@ export function PortfolioPageContent() {
 
   return (
     <div>
-      <section className="bg-linear-to-br from-background via-background to-primary/5 py-20 sm:py-28">
-        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+      <BrandSection className="tts-brand-grid bg-linear-to-br from-background via-background to-primary/5">
+        <BrandHeroContainer>
+          <h1 className="tts-landing-display text-4xl font-bold tracking-tight sm:text-5xl">
             {content.hero.titleHighlight ? (
               <>
                 {content.hero.title.replace(content.hero.titleHighlight, '').trim()}{' '}
@@ -150,12 +156,12 @@ export function PortfolioPageContent() {
               content.hero.title
             )}
           </h1>
-          <p className="mt-6 text-lg leading-8 text-muted-foreground">{content.hero.subtitle}</p>
-        </div>
-      </section>
+          <p className="tts-brand-body mt-6 text-lg leading-8">{content.hero.subtitle}</p>
+        </BrandHeroContainer>
+      </BrandSection>
 
-      <section className="border-b border-border">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <section className="border-b border-border bg-muted/20">
+        <BrandContainer>
           <div className="flex gap-6 overflow-x-auto py-4">
             {categories.map((cat) => (
               <button
@@ -163,31 +169,31 @@ export function PortfolioPageContent() {
                 onClick={() => setActiveCategory(cat)}
                 className={`whitespace-nowrap text-sm font-medium transition-colors ${
                   activeCategory === cat
-                    ? 'border-b-2 border-primary pb-3 text-primary'
-                    : 'pb-3 text-muted-foreground hover:text-foreground'
+                    ? 'rounded-full bg-primary/10 px-3 py-1 text-primary'
+                    : 'rounded-full px-3 py-1 text-muted-foreground hover:bg-muted hover:text-foreground'
                 }`}
               >
                 {cat}
               </button>
             ))}
           </div>
-        </div>
+        </BrandContainer>
       </section>
 
-      <section className="py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <BrandSection>
+        <BrandContainer>
           {filteredItems.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-border p-10 text-center">
-              <p className="text-sm text-muted-foreground">
+            <BrandSurface className="rounded-xl border-dashed p-10 text-center">
+              <p className="tts-brand-body text-sm">
                 No featured projects configured yet. Please enable showcase projects in Dashboard → Content → Portfolio.
               </p>
-            </div>
+            </BrandSurface>
           ) : (
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {filteredItems.map((project) => (
-                <div
+                <BrandSurface
                   key={`${project.title}-${project.client}`}
-                  className="group overflow-hidden rounded-xl border border-border bg-background transition-all hover:border-primary/30 hover:shadow-lg"
+                  className="group overflow-hidden rounded-xl transition-all hover:border-primary/30 hover:shadow-lg"
                 >
                   <div className={`flex h-48 items-center justify-center overflow-hidden ${project.thumbnailUrl ? '' : 'bg-linear-to-br from-primary/10 to-accent/10'}`}>
                     {project.thumbnailUrl ? (
@@ -209,7 +215,7 @@ export function PortfolioPageContent() {
                       </span>
                     </div>
                     <h3 className="mt-2 text-lg font-semibold">{project.title}</h3>
-                    <p className="mt-2 text-sm text-muted-foreground">{project.description}</p>
+                    <p className="tts-brand-body mt-2 text-sm">{project.description}</p>
 
                     <div className="mt-3 rounded-lg bg-primary/5 px-3 py-2 text-xs font-medium text-primary">
                       {project.results}
@@ -243,25 +249,25 @@ export function PortfolioPageContent() {
                       ))}
                     </div>
                   </div>
-                </div>
+                </BrandSurface>
               ))}
             </div>
           )}
-        </div>
-      </section>
+        </BrandContainer>
+      </BrandSection>
 
-      <section className="bg-muted/30 py-16">
-        <div className="mx-auto max-w-4xl px-4 text-center">
+      <BrandSection className="bg-muted/30 py-16">
+        <BrandHeroContainer>
           <h2 className="text-2xl font-bold sm:text-3xl">{content.cta?.title || defaults.cta.title}</h2>
-          <p className="mt-3 text-muted-foreground">{content.cta?.subtitle || defaults.cta.subtitle}</p>
+          <p className="tts-brand-body mt-3">{content.cta?.subtitle || defaults.cta.subtitle}</p>
           <Link
             href={content.cta?.buttonHref || defaults.cta.buttonHref}
-            className="mt-6 inline-flex rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="mt-6 inline-flex rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
           >
             {content.cta?.buttonText || defaults.cta.buttonText}
           </Link>
-        </div>
-      </section>
+        </BrandHeroContainer>
+      </BrandSection>
     </div>
   );
 }

@@ -108,7 +108,7 @@ export default function PortalProjectEditPage() {
           </Link>
         </MotionReveal>
 
-        <form onSubmit={handleSubmit} className="tts-form-shell mx-auto max-w-2xl space-y-6">
+        <form onSubmit={handleSubmit} className="tts-form-shell tts-workspace-surface mx-auto max-w-2xl space-y-6 p-6">
           <MotionReveal delay={0.06}>
             <div>
             <label className="text-sm font-medium">

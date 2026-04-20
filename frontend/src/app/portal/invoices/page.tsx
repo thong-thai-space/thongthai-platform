@@ -8,17 +8,17 @@ import { useState } from 'react';
 
 const statusLabels: Record<string, string> = {
   DRAFT: 'Draft',
-  SENT: 'Sent',
+          <div className="tts-workspace-surface p-4">
   PAID: 'Paid',
   OVERDUE: 'Overdue',
   CANCELLED: 'Cancelled',
-};
+          <div className="tts-workspace-surface p-4">
 
 const statusColors: Record<string, string> = {
   DRAFT: 'bg-gray-100 text-gray-700',
   SENT: 'bg-blue-100 text-blue-700',
   PAID: 'bg-green-100 text-green-700',
-  OVERDUE: 'bg-red-100 text-red-700',
+          <div className="tts-workspace-surface p-4">
   CANCELLED: 'bg-gray-100 text-gray-500',
 };
 
@@ -51,17 +51,17 @@ export default function PortalInvoicesPage() {
       <main className="flex-1 overflow-y-auto p-6">
         {/* Summary cards */}
         <div className="mb-6 grid gap-4 sm:grid-cols-3">
-          <div className="rounded-xl border border-border bg-card p-4">
+          <div className="tts-workspace-surface p-4">
             <div className="text-xs text-muted-foreground">Total Invoices</div>
             <div className="text-2xl font-bold">{invoices?.length || 0}</div>
           </div>
-          <div className="rounded-xl border border-border bg-card p-4">
+          <div className="tts-workspace-surface p-4">
             <div className="text-xs text-muted-foreground">Amount Due</div>
             <div className="text-2xl font-bold text-red-600">
               {formatCurrency(totalUnpaid, 'VND')}
             </div>
           </div>
-          <div className="rounded-xl border border-border bg-card p-4">
+          <div className="tts-workspace-surface p-4">
             <div className="text-xs text-muted-foreground">Paid</div>
             <div className="text-2xl font-bold text-green-600">
               {formatCurrency(totalPaid, 'VND')}
@@ -69,7 +69,7 @@ export default function PortalInvoicesPage() {
           </div>
         </div>
 
-        {/* Filters */}
+          <div className="tts-workspace-surface overflow-x-auto">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -112,7 +112,7 @@ export default function PortalInvoicesPage() {
 
         {/* Invoice Table */}
         {filtered && filtered.length > 0 && (
-          <div className="overflow-x-auto rounded-xl border border-border">
+          <div className="tts-workspace-surface overflow-x-auto">
             <table className="tts-data-table w-full text-sm">
               <thead className="border-b border-border bg-muted/50">
                 <tr>

@@ -75,7 +75,7 @@ export default function SettingsPage() {
     <>
       <DashboardHeader title="Settings" />
       <main className="flex-1 overflow-y-auto p-6">
-        <div className="mx-auto max-w-2xl">
+        <div className="tts-workspace-surface mx-auto max-w-2xl p-4 sm:p-6">
           {/* Tabs */}
           <div className="flex gap-1 rounded-lg border border-border bg-muted/30 p-1">
             {tabs.map((tab) => (
@@ -109,7 +109,7 @@ export default function SettingsPage() {
                   <input
                     value={profile.name}
                     onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="tts-form-field w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
                 <div>
@@ -118,7 +118,7 @@ export default function SettingsPage() {
                     type="email"
                     value={user?.email ?? ''}
                     disabled
-                    className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-muted-foreground"
+                    className="tts-form-field w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-muted-foreground"
                   />
                 </div>
                 <div>
@@ -126,7 +126,7 @@ export default function SettingsPage() {
                   <input
                     value={profile.phone}
                     onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="tts-form-field w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
                 <div>
@@ -134,7 +134,7 @@ export default function SettingsPage() {
                   <input
                     value={user?.role ?? ''}
                     disabled
-                    className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-muted-foreground"
+                    className="tts-form-field w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-muted-foreground"
                   />
                 </div>
                 <button
@@ -156,7 +156,7 @@ export default function SettingsPage() {
                   type="password"
                   value={passwords.currentPassword}
                   onChange={(e) => setPasswords({ ...passwords, currentPassword: e.target.value })}
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="tts-form-field w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
               <div>
@@ -166,7 +166,7 @@ export default function SettingsPage() {
                   required
                   value={passwords.newPassword}
                   onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="tts-form-field w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
               <div>
@@ -176,7 +176,7 @@ export default function SettingsPage() {
                   required
                   value={passwords.confirmPassword}
                   onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="tts-form-field w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
               <button

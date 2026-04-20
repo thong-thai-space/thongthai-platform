@@ -62,7 +62,7 @@ export default function RegisterPage() {
 
   if (registeredEmail) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
+      <div className="tts-brand-grid flex min-h-screen items-center justify-center bg-muted/30 px-4">
         <div className="w-full max-w-md">
           <div className="mb-8 text-center">
             <Link href="/" className="inline-flex items-center">
@@ -71,7 +71,7 @@ export default function RegisterPage() {
               </span>
             </Link>
           </div>
-          <div className="rounded-xl border border-border bg-background p-8 shadow-sm text-center">
+          <div className="tts-brand-surface p-8 text-center">
             <div className="mb-4 flex justify-center">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
                 <Mail className="h-7 w-7 text-primary" />
@@ -98,7 +98,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
+    <div className="tts-brand-grid flex min-h-screen items-center justify-center bg-muted/30 px-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 text-center">
@@ -110,7 +110,7 @@ export default function RegisterPage() {
           <p className="mt-2 text-sm text-muted-foreground">Create a new account</p>
         </div>
 
-        <div className="rounded-xl border border-border bg-background p-6 shadow-sm">
+        <div className="tts-brand-surface p-6">
           <button
             type="button"
             onClick={() => loginWithGoogle(redirectTo || undefined)}
@@ -155,7 +155,7 @@ export default function RegisterPage() {
                   required: 'Please enter your full name',
                   minLength: { value: 2, message: 'Name must be at least 2 characters' },
                 })}
-                className="mt-1 w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                className="tts-form-field mt-1 w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 placeholder="John Doe"
               />
               {errors.name && (
@@ -172,7 +172,7 @@ export default function RegisterPage() {
                 })}
                 type="email"
                 autoComplete="email"
-                className="mt-1 w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                className="tts-form-field mt-1 w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 placeholder="email@company.com"
               />
               {errors.email && (
@@ -190,7 +190,7 @@ export default function RegisterPage() {
                   })}
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="new-password"
-                  className="w-full rounded-lg border border-border bg-background px-4 py-2.5 pr-10 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="tts-form-field w-full rounded-lg border border-border bg-background px-4 py-2.5 pr-10 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   placeholder="••••••••"
                 />
                 <button
@@ -215,7 +215,7 @@ export default function RegisterPage() {
                 })}
                 type="password"
                 autoComplete="new-password"
-                className="mt-1 w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                className="tts-form-field mt-1 w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 placeholder="••••••••"
               />
               {errors.confirmPassword && (

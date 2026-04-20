@@ -57,7 +57,7 @@ export function TestimonialsSection() {
             <MotionCard
               key={t.name}
               delay={index * 0.08}
-              className="rounded-2xl border border-slate-200/80 bg-white/85 p-6 shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-white/5"
+              className="tts-brand-surface rounded-2xl p-6"
             >
               <div className="flex gap-1">
                 {Array.from({ length: t.rating }).map((_, i) => (
@@ -67,7 +67,7 @@ export function TestimonialsSection() {
                   />
                 ))}
               </div>
-              <p className="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+              <p className="tts-brand-body mt-4 text-sm leading-relaxed">
                 &ldquo;{t.content}&rdquo;
               </p>
               <div className="mt-4 border-t border-slate-200/80 pt-4 dark:border-white/10">

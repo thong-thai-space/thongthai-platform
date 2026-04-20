@@ -101,8 +101,8 @@ export function HeroSection({
 
         <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8 lg:py-10">
           <div className="flex justify-center">
-            <div className="max-w-4xl rounded-3xl border border-slate-200/80 bg-white/80 p-6 text-center shadow-[0_30px_90px_-45px_rgba(15,23,42,0.45)] backdrop-blur-xl sm:p-8 dark:border-white/15 dark:bg-slate-950/45">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+            <div className="tts-brand-surface tts-brand-grid max-w-4xl p-6 text-center sm:p-8">
+              <div className="tts-brand-kicker mb-6">
                 <Sparkles className="h-4 w-4" />
                 {c.badge}
               </div>
@@ -117,14 +117,14 @@ export function HeroSection({
                 {c.titleEnd}
               </h1>
 
-              <p className="tts-landing-subtitle mx-auto mt-6 max-w-3xl text-base leading-8 text-slate-700 sm:text-lg dark:text-slate-200">
+              <p className="tts-landing-subtitle tts-brand-body mx-auto mt-6 max-w-3xl text-base sm:text-lg">
                 {c.subtitle}
               </p>
 
               <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
                 <Link
                   href={c.primaryCta.href}
-                  className="tts-conversion-strong inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 text-sm font-medium text-primary-foreground shadow-[0_14px_36px_color-mix(in_srgb,var(--primary)_38%,transparent)] transition-all hover:-translate-y-0.5 hover:bg-primary/90"
+                  className="tts-conversion-strong inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 text-sm font-semibold text-primary-foreground shadow-[0_14px_36px_color-mix(in_srgb,var(--primary)_38%,transparent)] transition-all hover:-translate-y-0.5 hover:bg-primary/90"
                 >
                   {c.primaryCta.text}
                   <ArrowRight className="h-4 w-4" />
@@ -140,7 +140,7 @@ export function HeroSection({
           </div>
 
           {/* Stats strip */}
-          <div className="mx-auto mt-8 max-w-5xl rounded-2xl border border-slate-200/80 bg-white/80 p-5 shadow-lg backdrop-blur-md sm:p-6 dark:border-white/15 dark:bg-slate-950/30 dark:shadow-xl">
+          <div className="tts-brand-surface mx-auto mt-8 max-w-5xl p-5 sm:p-6">
             <div className="grid grid-cols-2 gap-6 text-center sm:grid-cols-4">
               {c.stats.map((stat) => (
                 <div key={stat.label} className="rounded-xl border border-slate-200/60 bg-white/70 p-3 dark:border-white/10 dark:bg-white/5">

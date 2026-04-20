@@ -252,7 +252,7 @@ export default function TasksPage() {
               return (
                 <div
                   key={status}
-                  className="rounded-lg border border-border bg-muted/30 p-3"
+                  className="tts-workspace-surface bg-muted/30 p-3"
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={(e) => {
                     e.preventDefault();
@@ -293,7 +293,7 @@ export default function TasksPage() {
 
         {showCreate && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="w-full max-w-2xl rounded-xl border border-border bg-background p-5">
+            <div className="tts-workspace-surface w-full max-w-2xl p-5">
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Create Task</h3>
                 <button onClick={() => setShowCreate(false)} className="rounded p-1 hover:bg-muted">
@@ -305,12 +305,12 @@ export default function TasksPage() {
                   value={newTask.title}
                   onChange={(e) => setNewTask((p) => ({ ...p, title: e.target.value }))}
                   placeholder="Task title"
-                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                  className="tts-form-field rounded-lg border border-border bg-background px-3 py-2 text-sm"
                 />
                 <select
                   value={newTask.projectId}
                   onChange={(e) => setNewTask((p) => ({ ...p, projectId: e.target.value }))}
-                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                  className="tts-form-field rounded-lg border border-border bg-background px-3 py-2 text-sm"
                 >
                   <option value="">Select project</option>
                   {projects.map((p) => (
@@ -320,7 +320,7 @@ export default function TasksPage() {
                 <select
                   value={newTask.assigneeId}
                   onChange={(e) => setNewTask((p) => ({ ...p, assigneeId: e.target.value }))}
-                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                  className="tts-form-field rounded-lg border border-border bg-background px-3 py-2 text-sm"
                 >
                   <option value="">Assignee (optional)</option>
                   {team.map((u) => (
@@ -330,7 +330,7 @@ export default function TasksPage() {
                 <select
                   value={newTask.priority}
                   onChange={(e) => setNewTask((p) => ({ ...p, priority: e.target.value as TaskPriority }))}
-                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                  className="tts-form-field rounded-lg border border-border bg-background px-3 py-2 text-sm"
                 >
                   {Object.entries(priorityLabels).map(([k, v]) => (
                     <option key={k} value={k}>{v}</option>
@@ -339,7 +339,7 @@ export default function TasksPage() {
                 <select
                   value={newTask.status}
                   onChange={(e) => setNewTask((p) => ({ ...p, status: e.target.value as TaskStatus }))}
-                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                  className="tts-form-field rounded-lg border border-border bg-background px-3 py-2 text-sm"
                 >
                   {Object.entries(statusLabels).map(([k, v]) => (
                     <option key={k} value={k}>{v}</option>
@@ -349,14 +349,14 @@ export default function TasksPage() {
                   type="date"
                   value={newTask.dueDate}
                   onChange={(e) => setNewTask((p) => ({ ...p, dueDate: e.target.value }))}
-                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                  className="tts-form-field rounded-lg border border-border bg-background px-3 py-2 text-sm"
                 />
                 <textarea
                   value={newTask.description}
                   onChange={(e) => setNewTask((p) => ({ ...p, description: e.target.value }))}
                   placeholder="Description"
                   rows={3}
-                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm md:col-span-2"
+                  className="tts-form-field rounded-lg border border-border bg-background px-3 py-2 text-sm md:col-span-2"
                 />
               </div>
               <div className="mt-4 flex justify-end gap-2">
@@ -375,7 +375,7 @@ export default function TasksPage() {
 
         {selectedTask && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="w-full max-w-2xl rounded-xl border border-border bg-background p-5">
+            <div className="tts-workspace-surface w-full max-w-2xl p-5">
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Task Detail</h3>
                 <button onClick={() => setSelectedTaskId('')} className="rounded p-1 hover:bg-muted">
@@ -386,12 +386,12 @@ export default function TasksPage() {
                 <input
                   value={selectedTask.title}
                   onChange={(e) => updateTask.mutate({ id: selectedTask.id, title: e.target.value })}
-                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm md:col-span-2"
+                  className="tts-form-field rounded-lg border border-border bg-background px-3 py-2 text-sm md:col-span-2"
                 />
                 <select
                   value={selectedTask.status}
                   onChange={(e) => updateTask.mutate({ id: selectedTask.id, status: e.target.value as TaskStatus })}
-                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                  className="tts-form-field rounded-lg border border-border bg-background px-3 py-2 text-sm"
                 >
                   {Object.entries(statusLabels).map(([k, v]) => (
                     <option key={k} value={k}>{v}</option>
@@ -400,7 +400,7 @@ export default function TasksPage() {
                 <select
                   value={selectedTask.priority}
                   onChange={(e) => updateTask.mutate({ id: selectedTask.id, priority: e.target.value as TaskPriority })}
-                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                  className="tts-form-field rounded-lg border border-border bg-background px-3 py-2 text-sm"
                 >
                   {Object.entries(priorityLabels).map(([k, v]) => (
                     <option key={k} value={k}>{v}</option>
@@ -409,7 +409,7 @@ export default function TasksPage() {
                 <select
                   value={selectedTask.assigneeId || ''}
                   onChange={(e) => updateTask.mutate({ id: selectedTask.id, assigneeId: e.target.value || undefined })}
-                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm md:col-span-2"
+                  className="tts-form-field rounded-lg border border-border bg-background px-3 py-2 text-sm md:col-span-2"
                 >
                   <option value="">No assignee</option>
                   {team.map((u) => (
@@ -420,20 +420,20 @@ export default function TasksPage() {
                   type="date"
                   value={selectedTask.dueDate ? new Date(selectedTask.dueDate).toISOString().slice(0, 10) : ''}
                   onChange={(e) => updateTask.mutate({ id: selectedTask.id, dueDate: e.target.value || undefined })}
-                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                  className="tts-form-field rounded-lg border border-border bg-background px-3 py-2 text-sm"
                 />
                 <input
                   type="number"
                   value={selectedTask.estimatedHours || ''}
                   onChange={(e) => updateTask.mutate({ id: selectedTask.id, estimatedHours: Number(e.target.value || 0) || undefined })}
                   placeholder="Estimated hours"
-                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                  className="tts-form-field rounded-lg border border-border bg-background px-3 py-2 text-sm"
                 />
                 <textarea
                   value={selectedTask.description || ''}
                   onChange={(e) => updateTask.mutate({ id: selectedTask.id, description: e.target.value })}
                   rows={3}
-                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm md:col-span-2"
+                  className="tts-form-field rounded-lg border border-border bg-background px-3 py-2 text-sm md:col-span-2"
                 />
                 <div className="rounded-lg border border-border p-3 md:col-span-2">
                   <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Timeline</p>
@@ -468,7 +468,7 @@ export default function TasksPage() {
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                       placeholder="Write a comment..."
-                      className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                      className="tts-form-field flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm"
                     />
                     <button
                       onClick={async () => {
@@ -509,3 +509,4 @@ export default function TasksPage() {
     </>
   );
 }
+

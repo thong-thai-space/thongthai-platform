@@ -109,7 +109,7 @@ export default function ProjectsPage() {
             {filtered.map((project) => (
               <div
                 key={project.id}
-                className="group rounded-xl border border-border bg-background p-5 transition-all hover:border-primary/30 hover:shadow-md"
+                className="tts-workspace-surface group p-5 transition-all hover:border-primary/30 hover:shadow-md"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-1.5">

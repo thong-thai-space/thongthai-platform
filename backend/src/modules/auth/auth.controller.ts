@@ -18,6 +18,8 @@ import type { Request, Response, CookieOptions } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import type { GoogleAuthUser } from './strategies/google.strategy';
 
 @ApiTags('Auth')
@@ -118,6 +120,31 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async resendVerification(@Body('email') email: string) {
     return this.authService.resendVerification(email);
+  }
+
+  @SkipThrottle()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(@Body() dto: ForgotPasswordDto, @Req() req: Request) {
+    return this.authService.forgotPassword(
+      dto.email,
+      this.getClientIp(req),
+      dto.turnstileToken,
+    );
+  }
+
+  @SkipThrottle()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Body() dto: ResetPasswordDto, @Req() req: Request) {
+    return this.authService.resetPassword(
+      dto.token,
+      dto.newPassword,
+      this.getClientIp(req),
+      dto.turnstileToken,
+    );
   }
 
   @Get('google')

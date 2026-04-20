@@ -67,16 +67,16 @@ export function ServicesSection() {
               <MotionCard
                 key={service.title}
                 delay={0.06 * c.items.indexOf(service)}
-                className="group rounded-2xl border border-slate-200/80 bg-white/85 p-6 shadow-sm backdrop-blur-sm transition-all hover:border-primary/35 hover:shadow-[0_20px_45px_-28px_rgba(37,99,235,0.45)] dark:border-white/10 dark:bg-white/5"
+                className="tts-brand-surface group rounded-2xl p-6 transition-all hover:border-primary/35 hover:shadow-[0_20px_45px_-28px_rgba(37,99,235,0.45)]"
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                   {Icon && <Icon className="h-6 w-6" />}
                 </div>
                 <h3 className="mt-4 text-lg font-semibold text-slate-900 dark:text-white">{service.title}</h3>
-                <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{service.description}</p>
+                <p className="tts-brand-body mt-2 text-sm">{service.description}</p>
                 <ul className="mt-4 space-y-1">
                   {service.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                    <li key={f} className="tts-brand-body flex items-center gap-2 text-sm">
                       <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                       {f}
                     </li>

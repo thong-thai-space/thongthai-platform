@@ -13,6 +13,7 @@ const PUBLIC_ROUTES = [
   "/login",
   "/register",
   "/forgot-password",
+  "/reset-password",
 ] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {

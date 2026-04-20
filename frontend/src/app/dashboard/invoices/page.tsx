@@ -201,7 +201,7 @@ export default function InvoicesPage() {
         {/* Create form modal */}
         {showForm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4">
-            <form onSubmit={handleSubmit} className="w-full max-w-lg rounded-xl bg-background p-6 shadow-lg">
+            <form onSubmit={handleSubmit} className="tts-workspace-surface w-full max-w-lg p-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold">Create New Invoice</h2>
                 <button type="button" onClick={() => setShowForm(false)} className="text-muted-foreground hover:text-foreground">
@@ -213,7 +213,7 @@ export default function InvoicesPage() {
                   required
                   value={form.clientId}
                   onChange={(e) => setForm({ ...form, clientId: e.target.value })}
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+                  className="tts-form-field w-full rounded-lg border border-border px-3 py-2 text-sm"
                 >
                   <option value="">Select client *</option>
                   {clients.map((c) => (
@@ -223,7 +223,7 @@ export default function InvoicesPage() {
                 <select
                   value={form.projectId}
                   onChange={(e) => setForm({ ...form, projectId: e.target.value })}
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+                  className="tts-form-field w-full rounded-lg border border-border px-3 py-2 text-sm"
                 >
                   <option value="">Project (optional)</option>
                   {projects.map((p) => (
@@ -236,12 +236,12 @@ export default function InvoicesPage() {
                     type="date"
                     value={form.dueDate}
                     onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
-                    className="rounded-lg border border-border px-3 py-2 text-sm"
+                    className="tts-form-field rounded-lg border border-border px-3 py-2 text-sm"
                   />
                   <select
                     value={form.currency}
                     onChange={(e) => setForm({ ...form, currency: e.target.value })}
-                    className="rounded-lg border border-border px-3 py-2 text-sm"
+                    className="tts-form-field rounded-lg border border-border px-3 py-2 text-sm"
                   >
                     <option value="VND">VND</option>
                     <option value="USD">USD</option>
@@ -251,7 +251,7 @@ export default function InvoicesPage() {
                     value={form.taxRate}
                     onChange={(e) => setForm({ ...form, taxRate: e.target.value })}
                     placeholder="Tax %"
-                    className="rounded-lg border border-border px-3 py-2 text-sm"
+                    className="tts-form-field rounded-lg border border-border px-3 py-2 text-sm"
                   />
                 </div>
 
@@ -264,14 +264,14 @@ export default function InvoicesPage() {
                         value={item.description}
                         onChange={(e) => updateItem(i, 'description', e.target.value)}
                         placeholder="Description"
-                        className="flex-1 rounded-lg border border-border px-3 py-2 text-sm"
+                        className="tts-form-field flex-1 rounded-lg border border-border px-3 py-2 text-sm"
                       />
                       <input
                         type="number"
                         min={1}
                         value={item.quantity}
                         onChange={(e) => updateItem(i, 'quantity', e.target.value)}
-                        className="w-20 rounded-lg border border-border px-2 py-2 text-sm"
+                        className="tts-form-field w-20 rounded-lg border border-border px-2 py-2 text-sm"
                       />
                       <input
                         type="number"
@@ -279,7 +279,7 @@ export default function InvoicesPage() {
                         value={item.unitPrice}
                         onChange={(e) => updateItem(i, 'unitPrice', e.target.value)}
                         placeholder="Unit Price"
-                        className="w-28 rounded-lg border border-border px-2 py-2 text-sm"
+                        className="tts-form-field w-28 rounded-lg border border-border px-2 py-2 text-sm"
                       />
                       {form.items.length > 1 && (
                         <button type="button" onClick={() => removeItem(i)} className="text-muted-foreground hover:text-destructive">
@@ -298,7 +298,7 @@ export default function InvoicesPage() {
                   onChange={(e) => setForm({ ...form, notes: e.target.value })}
                   placeholder="Notes"
                   rows={2}
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+                  className="tts-form-field w-full rounded-lg border border-border px-3 py-2 text-sm"
                 />
               </div>
               <div className="mt-5 flex justify-end gap-3">
@@ -409,7 +409,7 @@ export default function InvoicesPage() {
 
         {editingInvoice && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <form onSubmit={handleEditSubmit} className="w-full max-w-md rounded-xl bg-background p-6 shadow-lg">
+            <form onSubmit={handleEditSubmit} className="tts-workspace-surface w-full max-w-md p-6">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-lg font-semibold">Update Invoice</h2>
                 <button
@@ -429,7 +429,7 @@ export default function InvoicesPage() {
                 <select
                   value={editForm.status}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, status: e.target.value as InvoiceStatus }))}
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+                  className="tts-form-field w-full rounded-lg border border-border px-3 py-2 text-sm"
                 >
                   {Object.entries(statusLabels).map(([k, v]) => (
                     <option key={k} value={k}>{v}</option>
@@ -440,7 +440,7 @@ export default function InvoicesPage() {
                   type="date"
                   value={editForm.dueDate}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, dueDate: e.target.value }))}
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+                  className="tts-form-field w-full rounded-lg border border-border px-3 py-2 text-sm"
                 />
 
                 <textarea
@@ -448,7 +448,7 @@ export default function InvoicesPage() {
                   value={editForm.notes}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, notes: e.target.value }))}
                   placeholder="Notes"
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+                  className="tts-form-field w-full rounded-lg border border-border px-3 py-2 text-sm"
                 />
               </div>
 

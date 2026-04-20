@@ -318,7 +318,7 @@ export function ArchitectureAgentGate({
         }`}
       >
         <div className="ai-agent-shell rounded-3xl border border-sky-200/80 bg-white/86 p-4 text-slate-900 shadow-[0_18px_45px_rgba(2,6,23,0.14)] backdrop-blur-md sm:p-5 dark:border-white/20 dark:bg-slate-950/80 dark:text-white dark:shadow-2xl">
-          <AiParticleFormation active={isVisible} className="mb-3" />
+          {/* <AiParticleFormation active={isVisible} className="mb-3" /> */}
 
           <div className="mb-2 flex justify-center">
             <div className="ai-agent-badge inline-flex items-center gap-2 rounded-full border border-cyan-400/35 bg-cyan-500/12 px-3 py-1 text-xs font-medium text-cyan-700 dark:text-cyan-200">

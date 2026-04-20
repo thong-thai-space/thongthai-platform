@@ -5,6 +5,12 @@ import { Award, Heart, Target, Users } from 'lucide-react';
 import { useSectionContent } from '@/hooks/use-content';
 import { resolveBackendAssetUrl } from '@/lib/asset-url';
 import type { ComponentType } from 'react';
+import {
+  BrandContainer,
+  BrandHeroContainer,
+  BrandSection,
+  BrandSurface,
+} from '@/components/brand/brand-primitives';
 
 const iconMap: Record<string, ComponentType<{ className?: string }>> = {
   Target,
@@ -93,44 +99,44 @@ export function AboutPageContent() {
 
   return (
     <div>
-      <section className="bg-linear-to-br from-background via-background to-primary/5 py-20 sm:py-28">
-        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+      <BrandSection className="tts-brand-grid bg-linear-to-br from-background via-background to-primary/5">
+        <BrandHeroContainer>
+          <h1 className="tts-landing-display text-4xl font-bold tracking-tight sm:text-5xl">
             {c.hero.title}
           </h1>
-          <p className="mt-6 text-lg leading-8 text-muted-foreground">{c.hero.subtitle}</p>
-        </div>
-      </section>
+          <p className="tts-brand-body mt-6 text-lg leading-8">{c.hero.subtitle}</p>
+        </BrandHeroContainer>
+      </BrandSection>
 
-      <section className="py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-center text-3xl font-bold">{c.valuesTitle}</h2>
+      <BrandSection>
+        <BrandContainer>
+          <h2 className="tts-landing-title text-center text-3xl font-bold">{c.valuesTitle}</h2>
           <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {c.values.map((v) => {
               const Icon = iconMap[v.icon] || Target;
               return (
-                <div key={v.title} className="text-center">
+                <BrandSurface key={v.title} className="p-6 text-center">
                   <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
                     <Icon className="h-7 w-7" />
                   </div>
                   <h3 className="mt-4 text-lg font-semibold">{v.title}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{v.description}</p>
-                </div>
+                  <p className="tts-brand-body mt-2 text-sm">{v.description}</p>
+                </BrandSurface>
               );
             })}
           </div>
-        </div>
-      </section>
+        </BrandContainer>
+      </BrandSection>
 
-      <section className="bg-muted/30 py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-center text-3xl font-bold">{c.teamTitle}</h2>
-          <p className="mt-4 text-center text-muted-foreground">{c.teamSubtitle}</p>
+      <BrandSection className="bg-muted/30">
+        <BrandContainer>
+          <h2 className="tts-landing-title text-center text-3xl font-bold">{c.teamTitle}</h2>
+          <p className="tts-brand-body mt-4 text-center">{c.teamSubtitle}</p>
           <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {c.team.map((member, index) => (
-              <div
+              <BrandSurface
                 key={`${member.name}-${index}`}
-                className="rounded-xl border border-border bg-background p-6 text-center"
+                className="p-6 text-center"
               >
                 <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 text-2xl font-bold text-primary">
                   {member.avatar ? (
@@ -145,12 +151,12 @@ export function AboutPageContent() {
                 </div>
                 <h3 className="mt-4 text-lg font-semibold">{member.name}</h3>
                 <div className="text-sm text-primary">{member.role}</div>
-                <p className="mt-2 text-sm text-muted-foreground">{member.bio}</p>
-              </div>
+                <p className="tts-brand-body mt-2 text-sm">{member.bio}</p>
+              </BrandSurface>
             ))}
           </div>
-        </div>
-      </section>
+        </BrandContainer>
+      </BrandSection>
     </div>
   );
 }

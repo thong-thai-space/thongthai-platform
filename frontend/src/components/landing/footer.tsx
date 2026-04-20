@@ -39,7 +39,7 @@ export function Footer() {
   return (
     <footer className="border-t border-border bg-muted/30">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+        <div className="tts-brand-surface grid gap-8 p-6 md:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div>
             <Link href="/" className="flex items-center">
@@ -47,10 +47,10 @@ export function Footer() {
                 {c.brand.name.replace(' Space', '')}<span className="text-primary"> Space</span>
               </span>
             </Link>
-            <p className="mt-3 text-sm text-muted-foreground">
+            <p className="tts-brand-body mt-3 text-sm">
               {c.brand.description}
             </p>
-            <div className="mt-4 space-y-2 text-sm text-muted-foreground">
+            <div className="tts-brand-body mt-4 space-y-2 text-sm">
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
                 <span>{c.brand.email}</span>
@@ -75,7 +75,7 @@ export function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      className="tts-brand-body text-sm transition-colors hover:text-foreground"
                     >
                       {link.label}
                     </Link>

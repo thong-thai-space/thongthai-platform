@@ -70,13 +70,13 @@ export function ProcessSection() {
                   <div className="absolute left-[55%] top-10 hidden h-0.5 w-full bg-linear-to-r from-primary/35 to-transparent lg:block" />
                 )}
 
-                <div className="rounded-2xl border border-slate-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-white/5">
+                <div className="tts-brand-surface rounded-2xl p-5">
                   <div className="relative mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-primary">
                     {Icon && <Icon className="h-6 w-6" />}
                   </div>
                   <div className="mt-3 text-center text-xs font-bold tracking-wide text-primary">{item.step}</div>
                   <h3 className="mt-2 text-center text-lg font-semibold text-slate-900 dark:text-white">{item.title}</h3>
-                  <p className="mt-2 text-center text-sm text-slate-600 dark:text-slate-300">{item.description}</p>
+                  <p className="tts-brand-body mt-2 text-center text-sm">{item.description}</p>
                 </div>
               </MotionReveal>
             );

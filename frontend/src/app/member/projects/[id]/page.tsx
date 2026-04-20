@@ -183,7 +183,7 @@ export default function MemberProjectDetailPage() {
         </div>
 
         {/* Overall progress bar */}
-        <div className="mb-8 rounded-xl border border-border bg-card p-5">
+        <div className="tts-workspace-surface mb-8 p-5">
           <div className="mb-2 flex items-center justify-between text-sm">
             <span className="font-medium">Overall Progress</span>
             <span className="font-bold text-primary">{progress}%</span>
@@ -197,7 +197,7 @@ export default function MemberProjectDetailPage() {
         </div>
 
         {/* My Tasks in this project */}
-        <section className="mb-6 rounded-xl border border-border bg-card p-5">
+        <section className="tts-workspace-surface mb-6 p-5">
           <h3 className="mb-4 text-base font-semibold">
             My Tasks ({myTasks.length})
           </h3>
@@ -269,7 +269,7 @@ function InfoCard({
   value: string;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
+    <div className="tts-workspace-surface p-4">
       <div className="mb-2 flex items-center gap-2">
         {icon}
         <span className="text-xs text-muted-foreground">{label}</span>
@@ -337,7 +337,7 @@ function ProjectChat({ projectId }: { projectId: string }) {
   };
 
   return (
-    <section className="rounded-xl border border-border bg-card">
+    <section className="tts-workspace-surface">
       <button
         onClick={() => setOpen(!open)}
         className="flex w-full items-center justify-between p-5"

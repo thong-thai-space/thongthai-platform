@@ -18,6 +18,7 @@ export default function PortalSettingsPage() {
     <>
       <PortalHeader title="Settings" />
       <main className="flex-1 overflow-y-auto p-6">
+        <div className="tts-workspace-surface p-4 sm:p-6">
         {/* Tabs */}
         <div className="mb-6 flex gap-1 rounded-lg bg-muted p-1">
           <button
@@ -49,6 +50,7 @@ export default function PortalSettingsPage() {
 
         <div className="mt-8 max-w-md">
           <MotionPreferences />
+        </div>
         </div>
       </main>
     </>
@@ -89,7 +91,7 @@ function ProfileForm() {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+            className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
           />
         </div>
         <div>
@@ -98,7 +100,7 @@ function ProfileForm() {
             type="email"
             value={user?.email || ''}
             disabled
-            className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-muted-foreground"
+            className="tts-form-field w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-muted-foreground"
           />
         </div>
         <div>
@@ -107,7 +109,7 @@ function ProfileForm() {
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+            className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
           />
         </div>
 
@@ -174,7 +176,7 @@ function PasswordForm() {
           value={currentPassword}
           onChange={(e) => setCurrentPassword(e.target.value)}
           required
-          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+          className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
         />
       </div>
       <div>
@@ -184,7 +186,7 @@ function PasswordForm() {
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
           required
-          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+          className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
         />
       </div>
       <div>
@@ -194,7 +196,7 @@ function PasswordForm() {
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
-          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+          className="tts-form-field w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
         />
       </div>
 

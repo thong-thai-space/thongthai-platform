@@ -105,7 +105,7 @@ export default function PortalNewProjectPage() {
             </Link>
           </MotionReveal>
 
-          <MotionReveal delay={0.06} className="rounded-xl border border-border bg-card p-6">
+          <MotionReveal delay={0.06} className="tts-workspace-surface p-6">
             <h2 className="mb-1 text-lg font-semibold">Submit Project Request</h2>
             <p className="mb-6 text-sm text-muted-foreground">
               Describe the project you&apos;d like to build. The Thong Thai Space team will review and contact you.

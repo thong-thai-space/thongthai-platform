@@ -103,7 +103,7 @@ export default function PortalOverviewPage() {
 
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Active Projects */}
-          <section className="rounded-xl border border-border bg-card p-5">
+          <section className="tts-workspace-surface p-5">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-base font-semibold">Active Projects</h2>
               <Link
@@ -157,7 +157,7 @@ export default function PortalOverviewPage() {
           </section>
 
           {/* Recent Invoices */}
-          <section className="rounded-xl border border-border bg-card p-5">
+          <section className="tts-workspace-surface p-5">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-base font-semibold">Recent Invoices</h2>
               <Link
@@ -215,7 +215,7 @@ function StatCard({
   bg: string;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-5">
+    <div className="tts-workspace-surface p-5">
       <div className="mb-3 flex items-center gap-3">
         <div className={`rounded-lg p-2 ${bg}`}>{icon}</div>
         <span className="text-sm text-muted-foreground">{label}</span>

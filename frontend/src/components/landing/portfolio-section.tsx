@@ -70,7 +70,7 @@ export function PortfolioSection() {
               <MotionCard
                 key={`${project.title}-${project.client}`}
                 delay={0.08 * index}
-                className="group overflow-hidden rounded-2xl border border-slate-200/80 bg-white/85 shadow-sm backdrop-blur-sm transition-all hover:border-primary/35 hover:shadow-[0_22px_55px_-30px_rgba(37,99,235,0.45)] dark:border-white/10 dark:bg-white/5"
+                className="tts-brand-surface group overflow-hidden rounded-2xl transition-all hover:border-primary/35 hover:shadow-[0_22px_55px_-30px_rgba(37,99,235,0.45)]"
               >
                 <div className={`flex h-48 items-center justify-center overflow-hidden ${project.thumbnailUrl ? '' : 'bg-linear-to-br from-primary/10 to-accent/10'}`}>
                   {project.thumbnailUrl ? (
@@ -99,7 +99,7 @@ export function PortfolioSection() {
                     )}
                   </div>
                   <h3 className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">{project.title}</h3>
-                  <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{project.description}</p>
+                  <p className="tts-brand-body mt-2 text-sm">{project.description}</p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {project.techStack.map((tech) => (
                       <span

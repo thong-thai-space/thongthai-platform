@@ -11,6 +11,12 @@ import {
 } from 'lucide-react';
 import { useSectionContent } from '@/hooks/use-content';
 import type { ComponentType } from 'react';
+import {
+  BrandContainer,
+  BrandHeroContainer,
+  BrandSection,
+  BrandSurface,
+} from '@/components/brand/brand-primitives';
 
 const iconMap: Record<string, ComponentType<{ className?: string }>> = {
   Globe,
@@ -135,9 +141,9 @@ export function ServicesPageContent() {
 
   return (
     <div>
-      <section className="bg-linear-to-br from-background via-background to-primary/5 py-20 sm:py-28">
-        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+      <BrandSection className="tts-brand-grid bg-linear-to-br from-background via-background to-primary/5">
+        <BrandHeroContainer>
+          <h1 className="tts-landing-display text-4xl font-bold tracking-tight sm:text-5xl">
             {titleParts ? (
               <>
                 {titleParts[0]}
@@ -148,12 +154,12 @@ export function ServicesPageContent() {
               c.hero.title
             )}
           </h1>
-          <p className="mt-6 text-lg leading-8 text-muted-foreground">{c.hero.subtitle}</p>
-        </div>
-      </section>
+          <p className="tts-brand-body mt-6 text-lg leading-8">{c.hero.subtitle}</p>
+        </BrandHeroContainer>
+      </BrandSection>
 
-      <section className="py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <BrandSection>
+        <BrandContainer>
           <div className="space-y-20">
             {services.map((service, idx) => {
               const Icon = iconMap[service.icon] || Globe;
@@ -165,17 +171,17 @@ export function ServicesPageContent() {
                     idx % 2 === 1 ? 'lg:flex-row-reverse' : ''
                   }`}
                 >
-                  <div className="flex-1">
+                  <BrandSurface className="flex-1 p-6">
                     <div className="flex items-center gap-3">
                       <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
                         <Icon className="h-6 w-6" />
                       </div>
                       <h2 className="text-2xl font-bold">{service.title}</h2>
                     </div>
-                    <p className="mt-4 text-muted-foreground">{service.description}</p>
+                    <p className="tts-brand-body mt-4">{service.description}</p>
                     <ul className="mt-6 space-y-2">
                       {service.features?.map((f) => (
-                        <li key={f} className="flex items-start gap-2 text-sm">
+                        <li key={f} className="tts-brand-body flex items-start gap-2 text-sm">
                           <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                           {f}
                         </li>
@@ -191,31 +197,31 @@ export function ServicesPageContent() {
                         </span>
                       ))}
                     </div>
-                  </div>
+                  </BrandSurface>
 
-                  <div className="flex flex-1 items-center justify-center rounded-2xl bg-linear-to-br from-primary/5 to-accent/5 p-12">
+                  <BrandSurface className="tts-brand-grid flex flex-1 items-center justify-center p-12">
                     <Icon className="h-24 w-24 text-primary/20" />
-                  </div>
+                  </BrandSurface>
                 </div>
               );
             })}
           </div>
-        </div>
-      </section>
+        </BrandContainer>
+      </BrandSection>
 
-      <section className="bg-primary py-16">
-        <div className="mx-auto max-w-4xl px-4 text-center">
+      <BrandSection className="bg-primary py-16">
+        <BrandHeroContainer>
           <h2 className="text-2xl font-bold text-primary-foreground sm:text-3xl">{c.cta.title}</h2>
           <p className="mt-3 text-primary-foreground/80">{c.cta.subtitle}</p>
           <Link
             href={c.cta.buttonHref}
-            className="mt-6 inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 text-sm font-medium text-primary transition-all hover:bg-white/90"
+            className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-primary transition-all hover:bg-white/90"
           >
             {c.cta.buttonText}
             <ArrowRight className="h-4 w-4" />
           </Link>
-        </div>
-      </section>
+        </BrandHeroContainer>
+      </BrandSection>
     </div>
   );
 }
