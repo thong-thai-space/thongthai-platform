@@ -150,7 +150,11 @@ export function PublicAiChatWidget() {
             {/* Header */}
             <div className="flex items-center justify-between rounded-t-2xl bg-primary px-4 py-3 text-primary-foreground">
               <div className="flex items-center gap-2">
-                <ChatFaceAvatar size={20} />
+                <ChatFaceAvatar
+                  size={34}
+                  variant="fullbody"
+                  className="pointer-events-none drop-shadow-[0_8px_16px_rgba(0,0,0,0.25)]"
+                />
                 <div>
                   <span className="text-sm font-semibold">{aiUi.publicChatHeaderTitle}</span>
                   <p className="text-[10px] text-primary-foreground/80">{aiUi.publicChatHeaderSubtitle}</p>
@@ -169,6 +173,20 @@ export function PublicAiChatWidget() {
                 >
                   <X className="h-4 w-4" />
                 </button>
+              </div>
+            </div>
+
+            <div className="relative overflow-hidden border-b border-border/80 bg-gradient-to-b from-primary/8 to-transparent px-3 py-2">
+              <span className="pointer-events-none absolute bottom-1 left-8 h-4 w-14 rounded-full bg-primary/20 blur-md" />
+              <div className="flex items-center gap-2">
+                <ChatFaceAvatar
+                  size={68}
+                  variant="fullbody"
+                  className="pointer-events-none shrink-0"
+                />
+                <p className="text-xs leading-5 text-muted-foreground">
+                  AI assistant sẵn sàng hỗ trợ về dịch vụ, timeline và báo giá.
+                </p>
               </div>
             </div>
 

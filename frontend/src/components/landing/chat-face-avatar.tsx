@@ -18,6 +18,10 @@ const AVATAR_CONFIG = {
     modelPosition: [0, -1.1, 0] as [number, number, number],
     cameraPosition: [0, 0, 3] as [number, number, number],
     cameraFov: 30,
+    mobileModelScale: 1.55,
+    mobileModelPosition: [0, -1.1, 0] as [number, number, number],
+    mobileCameraPosition: [0, 0, 3] as [number, number, number],
+    mobileCameraFov: 30,
     clipCircle: true,
     swayAmplitude: 0.12,
     swaySpeed: 0.35,
@@ -199,16 +203,16 @@ export function ChatFaceAvatar({
     .join(' ');
 
   const modelScale = isMobileViewport
-    ? config.mobileModelScale ?? config.modelScale
+    ? config.mobileModelScale
     : config.modelScale;
   const modelPosition = isMobileViewport
-    ? config.mobileModelPosition ?? config.modelPosition
+    ? config.mobileModelPosition
     : config.modelPosition;
   const cameraPosition = isMobileViewport
-    ? config.mobileCameraPosition ?? config.cameraPosition
+    ? config.mobileCameraPosition
     : config.cameraPosition;
   const cameraFov = isMobileViewport
-    ? config.mobileCameraFov ?? config.cameraFov
+    ? config.mobileCameraFov
     : config.cameraFov;
 
   useEffect(() => {
