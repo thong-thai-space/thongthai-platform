@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useSectionContent } from "@/hooks/use-content";
 import { Syne } from "next/font/google";
-import { type ReactNode, useRef } from "react";
+import { type ReactNode } from "react";
 
 const syne = Syne({
   weight: ["700"],
@@ -30,22 +30,12 @@ const defaults = {
 };
 
 interface HeroSectionProps {
-  onIntroVideoCompleted?: () => void;
   architectureOverlay?: ReactNode;
 }
 
 export function HeroSection({
-  onIntroVideoCompleted,
   architectureOverlay,
 }: HeroSectionProps) {
-  const hasNotifiedIntroEndRef = useRef(false);
-
-  const notifyIntroCompleted = () => {
-    if (hasNotifiedIntroEndRef.current) return;
-    hasNotifiedIntroEndRef.current = true;
-    onIntroVideoCompleted?.();
-  };
-
   const { data } = useSectionContent("hero");
   const raw = (data?.data as Partial<typeof defaults>) || {};
   const c = {
@@ -66,16 +56,6 @@ export function HeroSection({
             muted
             loop
             playsInline
-            onEnded={notifyIntroCompleted}
-            onTimeUpdate={(event) => {
-              const video = event.currentTarget;
-              if (!Number.isFinite(video.duration) || video.duration <= 0) return;
-
-              // With loop enabled, onEnded is not always reliable across browsers.
-              if (video.currentTime >= video.duration - 0.15) {
-                notifyIntroCompleted();
-              }
-            }}
             className="h-full w-full scale-[1.3] object-contain"
           >
             <source

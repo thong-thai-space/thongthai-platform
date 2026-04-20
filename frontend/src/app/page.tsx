@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import {
   ArchitectureAgentGate,
   HeroSection,
@@ -14,25 +13,15 @@ import {
 import { Navbar } from '@/components/landing/navbar';
 import { Footer } from '@/components/landing/footer';
 import { PublicAiChatWidget } from '@/components/landing/ai-chat-widget';
-import { useSearchParams } from "next/navigation";
 
 export default function Home() {
-  const [introVideoDone, setIntroVideoDone] = useState(false);
-  const searchParams = useSearchParams();
-
-  const forceOpenArchitecture = useMemo(
-    () => searchParams.get("openArchitectureAgent") === "1",
-    [searchParams],
-  );
-
-  const canRenderArchitectureAgent = introVideoDone || forceOpenArchitecture;
+  const canRenderArchitectureAgent = true;
 
   return (
     <>
       <Navbar />
-      <main>
+      <main className="pt-4 sm:pt-5 lg:pt-6">
         <HeroSection
-          onIntroVideoCompleted={() => setIntroVideoDone(true)}
           architectureOverlay={
             <ArchitectureAgentGate canRenderAgent={canRenderArchitectureAgent} />
           }
