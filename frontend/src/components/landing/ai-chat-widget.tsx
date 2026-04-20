@@ -151,9 +151,8 @@ export function PublicAiChatWidget() {
             <div className="flex items-center justify-between rounded-t-2xl bg-primary px-4 py-3 text-primary-foreground">
               <div className="flex items-center gap-2">
                 <ChatFaceAvatar
-                  size={34}
-                  variant="fullbody"
-                  className="pointer-events-none drop-shadow-[0_8px_16px_rgba(0,0,0,0.25)]"
+                  size={20}
+                  className="pointer-events-none"
                 />
                 <div>
                   <span className="text-sm font-semibold">{aiUi.publicChatHeaderTitle}</span>
