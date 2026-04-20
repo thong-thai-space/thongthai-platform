@@ -61,6 +61,7 @@ type ChatFaceAvatarProps = {
   size?: number;
   variant?: AvatarVariant;
   className?: string;
+  renderMode?: 'auto' | 'image';
 };
 
 function supportsWebGL() {
@@ -183,14 +184,16 @@ export function ChatFaceAvatar({
   size = 22,
   variant = 'face',
   className,
+  renderMode = 'auto',
 }: ChatFaceAvatarProps) {
   const config = AVATAR_CONFIG[variant];
   const [isMobileViewport, setIsMobileViewport] = useState(() =>
     typeof window !== 'undefined' ? window.matchMedia(MOBILE_MEDIA_QUERY).matches : false,
   );
-  const [mode, setMode] = useState<'3d' | 'image' | 'icon'>(() =>
-    supportsWebGL() && !shouldPreferStaticAvatar() ? '3d' : 'image',
-  );
+  const [mode, setMode] = useState<'3d' | 'image' | 'icon'>(() => {
+    if (renderMode === 'image') return 'image';
+    return supportsWebGL() && !shouldPreferStaticAvatar() ? '3d' : 'image';
+  });
   const [scene, setScene] = useState<Object3D | null>(null);
   const [animations, setAnimations] = useState<AnimationClip[]>([]);
   const spin = useMemo(() => !prefersReducedMotion(), []);
@@ -230,10 +233,16 @@ export function ChatFaceAvatar({
   }, []);
 
   useEffect(() => {
+    if (renderMode === 'image') {
+      setMode('image');
+      return;
+    }
+
     preloadModelIdle(variant);
-  }, [variant]);
+  }, [renderMode, variant]);
 
   useEffect(() => {
+    if (renderMode === 'image') return;
     if (mode !== '3d') return;
 
     const cached = cachedModels[variant];
@@ -267,7 +276,7 @@ export function ChatFaceAvatar({
     return () => {
       active = false;
     };
-  }, [config.modelUrl, mode, variant]);
+  }, [config.modelUrl, mode, renderMode, variant]);
 
   if (mode === '3d') {
     if (!scene) {

@@ -121,16 +121,15 @@ export function PublicAiChatWidget() {
                 setIsOpen(true);
                 setShowWelcomeNudge(false);
               }}
-              className="relative flex h-24 w-24 items-end justify-center rounded-full bg-transparent text-primary-foreground transition-transform hover:scale-105"
+              className="relative flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 hover:bg-primary/90"
             >
-              <span className="pointer-events-none absolute bottom-1 left-1/2 -z-10 h-4 w-14 -translate-x-1/2 rounded-full bg-primary/35 blur-md" />
               {showWelcomeNudge && (
                 <span className="absolute -inset-1 -z-10 rounded-full bg-primary/30 animate-ping" />
               )}
               <ChatFaceAvatar
-                size={110}
-                variant="fullbody"
-                className="pointer-events-none drop-shadow-[0_14px_24px_rgba(37,99,235,0.34)]"
+                size={34}
+                renderMode="image"
+                className="pointer-events-none"
               />
             </motion.button>
           </div>
@@ -147,57 +146,33 @@ export function PublicAiChatWidget() {
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             className="fixed bottom-6 right-6 z-50 flex h-120 w-[min(22.5rem,calc(100vw-1.25rem))] flex-col rounded-2xl border border-border bg-background shadow-2xl"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between rounded-t-2xl bg-primary px-4 py-3 text-primary-foreground">
-              <div className="flex items-center gap-2">
-                <ChatFaceAvatar
-                  size={20}
-                  className="pointer-events-none"
-                />
-                <div>
-                  <span className="text-sm font-semibold">{aiUi.publicChatHeaderTitle}</span>
-                  <p className="text-[10px] text-primary-foreground/80">{aiUi.publicChatHeaderSubtitle}</p>
-                </div>
-              </div>
-              <div className="flex gap-1">
-                <button onClick={() => setIsOpen(false)} className="rounded p-1 hover:bg-primary-foreground/10">
-                  <Minimize2 className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => {
-                    setIsOpen(false);
-                    setMessages([]);
-                  }}
-                  className="rounded p-1 hover:bg-primary-foreground/10"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-
-            <div className="relative overflow-hidden border-b border-border/80 bg-gradient-to-b from-primary/8 to-transparent px-3 py-2">
-              <span className="pointer-events-none absolute bottom-1 left-8 h-4 w-14 rounded-full bg-primary/20 blur-md" />
-              <div className="flex items-center gap-2">
-                <ChatFaceAvatar
-                  size={68}
-                  variant="fullbody"
-                  className="pointer-events-none shrink-0"
-                />
-                <p className="text-xs leading-5 text-muted-foreground">
-                  AI assistant sẵn sàng hỗ trợ về dịch vụ, timeline và báo giá.
-                </p>
-              </div>
+            <div className="absolute right-3 top-3 z-10 flex gap-1">
+              <button onClick={() => setIsOpen(false)} className="rounded p-1 text-muted-foreground hover:bg-muted">
+                <Minimize2 className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  setMessages([]);
+                }}
+                className="rounded p-1 text-muted-foreground hover:bg-muted"
+              >
+                <X className="h-4 w-4" />
+              </button>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-3 space-y-3">
+            <div className="flex-1 overflow-y-auto px-3 pb-3 pt-11 space-y-3">
               {messages.length === 0 && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="space-y-2 text-center text-sm text-muted-foreground"
+                  className="space-y-3 text-center text-sm text-muted-foreground"
                 >
+                  <div className="mx-auto w-fit rounded-full border border-border bg-muted/35 p-2">
+                    <ChatFaceAvatar size={40} renderMode="image" />
+                  </div>
                   <p className="font-medium">{aiUi.publicChatWelcomeTitle}</p>
                   <p>{aiUi.publicChatWelcomeBody}</p>
                 </motion.div>
