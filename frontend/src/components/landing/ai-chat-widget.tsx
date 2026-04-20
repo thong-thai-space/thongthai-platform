@@ -121,15 +121,16 @@ export function PublicAiChatWidget() {
                 setIsOpen(true);
                 setShowWelcomeNudge(false);
               }}
-              className="relative flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 hover:bg-primary/90"
+              className="relative flex h-20 w-20 items-end justify-center bg-transparent text-primary-foreground transition-transform hover:scale-105"
             >
               {showWelcomeNudge && (
-                <span className="absolute -inset-1 -z-10 rounded-full bg-primary/30 animate-ping" />
+                <span className="absolute bottom-2 left-1/2 -z-10 h-5 w-14 -translate-x-1/2 rounded-full bg-primary/25 blur-md animate-pulse" />
               )}
               <ChatFaceAvatar
-                size={34}
+                size={82}
+                variant="fullbody"
                 renderMode="image"
-                className="pointer-events-none"
+                className="pointer-events-none drop-shadow-[0_12px_18px_rgba(37,99,235,0.28)]"
               />
             </motion.button>
           </div>
@@ -170,8 +171,8 @@ export function PublicAiChatWidget() {
                   transition={{ delay: 0.2 }}
                   className="space-y-3 text-center text-sm text-muted-foreground"
                 >
-                  <div className="mx-auto w-fit rounded-full border border-border bg-muted/35 p-2">
-                    <ChatFaceAvatar size={40} renderMode="image" />
+                  <div className="mx-auto w-fit">
+                    <ChatFaceAvatar size={54} variant="fullbody" renderMode="image" />
                   </div>
                   <p className="font-medium">{aiUi.publicChatWelcomeTitle}</p>
                   <p>{aiUi.publicChatWelcomeBody}</p>
