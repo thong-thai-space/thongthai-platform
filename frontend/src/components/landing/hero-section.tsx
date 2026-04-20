@@ -59,29 +59,31 @@ export function HeroSection({
   return (
     <>
       {/* Video block - separate section on top */}
-      <section className="relative mx-auto h-[34vh] w-[calc(100%-1.5rem)] max-w-6xl overflow-hidden rounded-4xl bg-transparent sm:h-[42vh] sm:w-[calc(100%-2.5rem)] lg:h-[56vh]">
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          onEnded={notifyIntroCompleted}
-          onTimeUpdate={(event) => {
-            const video = event.currentTarget;
-            if (!Number.isFinite(video.duration) || video.duration <= 0) return;
+      <section className="relative mx-auto h-[34vh] w-[calc(100%-1.5rem)] max-w-6xl sm:h-[42vh] sm:w-[calc(100%-2.5rem)] lg:h-[56vh]">
+        <div className="h-full w-full overflow-hidden rounded-4xl border border-slate-200/80 bg-white shadow-[0_14px_40px_rgba(15,23,42,0.18)] dark:border-white/10 dark:bg-slate-950">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            onEnded={notifyIntroCompleted}
+            onTimeUpdate={(event) => {
+              const video = event.currentTarget;
+              if (!Number.isFinite(video.duration) || video.duration <= 0) return;
 
-            // With loop enabled, onEnded is not always reliable across browsers.
-            if (video.currentTime >= video.duration - 0.15) {
-              notifyIntroCompleted();
-            }
-          }}
-          className="h-full w-full scale-[1.3] object-contain mix-blend-screen brightness-[0.98] contrast-110 saturate-115 dark:mix-blend-normal dark:brightness-[1.02] dark:contrast-110"
-        >
-          <source
-            src="/videos/video_abdeaea5-859e-4b99-8330-da037fe439e8.mp4"
-            type="video/mp4"
-          />
-        </video>
+              // With loop enabled, onEnded is not always reliable across browsers.
+              if (video.currentTime >= video.duration - 0.15) {
+                notifyIntroCompleted();
+              }
+            }}
+            className="h-full w-full scale-[1.3] object-contain"
+          >
+            <source
+              src="/videos/video_abdeaea5-859e-4b99-8330-da037fe439e8.mp4"
+              type="video/mp4"
+            />
+          </video>
+        </div>
       </section>
 
       {architectureOverlay ? (
