@@ -59,7 +59,7 @@ export function HeroSection({
   return (
     <>
       {/* Video block - separate section on top */}
-      <section className="relative h-[34vh] overflow-hidden bg-black sm:h-[42vh] lg:h-[56vh]">
+      <section className="relative h-[34vh] overflow-hidden bg-transparent sm:h-[42vh] lg:h-[56vh]">
         <video
           autoPlay
           muted
@@ -75,14 +75,13 @@ export function HeroSection({
               notifyIntroCompleted();
             }
           }}
-          className="h-full w-full scale-[1.3] object-contain"
+          className="h-full w-full scale-[1.3] object-contain mix-blend-screen brightness-[0.98] contrast-110 saturate-115 dark:mix-blend-normal dark:brightness-[1.02] dark:contrast-110"
         >
           <source
             src="/videos/video_abdeaea5-859e-4b99-8330-da037fe439e8.mp4"
             type="video/mp4"
           />
         </video>
-        <div className="pointer-events-none absolute inset-0 bg-black/25" />
       </section>
 
       {architectureOverlay ? (
