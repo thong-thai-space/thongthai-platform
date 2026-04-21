@@ -53,8 +53,8 @@ export default function RootLayout({
           <AuthProvider>
             <SocketProvider>
               <AnimationProvider>
-                <FirstVisitTurnstileGate />
                 {children}
+                <FirstVisitTurnstileGate />
               </AnimationProvider>
             </SocketProvider>
           </AuthProvider>

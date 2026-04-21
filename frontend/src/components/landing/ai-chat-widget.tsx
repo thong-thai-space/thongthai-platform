@@ -28,6 +28,7 @@ export function PublicAiChatWidget() {
   const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [openPosition, setOpenPosition] = useState<{ x: number; y: number } | null>(null);
+  const [launcherPosition, setLauncherPosition] = useState<{ x: number; y: number } | null>(null);
   const [showWelcomeNudge, setShowWelcomeNudge] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<
@@ -38,11 +39,21 @@ export function PublicAiChatWidget() {
   const aiUi = parseAiUiContent(aiUiSection?.data);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const openWindowRef = useRef<HTMLDivElement>(null);
+  const launcherWrapperRef = useRef<HTMLDivElement>(null);
   const dragStateRef = useRef({
     isDragging: false,
     pointerId: -1,
     offsetX: 0,
     offsetY: 0,
+  });
+  const launcherDragRef = useRef({
+    isDragging: false,
+    pointerId: -1,
+    offsetX: 0,
+    offsetY: 0,
+    startX: 0,
+    startY: 0,
+    didDrag: false,
   });
 
   useEffect(() => {
@@ -84,24 +95,56 @@ export function PublicAiChatWidget() {
   }, [isOpen, openPosition]);
 
   useEffect(() => {
+    if (launcherPosition) return;
+    const size = 80;
+    const margin = 24;
+    setLauncherPosition({
+      x: Math.max(8, window.innerWidth - size - margin),
+      y: Math.max(8, window.innerHeight - size - margin),
+    });
+  }, [launcherPosition]);
+
+  useEffect(() => {
     const handlePointerMove = (event: PointerEvent) => {
-      if (!dragStateRef.current.isDragging || !openWindowRef.current) return;
+      if (dragStateRef.current.isDragging && openWindowRef.current) {
+        const rect = openWindowRef.current.getBoundingClientRect();
+        const margin = 8;
+        const maxX = Math.max(margin, window.innerWidth - rect.width - margin);
+        const maxY = Math.max(margin, window.innerHeight - rect.height - margin);
 
-      const rect = openWindowRef.current.getBoundingClientRect();
-      const margin = 8;
-      const maxX = Math.max(margin, window.innerWidth - rect.width - margin);
-      const maxY = Math.max(margin, window.innerHeight - rect.height - margin);
+        setOpenPosition({
+          x: Math.min(maxX, Math.max(margin, event.clientX - dragStateRef.current.offsetX)),
+          y: Math.min(maxY, Math.max(margin, event.clientY - dragStateRef.current.offsetY)),
+        });
+        return;
+      }
 
-      setOpenPosition({
-        x: Math.min(maxX, Math.max(margin, event.clientX - dragStateRef.current.offsetX)),
-        y: Math.min(maxY, Math.max(margin, event.clientY - dragStateRef.current.offsetY)),
-      });
+      if (launcherDragRef.current.isDragging && launcherWrapperRef.current) {
+        const rect = launcherWrapperRef.current.getBoundingClientRect();
+        const margin = 8;
+        const maxX = Math.max(margin, window.innerWidth - rect.width - margin);
+        const maxY = Math.max(margin, window.innerHeight - rect.height - margin);
+
+        const diffX = Math.abs(event.clientX - launcherDragRef.current.startX);
+        const diffY = Math.abs(event.clientY - launcherDragRef.current.startY);
+        if (diffX > 4 || diffY > 4) {
+          launcherDragRef.current.didDrag = true;
+        }
+
+        setLauncherPosition({
+          x: Math.min(maxX, Math.max(margin, event.clientX - launcherDragRef.current.offsetX)),
+          y: Math.min(maxY, Math.max(margin, event.clientY - launcherDragRef.current.offsetY)),
+        });
+      }
     };
 
     const handlePointerUp = () => {
-      if (!dragStateRef.current.isDragging) return;
       dragStateRef.current.isDragging = false;
       dragStateRef.current.pointerId = -1;
+
+      launcherDragRef.current.isDragging = false;
+      launcherDragRef.current.pointerId = -1;
+
       document.body.style.userSelect = '';
     };
 
@@ -155,6 +198,34 @@ export function PublicAiChatWidget() {
     document.body.style.userSelect = 'none';
   };
 
+  const startDraggingLauncher = (event: React.PointerEvent<HTMLButtonElement>) => {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    if (!launcherWrapperRef.current) return;
+
+    const rect = launcherWrapperRef.current.getBoundingClientRect();
+    launcherDragRef.current = {
+      isDragging: true,
+      pointerId: event.pointerId,
+      offsetX: event.clientX - rect.left,
+      offsetY: event.clientY - rect.top,
+      startX: event.clientX,
+      startY: event.clientY,
+      didDrag: false,
+    };
+
+    document.body.style.userSelect = 'none';
+  };
+
+  const handleOpenByLauncher = () => {
+    if (launcherDragRef.current.didDrag) {
+      launcherDragRef.current.didDrag = false;
+      return;
+    }
+
+    setIsOpen(true);
+    setShowWelcomeNudge(false);
+  };
+
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || chatMutation.isPending) return;
@@ -184,7 +255,11 @@ export function PublicAiChatWidget() {
     <>
       <AnimatePresence>
         {!isOpen && (
-          <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
+          <div
+            ref={launcherWrapperRef}
+            className="fixed z-50 flex flex-col items-end gap-2"
+            style={launcherPosition ? { left: launcherPosition.x, top: launcherPosition.y } : { right: 24, bottom: 24 }}
+          >
             <AnimatePresence>
               {showWelcomeNudge && (
                 <motion.button
@@ -210,10 +285,8 @@ export function PublicAiChatWidget() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0, opacity: 0 }}
               transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-              onClick={() => {
-                setIsOpen(true);
-                setShowWelcomeNudge(false);
-              }}
+              onPointerDown={startDraggingLauncher}
+              onClick={handleOpenByLauncher}
               className="relative flex h-20 w-20 items-end justify-center bg-transparent text-primary-foreground transition-transform hover:scale-105"
             >
               {showWelcomeNudge && (

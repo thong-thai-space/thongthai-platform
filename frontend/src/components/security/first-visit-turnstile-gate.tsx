@@ -85,7 +85,7 @@ export function FirstVisitTurnstileGate() {
 
     const verifyOnServer = async () => {
       try {
-        const response = await api.post('/security/turnstile/verify', { token });
+        const response = await api.post('/security/turnstile/verify', { token }, { timeout: 12000 });
         const verified = Boolean(response.data?.verified);
 
         if (!active) return;
@@ -118,8 +118,14 @@ export function FirstVisitTurnstileGate() {
     return null;
   }
 
+  const handleRetry = () => {
+    setToken(null);
+    setError(null);
+    setState('challenge');
+  };
+
   return (
-    <div className="fixed inset-0 z-9999 flex items-center justify-center bg-slate-100 px-4">
+    <div className="fixed inset-0 flex items-center justify-center bg-slate-100 px-4" style={{ zIndex: 9999 }}>
       <div className="w-full max-w-2xl rounded-3xl border border-slate-300 bg-white p-7 shadow-xl sm:p-10">
         <div className="mb-6 flex items-center gap-3">
           <span className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-300 bg-slate-50 text-slate-700">
@@ -145,6 +151,18 @@ export function FirstVisitTurnstileGate() {
           )}
 
           {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+
+          {state !== 'verifying' && (
+            <div className="mt-3 flex justify-center">
+              <button
+                type="button"
+                onClick={handleRetry}
+                className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-100"
+              >
+                Retry challenge
+              </button>
+            </div>
+          )}
         </div>
 
         <p className="mt-5 text-xs text-slate-500">
