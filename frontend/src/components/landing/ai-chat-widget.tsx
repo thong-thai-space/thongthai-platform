@@ -27,8 +27,6 @@ function TypingIndicator() {
 export function PublicAiChatWidget() {
   const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [openPosition, setOpenPosition] = useState<{ x: number; y: number } | null>(null);
-  const [launcherPosition, setLauncherPosition] = useState<{ x: number; y: number } | null>(null);
   const [showWelcomeNudge, setShowWelcomeNudge] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<
@@ -38,23 +36,6 @@ export function PublicAiChatWidget() {
   const { data: aiUiSection } = useSectionContent('ai-ui');
   const aiUi = parseAiUiContent(aiUiSection?.data);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const openWindowRef = useRef<HTMLDivElement>(null);
-  const launcherWrapperRef = useRef<HTMLDivElement>(null);
-  const dragStateRef = useRef({
-    isDragging: false,
-    pointerId: -1,
-    offsetX: 0,
-    offsetY: 0,
-  });
-  const launcherDragRef = useRef({
-    isDragging: false,
-    pointerId: -1,
-    offsetX: 0,
-    offsetY: 0,
-    startX: 0,
-    startY: 0,
-    didDrag: false,
-  });
 
   useEffect(() => {
     setMounted(true);
@@ -80,151 +61,6 @@ export function PublicAiChatWidget() {
       window.clearTimeout(hideTimer);
     };
   }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen || openPosition) return;
-
-    const margin = 12;
-    const estimatedWidth = Math.min(360, window.innerWidth - margin * 2);
-    const estimatedHeight = Math.min(480, window.innerHeight - margin * 2);
-
-    setOpenPosition({
-      x: Math.max(margin, window.innerWidth - estimatedWidth - 24),
-      y: Math.max(margin, window.innerHeight - estimatedHeight - 24),
-    });
-  }, [isOpen, openPosition]);
-
-  useEffect(() => {
-    if (launcherPosition) return;
-    const size = 80;
-    const margin = 24;
-    setLauncherPosition({
-      x: Math.max(8, window.innerWidth - size - margin),
-      y: Math.max(8, window.innerHeight - size - margin),
-    });
-  }, [launcherPosition]);
-
-  useEffect(() => {
-    const handlePointerMove = (event: PointerEvent) => {
-      if (dragStateRef.current.isDragging && openWindowRef.current) {
-        const rect = openWindowRef.current.getBoundingClientRect();
-        const margin = 8;
-        const maxX = Math.max(margin, window.innerWidth - rect.width - margin);
-        const maxY = Math.max(margin, window.innerHeight - rect.height - margin);
-
-        setOpenPosition({
-          x: Math.min(maxX, Math.max(margin, event.clientX - dragStateRef.current.offsetX)),
-          y: Math.min(maxY, Math.max(margin, event.clientY - dragStateRef.current.offsetY)),
-        });
-        return;
-      }
-
-      if (launcherDragRef.current.isDragging && launcherWrapperRef.current) {
-        const rect = launcherWrapperRef.current.getBoundingClientRect();
-        const margin = 8;
-        const maxX = Math.max(margin, window.innerWidth - rect.width - margin);
-        const maxY = Math.max(margin, window.innerHeight - rect.height - margin);
-
-        const diffX = Math.abs(event.clientX - launcherDragRef.current.startX);
-        const diffY = Math.abs(event.clientY - launcherDragRef.current.startY);
-        if (diffX > 4 || diffY > 4) {
-          launcherDragRef.current.didDrag = true;
-        }
-
-        setLauncherPosition({
-          x: Math.min(maxX, Math.max(margin, event.clientX - launcherDragRef.current.offsetX)),
-          y: Math.min(maxY, Math.max(margin, event.clientY - launcherDragRef.current.offsetY)),
-        });
-      }
-    };
-
-    const handlePointerUp = () => {
-      dragStateRef.current.isDragging = false;
-      dragStateRef.current.pointerId = -1;
-
-      launcherDragRef.current.isDragging = false;
-      launcherDragRef.current.pointerId = -1;
-
-      document.body.style.userSelect = '';
-    };
-
-    window.addEventListener('pointermove', handlePointerMove);
-    window.addEventListener('pointerup', handlePointerUp);
-    window.addEventListener('pointercancel', handlePointerUp);
-
-    return () => {
-      window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('pointerup', handlePointerUp);
-      window.removeEventListener('pointercancel', handlePointerUp);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!isOpen || !openPosition || !openWindowRef.current) return;
-
-    const syncPositionWithinViewport = () => {
-      if (!openWindowRef.current || !openPosition) return;
-      const rect = openWindowRef.current.getBoundingClientRect();
-      const margin = 8;
-      const maxX = Math.max(margin, window.innerWidth - rect.width - margin);
-      const maxY = Math.max(margin, window.innerHeight - rect.height - margin);
-
-      setOpenPosition((prev) => {
-        if (!prev) return prev;
-        return {
-          x: Math.min(maxX, Math.max(margin, prev.x)),
-          y: Math.min(maxY, Math.max(margin, prev.y)),
-        };
-      });
-    };
-
-    window.addEventListener('resize', syncPositionWithinViewport);
-    return () => {
-      window.removeEventListener('resize', syncPositionWithinViewport);
-    };
-  }, [isOpen, openPosition]);
-
-  const startDraggingOpenWindow = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (event.pointerType === 'mouse' && event.button !== 0) return;
-    if (!openWindowRef.current) return;
-
-    const rect = openWindowRef.current.getBoundingClientRect();
-    dragStateRef.current = {
-      isDragging: true,
-      pointerId: event.pointerId,
-      offsetX: event.clientX - rect.left,
-      offsetY: event.clientY - rect.top,
-    };
-    document.body.style.userSelect = 'none';
-  };
-
-  const startDraggingLauncher = (event: React.PointerEvent<HTMLButtonElement>) => {
-    if (event.pointerType === 'mouse' && event.button !== 0) return;
-    if (!launcherWrapperRef.current) return;
-
-    const rect = launcherWrapperRef.current.getBoundingClientRect();
-    launcherDragRef.current = {
-      isDragging: true,
-      pointerId: event.pointerId,
-      offsetX: event.clientX - rect.left,
-      offsetY: event.clientY - rect.top,
-      startX: event.clientX,
-      startY: event.clientY,
-      didDrag: false,
-    };
-
-    document.body.style.userSelect = 'none';
-  };
-
-  const handleOpenByLauncher = () => {
-    if (launcherDragRef.current.didDrag) {
-      launcherDragRef.current.didDrag = false;
-      return;
-    }
-
-    setIsOpen(true);
-    setShowWelcomeNudge(false);
-  };
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -255,11 +91,7 @@ export function PublicAiChatWidget() {
     <>
       <AnimatePresence>
         {!isOpen && (
-          <div
-            ref={launcherWrapperRef}
-            className="fixed z-50 flex flex-col items-end gap-2"
-            style={launcherPosition ? { left: launcherPosition.x, top: launcherPosition.y } : { right: 24, bottom: 24 }}
-          >
+          <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
             <AnimatePresence>
               {showWelcomeNudge && (
                 <motion.button
@@ -285,8 +117,10 @@ export function PublicAiChatWidget() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0, opacity: 0 }}
               transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-              onPointerDown={startDraggingLauncher}
-              onClick={handleOpenByLauncher}
+              onClick={() => {
+                setIsOpen(true);
+                setShowWelcomeNudge(false);
+              }}
               className="relative flex h-20 w-20 items-end justify-center bg-transparent text-primary-foreground transition-transform hover:scale-105"
             >
               {showWelcomeNudge && (
@@ -306,20 +140,13 @@ export function PublicAiChatWidget() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            ref={openWindowRef}
             key="chat-window"
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="fixed z-50 flex h-120 w-[min(22.5rem,calc(100vw-1.25rem))] flex-col rounded-2xl border border-border bg-background shadow-2xl"
-            style={openPosition ? { left: openPosition.x, top: openPosition.y } : undefined}
+            className="fixed bottom-6 right-6 z-50 flex h-120 w-[min(22.5rem,calc(100vw-1.25rem))] flex-col rounded-2xl border border-border bg-background shadow-2xl"
           >
-            <div
-              onPointerDown={startDraggingOpenWindow}
-              className="absolute inset-x-0 top-0 z-0 h-10 cursor-grab touch-none active:cursor-grabbing"
-              aria-hidden="true"
-            />
             <div className="absolute right-3 top-3 z-10 flex gap-1">
               <button onClick={() => setIsOpen(false)} className="rounded p-1 text-muted-foreground hover:bg-muted">
                 <Minimize2 className="h-4 w-4" />
