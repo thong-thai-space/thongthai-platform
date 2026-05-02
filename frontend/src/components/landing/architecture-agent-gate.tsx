@@ -222,6 +222,11 @@ export function ArchitectureAgentGate({
         | { message?: string | string[]; error?: string }
         | undefined;
 
+      const status = (err as { response?: { status?: number } }).response?.status;
+      if (status === 500) {
+        return "Sorry, the admin has run out of money.";
+      }
+
       if (typeof data?.message === "string") {
         return data.message;
       }

@@ -81,7 +81,7 @@ export function PublicAiChatWidget() {
         ...prev,
         {
           role: 'assistant',
-          content: 'Sorry, an error occurred. Please try again later.',
+          content: 'Sorry, the admin has run out of money.',
         },
       ]);
     }
