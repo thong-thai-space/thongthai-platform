@@ -107,7 +107,11 @@ describe('AuthService password reset flow', () => {
     mockTurnstileService.verifyToken.mockResolvedValue(false);
 
     await expect(
-      service.forgotPassword('user@example.com', '127.0.0.1', 'bad-turnstile-token'),
+      service.forgotPassword(
+        'user@example.com',
+        '127.0.0.1',
+        'bad-turnstile-token',
+      ),
     ).rejects.toThrow(UnauthorizedException);
   });
 
@@ -116,7 +120,12 @@ describe('AuthService password reset flow', () => {
     mockTurnstileService.verifyToken.mockResolvedValue(false);
 
     await expect(
-      service.resetPassword('valid-format-token', 'StrongPass1!', '127.0.0.1', 'bad-turnstile-token'),
+      service.resetPassword(
+        'valid-format-token',
+        'StrongPass1!',
+        '127.0.0.1',
+        'bad-turnstile-token',
+      ),
     ).rejects.toThrow(UnauthorizedException);
   });
 
@@ -152,7 +161,9 @@ describe('AuthService password reset flow', () => {
   });
 
   it('resetPassword should update password and clear refresh token hash for valid token', async () => {
-    const expectedFp = createHash('sha256').update('current-hash').digest('hex');
+    const expectedFp = createHash('sha256')
+      .update('current-hash')
+      .digest('hex');
 
     mockJwtService.verifyAsync.mockResolvedValue({
       sub: 'u1',

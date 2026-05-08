@@ -113,7 +113,8 @@ describe('Auth Password Reset E2E', () => {
 
   it('POST /api/auth/reset-password should return 200 on success', async () => {
     mockAuthService.resetPassword.mockResolvedValue({
-      message: 'Password has been reset successfully. Please sign in with your new password.',
+      message:
+        'Password has been reset successfully. Please sign in with your new password.',
     });
 
     const res = await request(app.getHttpServer())
@@ -139,7 +140,8 @@ describe('Auth Password Reset E2E', () => {
 
   it('POST /api/auth/reset-password should forward turnstile token to service', async () => {
     mockAuthService.resetPassword.mockResolvedValue({
-      message: 'Password has been reset successfully. Please sign in with your new password.',
+      message:
+        'Password has been reset successfully. Please sign in with your new password.',
     });
 
     await request(app.getHttpServer())
@@ -188,7 +190,11 @@ describe('Auth Password Reset E2E', () => {
 
     await request(app.getHttpServer())
       .post('/api/auth/reset-password')
-      .send({ token: 'valid-reset-token', newPassword: 'StrongPass1!', turnstileToken: 'bad-token' })
+      .send({
+        token: 'valid-reset-token',
+        newPassword: 'StrongPass1!',
+        turnstileToken: 'bad-token',
+      })
       .expect(401);
   });
 });

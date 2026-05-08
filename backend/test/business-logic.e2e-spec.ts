@@ -87,12 +87,12 @@ describe('Business Logic Validation (Integration)', () => {
   });
 
   describe('IDOR Prevention — Authorization', () => {
-    it('should prevent accessing another user\'s invoice', async () => {
+    it("should prevent accessing another user's invoice", async () => {
       // Setup: User A creates invoice, User B tries to access
       // Expected: 403 Forbidden
     });
 
-    it('should prevent accessing another user\'s task', async () => {
+    it("should prevent accessing another user's task", async () => {
       // Setup: User A creates task, User B tries to access
       // Expected: 403 Forbidden or 404 (depending on strategy)
     });

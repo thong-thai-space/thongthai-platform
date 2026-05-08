@@ -112,7 +112,9 @@ describe('ClientService', () => {
       const updated = { id: '1', name: 'Updated Client' };
       mockPrisma.user.update.mockResolvedValue(updated);
 
-      const result = await service.update('1', { name: 'Updated Client' } as any);
+      const result = await service.update('1', {
+        name: 'Updated Client',
+      } as any);
       expect(result).toEqual(updated);
     });
   });

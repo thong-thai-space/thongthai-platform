@@ -113,7 +113,9 @@ describe('TaskService', () => {
       const updated = { id: 't1', title: 'Updated Task' };
       mockPrisma.task.update.mockResolvedValue(updated);
 
-      const result = await service.update('t1', { title: 'Updated Task' } as any);
+      const result = await service.update('t1', {
+        title: 'Updated Task',
+      } as any);
       expect(result).toEqual(updated);
     });
   });

@@ -90,16 +90,20 @@ export class HealthService implements OnModuleDestroy {
     return this.redisClient;
   }
 
-  private toStatus(
-    result: PromiseSettledResult<{ status: CheckStatus }>,
-  ): { status: CheckStatus; error?: string } {
+  private toStatus(result: PromiseSettledResult<{ status: CheckStatus }>): {
+    status: CheckStatus;
+    error?: string;
+  } {
     if (result.status === 'fulfilled') {
       return result.value;
     }
 
     return {
       status: 'down',
-      error: result.reason instanceof Error ? result.reason.message : 'Unknown error',
+      error:
+        result.reason instanceof Error
+          ? result.reason.message
+          : 'Unknown error',
     };
   }
 }

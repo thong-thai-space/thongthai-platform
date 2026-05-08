@@ -22,11 +22,16 @@ export class PushService {
       this.logger.log('Web Push VAPID configured');
     } else {
       this.vapidConfigured = false;
-      this.logger.warn('Web Push VAPID not configured — push notifications disabled');
+      this.logger.warn(
+        'Web Push VAPID not configured — push notifications disabled',
+      );
     }
   }
 
-  async subscribe(userId: string, subscription: { endpoint: string; keys: { p256dh: string; auth: string } }) {
+  async subscribe(
+    userId: string,
+    subscription: { endpoint: string; keys: { p256dh: string; auth: string } },
+  ) {
     return this.prisma.pushSubscription.upsert({
       where: {
         userId_endpoint: { userId, endpoint: subscription.endpoint },
@@ -50,7 +55,10 @@ export class PushService {
     });
   }
 
-  async sendPush(userId: string, payload: { title: string; body: string; url?: string }) {
+  async sendPush(
+    userId: string,
+    payload: { title: string; body: string; url?: string },
+  ) {
     if (!this.vapidConfigured) return;
 
     const subscriptions = await this.prisma.pushSubscription.findMany({
@@ -73,11 +81,14 @@ export class PushService {
     const toRemove: string[] = [];
     results.forEach((result, index) => {
       if (result.status === 'rejected') {
-        const statusCode = (result.reason as { statusCode?: number })?.statusCode;
+        const statusCode = (result.reason as { statusCode?: number })
+          ?.statusCode;
         if (statusCode === 404 || statusCode === 410) {
           toRemove.push(subscriptions[index].id);
         } else {
-          this.logger.warn(`Push to ${subscriptions[index].endpoint} failed: ${result.reason}`);
+          this.logger.warn(
+            `Push to ${subscriptions[index].endpoint} failed: ${result.reason}`,
+          );
         }
       }
     });

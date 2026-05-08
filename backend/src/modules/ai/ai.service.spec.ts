@@ -91,8 +91,8 @@ describe('AiService', () => {
     mockPrisma.user.update.mockResolvedValue({});
     mockPrisma.project.count.mockResolvedValue(0);
     mockPrisma.task.count.mockResolvedValue(0);
-    mockPrisma.$transaction.mockImplementation(async (queries: Promise<unknown>[]) =>
-      Promise.all(queries),
+    mockPrisma.$transaction.mockImplementation(
+      async (queries: Promise<unknown>[]) => Promise.all(queries),
     );
   });
 
@@ -143,9 +143,9 @@ describe('AiService', () => {
     it('should block access to conversation not owned by current user', async () => {
       mockPrisma.aiConversation.findFirst.mockResolvedValue(null);
 
-      await expect(service.chat('user-1', 'Follow up', 'conv-other')).rejects.toThrow(
-        ForbiddenException,
-      );
+      await expect(
+        service.chat('user-1', 'Follow up', 'conv-other'),
+      ).rejects.toThrow(ForbiddenException);
 
       expect(mockPrisma.aiConversation.create).not.toHaveBeenCalled();
       expect(mockCreate).not.toHaveBeenCalled();
@@ -343,8 +343,7 @@ describe('AiService', () => {
         'Data Layer',
         'External Integrations',
       ],
-      svg:
-        '<svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg"><defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#334155"/></marker></defs><rect x="50" y="50" width="800" height="90" fill="#dbeafe"/><rect x="50" y="160" width="800" height="90" fill="#dcfce7"/><rect x="50" y="270" width="800" height="90" fill="#fff7ed"/><rect x="50" y="380" width="800" height="90" fill="#f5f3ff"/><rect x="50" y="490" width="800" height="70" fill="#ecfeff"/><text x="450" y="85">CLIENT LAYER</text><text x="450" y="110">Dashboard and client portal</text><text x="450" y="195">API LAYER</text><text x="450" y="220">Contract, task and invoice APIs</text><text x="450" y="305">BUSINESS LOGIC LAYER</text><text x="450" y="330">Workflow and rule processing</text><text x="450" y="415">DATA LAYER</text><text x="450" y="440">PostgreSQL and audit logs</text><text x="450" y="525">EXTERNAL INTEGRATIONS</text><line x1="450" y1="140" x2="450" y2="160" stroke="#334155" marker-end="url(#arrow)"/><line x1="450" y1="250" x2="450" y2="270" stroke="#334155" marker-end="url(#arrow)"/><line x1="450" y1="360" x2="450" y2="380" stroke="#334155" marker-end="url(#arrow)"/><line x1="450" y1="470" x2="450" y2="490" stroke="#334155" marker-end="url(#arrow)"/></svg>',
+      svg: '<svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg"><defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#334155"/></marker></defs><rect x="50" y="50" width="800" height="90" fill="#dbeafe"/><rect x="50" y="160" width="800" height="90" fill="#dcfce7"/><rect x="50" y="270" width="800" height="90" fill="#fff7ed"/><rect x="50" y="380" width="800" height="90" fill="#f5f3ff"/><rect x="50" y="490" width="800" height="70" fill="#ecfeff"/><text x="450" y="85">CLIENT LAYER</text><text x="450" y="110">Dashboard and client portal</text><text x="450" y="195">API LAYER</text><text x="450" y="220">Contract, task and invoice APIs</text><text x="450" y="305">BUSINESS LOGIC LAYER</text><text x="450" y="330">Workflow and rule processing</text><text x="450" y="415">DATA LAYER</text><text x="450" y="440">PostgreSQL and audit logs</text><text x="450" y="525">EXTERNAL INTEGRATIONS</text><line x1="450" y1="140" x2="450" y2="160" stroke="#334155" marker-end="url(#arrow)"/><line x1="450" y1="250" x2="450" y2="270" stroke="#334155" marker-end="url(#arrow)"/><line x1="450" y1="360" x2="450" y2="380" stroke="#334155" marker-end="url(#arrow)"/><line x1="450" y1="470" x2="450" y2="490" stroke="#334155" marker-end="url(#arrow)"/></svg>',
     };
 
     it('should generate architecture payload and docx for valid input', async () => {
@@ -368,8 +367,12 @@ describe('AiService', () => {
         'Design a SaaS platform',
       );
 
-      expect(result.description).toContain('System architecture is organized into five layers');
-      expect(result.docxBase64).toBe(Buffer.from('docx-content').toString('base64'));
+      expect(result.description).toContain(
+        'System architecture is organized into five layers',
+      );
+      expect(result.docxBase64).toBe(
+        Buffer.from('docx-content').toString('base64'),
+      );
       expect(result.usage.totalTokens).toBe(300);
       expect(mockPrisma.user.update).toHaveBeenCalled();
     });

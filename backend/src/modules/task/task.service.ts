@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { NotificationService } from '../notification/notification.service';
 import { CreateTaskDto, UpdateTaskDto } from './dto/task.dto';
 import { UserRole, NotificationType, Prisma } from '@prisma/client';
@@ -13,7 +18,11 @@ export class TaskService {
     private notificationService: NotificationService,
   ) {}
 
-  async findByProject(projectId: string | undefined, userId: string, role: UserRole) {
+  async findByProject(
+    projectId: string | undefined,
+    userId: string,
+    role: UserRole,
+  ) {
     if (role === UserRole.MEMBER) {
       return this.getMyTasks(userId);
     }
@@ -26,7 +35,9 @@ export class TaskService {
       return this.taskRepository.findAllWithIncludes(where);
     }
 
-    const where: Prisma.TaskWhereInput | undefined = projectId ? { projectId } : undefined;
+    const where: Prisma.TaskWhereInput | undefined = projectId
+      ? { projectId }
+      : undefined;
     return this.taskRepository.findAllWithIncludes(where);
   }
 
@@ -37,11 +48,15 @@ export class TaskService {
     // Pattern: Authorization - Per-resource access control
     // OWNER/ADMIN can access any task; MEMBER can access tasks from their projects; CLIENT can access tasks from their projects
     if (role === UserRole.MEMBER && task.assigneeId !== userId) {
-      throw new ForbiddenException('You do not have permission to access this task');
+      throw new ForbiddenException(
+        'You do not have permission to access this task',
+      );
     }
 
     if (role === UserRole.CLIENT && task.project.clientId !== userId) {
-      throw new ForbiddenException('You do not have permission to access this task');
+      throw new ForbiddenException(
+        'You do not have permission to access this task',
+      );
     }
 
     return task;
@@ -50,9 +65,14 @@ export class TaskService {
   async create(dto: CreateTaskDto, creatorId: string) {
     // Pattern: Validation - Prevent circular subtasks
     if (dto.parentId) {
-      const isCircular = await this.taskRepository.isCircularSubtask(dto.projectId, dto.parentId);
+      const isCircular = await this.taskRepository.isCircularSubtask(
+        dto.projectId,
+        dto.parentId,
+      );
       if (isCircular) {
-        throw new BadRequestException('Cannot create circular subtask relationship');
+        throw new BadRequestException(
+          'Cannot create circular subtask relationship',
+        );
       }
     }
 
@@ -78,7 +98,11 @@ export class TaskService {
             'Assignee does not have access to this project',
           );
         }
-      } else if ([UserRole.MEMBER, UserRole.OWNER, UserRole.ADMIN].includes(assignee.role)) {
+      } else if (
+        [UserRole.MEMBER, UserRole.OWNER, UserRole.ADMIN].includes(
+          assignee.role,
+        )
+      ) {
         // MEMBER/OWNER/ADMIN are allowed (they have system-wide project access)
         // Additional permission checks can be added per org structure
       }
@@ -92,9 +116,13 @@ export class TaskService {
       dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
       estimatedHours: dto.estimatedHours,
       order: dto.order,
-      ...(dto.assigneeId ? { assignee: { connect: { id: dto.assigneeId } } } : {}),
+      ...(dto.assigneeId
+        ? { assignee: { connect: { id: dto.assigneeId } } }
+        : {}),
       ...(dto.parentId ? { parent: { connect: { id: dto.parentId } } } : {}),
-      ...(dto.milestoneId ? { milestone: { connect: { id: dto.milestoneId } } } : {}),
+      ...(dto.milestoneId
+        ? { milestone: { connect: { id: dto.milestoneId } } }
+        : {}),
       project: { connect: { id: dto.projectId } },
       creator: { connect: { id: creatorId } },
     };
@@ -115,30 +143,52 @@ export class TaskService {
     return task;
   }
 
-  async update(id: string, dto: UpdateTaskDto, updaterId?: string, updaterRole?: UserRole) {
+  async update(
+    id: string,
+    dto: UpdateTaskDto,
+    updaterId?: string,
+    updaterRole?: UserRole,
+  ) {
     const task = await this.taskRepository.findById(id);
     if (!task) throw new NotFoundException('Task not found');
 
     // MEMBER can only update tasks assigned to them
     if (updaterRole === UserRole.MEMBER) {
       if (task.assigneeId !== updaterId) {
-        throw new ForbiddenException('You can only update tasks assigned to you');
+        throw new ForbiddenException(
+          'You can only update tasks assigned to you',
+        );
       }
     }
 
     const oldStatus = task.status;
     const updateData: Prisma.TaskUpdateInput = {
       ...(dto.title !== undefined ? { title: dto.title } : {}),
-      ...(dto.description !== undefined ? { description: dto.description } : {}),
+      ...(dto.description !== undefined
+        ? { description: dto.description }
+        : {}),
       ...(dto.status !== undefined ? { status: dto.status } : {}),
       ...(dto.priority !== undefined ? { priority: dto.priority } : {}),
-      ...(dto.dueDate !== undefined ? { dueDate: dto.dueDate ? new Date(dto.dueDate) : null } : {}),
-      ...(dto.estimatedHours !== undefined ? { estimatedHours: dto.estimatedHours } : {}),
+      ...(dto.dueDate !== undefined
+        ? { dueDate: dto.dueDate ? new Date(dto.dueDate) : null }
+        : {}),
+      ...(dto.estimatedHours !== undefined
+        ? { estimatedHours: dto.estimatedHours }
+        : {}),
       ...(dto.order !== undefined ? { order: dto.order } : {}),
-      ...(dto.assigneeId !== undefined ? { assignee: dto.assigneeId ? { connect: { id: dto.assigneeId } } : { disconnect: true } } : {}),
+      ...(dto.assigneeId !== undefined
+        ? {
+            assignee: dto.assigneeId
+              ? { connect: { id: dto.assigneeId } }
+              : { disconnect: true },
+          }
+        : {}),
     };
 
-    const updated = await this.taskRepository.updateWithIncludes(id, updateData);
+    const updated = await this.taskRepository.updateWithIncludes(
+      id,
+      updateData,
+    );
 
     // Get full task details for notification
     const fullTask = await this.taskRepository.findById(id);
@@ -172,7 +222,11 @@ export class TaskService {
     }
 
     // Notify new assignee when task is reassigned
-    if (dto.assigneeId && dto.assigneeId !== task.assigneeId && dto.assigneeId !== updaterId) {
+    if (
+      dto.assigneeId &&
+      dto.assigneeId !== task.assigneeId &&
+      dto.assigneeId !== updaterId
+    ) {
       const projectInfo = await this.prisma.project.findUnique({
         where: { id: task.projectId },
         select: { name: true },
@@ -199,7 +253,12 @@ export class TaskService {
     return this.taskRepository.findByAssignee(userId);
   }
 
-  async addComment(taskId: string, content: string, userId: string, role: UserRole) {
+  async addComment(
+    taskId: string,
+    content: string,
+    userId: string,
+    role: UserRole,
+  ) {
     const task = await this.taskRepository.findById(taskId);
 
     if (!task) throw new NotFoundException('Task not found');

@@ -299,7 +299,8 @@ export class MessageService {
     const counter = new Map<string, number>();
     for (const item of unreadNotifications) {
       const data = (item.data || {}) as Record<string, unknown>;
-      const projectId = typeof data.projectId === 'string' ? data.projectId : '';
+      const projectId =
+        typeof data.projectId === 'string' ? data.projectId : '';
       if (!projectId) continue;
       counter.set(projectId, (counter.get(projectId) || 0) + 1);
     }

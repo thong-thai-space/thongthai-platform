@@ -57,7 +57,9 @@ export class AuthRepository {
         },
       });
     } catch (error) {
-      throw new Error(`Failed to find user by email: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to find user by email: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -88,7 +90,9 @@ export class AuthRepository {
         },
       });
     } catch (error) {
-      throw new Error(`Failed to find user: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to find user: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -104,7 +108,9 @@ export class AuthRepository {
           throw new Error('Email already exists');
         }
       }
-      throw new Error(`Failed to create user: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to create user: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -118,10 +124,15 @@ export class AuthRepository {
         data,
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
         throw new Error('User not found');
       }
-      throw new Error(`Failed to update user: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to update user: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -134,7 +145,9 @@ export class AuthRepository {
         where: { emailVerifyToken: token },
       });
     } catch (error) {
-      throw new Error(`Failed to find verification token: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to find verification token: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -147,7 +160,9 @@ export class AuthRepository {
         where: { googleId },
       });
     } catch (error) {
-      throw new Error(`Failed to find user by Google ID: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to find user by Google ID: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 }

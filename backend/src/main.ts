@@ -66,7 +66,9 @@ async function bootstrap() {
     // Keep Swagger for local and test environments only.
     const config = new DocumentBuilder()
       .setTitle('Thông Thái Space API')
-      .setDescription('API for project management, client portal & AI assistant')
+      .setDescription(
+        'API for project management, client portal & AI assistant',
+      )
       .setVersion('1.0')
       .addBearerAuth()
       .build();

@@ -12,11 +12,7 @@ import { AuthRepository } from './repositories/auth.repository';
 import { TurnstileService } from '../../common/turnstile/turnstile.service';
 
 @Module({
-  imports: [
-    PassportModule,
-    JwtModule.register({}),
-    EmailModule,
-  ],
+  imports: [PassportModule, JwtModule.register({}), EmailModule],
   controllers: [AuthController],
   providers: [
     AuthService,

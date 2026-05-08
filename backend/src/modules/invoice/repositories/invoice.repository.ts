@@ -20,7 +20,9 @@ export class InvoiceRepository {
         orderBy: [{ createdAt: 'desc' }],
       });
     } catch (error) {
-      throw new Error(`Failed to fetch invoices: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to fetch invoices: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -33,7 +35,9 @@ export class InvoiceRepository {
         where: { id },
       });
     } catch (error) {
-      throw new Error(`Failed to find invoice: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to find invoice: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -51,7 +55,9 @@ export class InvoiceRepository {
       ) {
         throw new Error('Invoice number already exists');
       }
-      throw new Error(`Failed to create invoice: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to create invoice: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -65,10 +71,15 @@ export class InvoiceRepository {
         data,
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
         throw new Error('Invoice not found');
       }
-      throw new Error(`Failed to update invoice: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to update invoice: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -89,7 +100,9 @@ export class InvoiceRepository {
       await this.prisma.invoice.delete({ where: { id } });
       return true;
     } catch (error) {
-      throw new Error(`Failed to delete invoice: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to delete invoice: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -103,7 +116,9 @@ export class InvoiceRepository {
         orderBy: [{ createdAt: 'desc' }],
       });
     } catch (error) {
-      throw new Error(`Failed to find client invoices: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to find client invoices: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -117,7 +132,9 @@ export class InvoiceRepository {
         orderBy: [{ dueDate: 'asc' }, { createdAt: 'desc' }],
       });
     } catch (error) {
-      throw new Error(`Failed to find invoices by status: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to find invoices by status: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -135,7 +152,9 @@ export class InvoiceRepository {
         },
       });
     } catch (error) {
-      throw new Error(`Failed to find overdue invoices: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to find overdue invoices: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -146,7 +165,9 @@ export class InvoiceRepository {
     try {
       return await this.prisma.invoice.count({ where });
     } catch (error) {
-      throw new Error(`Failed to count invoices: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to count invoices: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -167,7 +188,9 @@ export class InvoiceRepository {
 
       return `${prefix}${String(nextSeq).padStart(6, '0')}`;
     } catch (error) {
-      throw new Error(`Failed to generate invoice number: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to generate invoice number: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 }

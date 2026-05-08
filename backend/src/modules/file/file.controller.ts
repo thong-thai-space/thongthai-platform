@@ -65,7 +65,12 @@ export class FileController {
         if (allowedMimeTypes.includes(file.mimetype)) {
           callback(null, true);
         } else {
-          callback(new BadRequestException(`File type ${file.mimetype} is not allowed`), false);
+          callback(
+            new BadRequestException(
+              `File type ${file.mimetype} is not allowed`,
+            ),
+            false,
+          );
         }
       },
     }),

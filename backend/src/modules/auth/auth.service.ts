@@ -112,18 +112,31 @@ export class AuthService {
       emailVerifyTokenExpiry: verifyExpiry,
     });
 
-    await this.emailService.sendVerificationEmail(dto.email, dto.name, verifyToken);
+    await this.emailService.sendVerificationEmail(
+      dto.email,
+      dto.name,
+      verifyToken,
+    );
 
-    return { message: 'Registration successful. Please check your email to verify your account.' };
+    return {
+      message:
+        'Registration successful. Please check your email to verify your account.',
+    };
   }
 
   async verifyEmail(token: string) {
     const user = await this.authRepository.findByVerificationToken(token);
 
     if (!user) throw new BadRequestException('Invalid verification link');
-    if (user.emailVerified) throw new BadRequestException('Email already verified');
-    if (!user.emailVerifyTokenExpiry || user.emailVerifyTokenExpiry < new Date()) {
-      throw new BadRequestException('Verification link has expired. Please request a new one.');
+    if (user.emailVerified)
+      throw new BadRequestException('Email already verified');
+    if (
+      !user.emailVerifyTokenExpiry ||
+      user.emailVerifyTokenExpiry < new Date()
+    ) {
+      throw new BadRequestException(
+        'Verification link has expired. Please request a new one.',
+      );
     }
 
     const updated = await this.authRepository.update(user.id, {
@@ -144,7 +157,10 @@ export class AuthService {
 
     if (!user || user.emailVerified) {
       // Return generic message to avoid exposing whether email exists
-      return { message: 'If that email is registered and unverified, a new link has been sent.' };
+      return {
+        message:
+          'If that email is registered and unverified, a new link has been sent.',
+      };
     }
 
     const verifyToken = randomBytes(32).toString('hex');
@@ -155,9 +171,16 @@ export class AuthService {
       emailVerifyTokenExpiry: verifyExpiry,
     });
 
-    await this.emailService.sendVerificationEmail(user.email, user.name, verifyToken);
+    await this.emailService.sendVerificationEmail(
+      user.email,
+      user.name,
+      verifyToken,
+    );
 
-    return { message: 'If that email is registered and unverified, a new link has been sent.' };
+    return {
+      message:
+        'If that email is registered and unverified, a new link has been sent.',
+    };
   }
 
   private passwordFingerprint(passwordHash: string): string {
@@ -197,8 +220,15 @@ export class AuthService {
       };
     }
 
-    const resetToken = await this.createResetPasswordToken(user.id, user.password);
-    await this.emailService.sendPasswordResetEmail(user.email, user.name, resetToken);
+    const resetToken = await this.createResetPasswordToken(
+      user.id,
+      user.password,
+    );
+    await this.emailService.sendPasswordResetEmail(
+      user.email,
+      user.name,
+      resetToken,
+    );
 
     return {
       message:
@@ -246,7 +276,8 @@ export class AuthService {
     });
 
     return {
-      message: 'Password has been reset successfully. Please sign in with your new password.',
+      message:
+        'Password has been reset successfully. Please sign in with your new password.',
     };
   }
 
@@ -272,7 +303,9 @@ export class AuthService {
 
     // Block login for email/password users who haven't verified
     if (!user.emailVerified && !user.googleId) {
-      throw new UnauthorizedException('Please verify your email before signing in.');
+      throw new UnauthorizedException(
+        'Please verify your email before signing in.',
+      );
     }
 
     const tokens = await this.generateTokens(user.id, user.role);

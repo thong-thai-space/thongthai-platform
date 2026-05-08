@@ -20,7 +20,9 @@ export class UserRepository {
       });
       return users;
     } catch (error) {
-      throw new Error(`Failed to fetch users: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to fetch users: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -31,7 +33,9 @@ export class UserRepository {
     try {
       return await this.prisma.user.findUnique({ where: { id } });
     } catch (error) {
-      throw new Error(`Failed to find user: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to find user: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -42,10 +46,15 @@ export class UserRepository {
     try {
       return await this.prisma.user.create({ data });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
         throw new Error('User with this email already exists');
       }
-      throw new Error(`Failed to create user: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to create user: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -59,10 +68,15 @@ export class UserRepository {
         data,
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
         throw new Error('User not found');
       }
-      throw new Error(`Failed to update user: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to update user: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -74,10 +88,15 @@ export class UserRepository {
       await this.prisma.user.delete({ where: { id } });
       return true;
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
         throw new Error('User not found');
       }
-      throw new Error(`Failed to delete user: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to delete user: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -88,7 +107,9 @@ export class UserRepository {
     try {
       return await this.prisma.user.count({ where });
     } catch (error) {
-      throw new Error(`Failed to count users: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to count users: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -99,7 +120,9 @@ export class UserRepository {
     try {
       return await this.prisma.user.findMany({ where: { role } });
     } catch (error) {
-      throw new Error(`Failed to find users by role: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to find users by role: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -110,7 +133,9 @@ export class UserRepository {
     try {
       return await this.prisma.user.findUnique({ where: { email } });
     } catch (error) {
-      throw new Error(`Failed to find user by email: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to find user by email: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 }
