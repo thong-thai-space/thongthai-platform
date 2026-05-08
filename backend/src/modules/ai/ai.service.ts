@@ -178,9 +178,7 @@ export class AiService {
   }
 
   private getPromptString(input: unknown, fallback: string) {
-    return typeof input === 'string' && input.trim().length > 0
-      ? input
-      : fallback;
+    return typeof input === 'string' && input.trim().length > 0 ? input : fallback;
   }
 
   private async getPromptConfig(): Promise<AiPromptConfig> {
@@ -191,45 +189,23 @@ export class AiService {
       select: { isActive: true, data: true },
     });
 
-    if (
-      !promptSection?.isActive ||
-      !promptSection.data ||
-      typeof promptSection.data !== 'object'
-    ) {
+    if (!promptSection?.isActive || !promptSection.data || typeof promptSection.data !== 'object') {
       return defaults;
     }
 
     const data = promptSection.data as Record<string, unknown>;
 
     return {
-      generalAssistant: this.getPromptString(
-        data.generalAssistant,
-        defaults.generalAssistant,
-      ),
-      clientAssistant: this.getPromptString(
-        data.clientAssistant,
-        defaults.clientAssistant,
-      ),
+      generalAssistant: this.getPromptString(data.generalAssistant, defaults.generalAssistant),
+      clientAssistant: this.getPromptString(data.clientAssistant, defaults.clientAssistant),
       publicFaq: this.getPromptString(data.publicFaq, defaults.publicFaq),
       proposal: this.getPromptString(data.proposal, defaults.proposal),
-      taskBreakdown: this.getPromptString(
-        data.taskBreakdown,
-        defaults.taskBreakdown,
-      ),
+      taskBreakdown: this.getPromptString(data.taskBreakdown, defaults.taskBreakdown),
       codeReview: this.getPromptString(data.codeReview, defaults.codeReview),
       estimate: this.getPromptString(data.estimate, defaults.estimate),
-      progressReport: this.getPromptString(
-        data.progressReport,
-        defaults.progressReport,
-      ),
-      strategicPlan: this.getPromptString(
-        data.strategicPlan,
-        defaults.strategicPlan,
-      ),
-      architectureDiagram: this.getPromptString(
-        data.architectureDiagram,
-        defaults.architectureDiagram,
-      ),
+      progressReport: this.getPromptString(data.progressReport, defaults.progressReport),
+      strategicPlan: this.getPromptString(data.strategicPlan, defaults.strategicPlan),
+      architectureDiagram: this.getPromptString(data.architectureDiagram, defaults.architectureDiagram),
       professionalOutputRules: this.getPromptString(
         data.professionalOutputRules,
         defaults.professionalOutputRules,
@@ -265,10 +241,7 @@ export class AiService {
     }
 
     if (user.aiQuotaUsedTokens + totalTokens > user.aiQuotaLimitTokens) {
-      throw new HttpException(
-        'AI quota exceeded',
-        HttpStatus.TOO_MANY_REQUESTS,
-      );
+      throw new HttpException('AI quota exceeded', HttpStatus.TOO_MANY_REQUESTS);
     }
 
     await this.prisma.user.update({
@@ -288,12 +261,9 @@ export class AiService {
       throw new BadRequestException('AI returned non-JSON architecture output');
     }
 
-    const description =
-      typeof parsed.description === 'string' ? parsed.description.trim() : '';
+    const description = typeof parsed.description === 'string' ? parsed.description.trim() : '';
     const layers = Array.isArray(parsed.layers)
-      ? parsed.layers
-          .filter((layer) => typeof layer === 'string')
-          .map((layer) => layer.trim())
+      ? parsed.layers.filter((layer) => typeof layer === 'string').map((layer) => layer.trim())
       : [];
     const svgRaw = typeof parsed.svg === 'string' ? parsed.svg.trim() : '';
     const svg = this.sanitizeArchitectureSvg(svgRaw);
@@ -342,9 +312,7 @@ export class AiService {
       .map((x) => x.trim())
       .filter(Boolean).length;
     if (paragraphCount < 1 || description.length < 120) {
-      throw new BadRequestException(
-        'Architecture description quality is too low',
-      );
+      throw new BadRequestException('Architecture description quality is too low');
     }
 
     if (layers.length < 3) {
@@ -364,9 +332,7 @@ export class AiService {
       svg.length < 500 ||
       svg.length > 120_000
     ) {
-      throw new BadRequestException(
-        'Architecture SVG contains unsafe or invalid markup',
-      );
+      throw new BadRequestException('Architecture SVG contains unsafe or invalid markup');
     }
 
     // Validate final SVG parse/render to prevent malformed XML from reaching UI.
@@ -376,9 +342,7 @@ export class AiService {
       });
       resvg.render();
     } catch {
-      throw new BadRequestException(
-        'Architecture SVG is malformed and cannot be rendered',
-      );
+      throw new BadRequestException('Architecture SVG is malformed and cannot be rendered');
     }
   }
 
@@ -398,28 +362,19 @@ export class AiService {
     }
 
     const code = String(anyError.code || '').toUpperCase();
-    if (
-      [
-        'ECONNRESET',
-        'ETIMEDOUT',
-        'ENOTFOUND',
-        'EAI_AGAIN',
-        'ECONNREFUSED',
-      ].includes(code)
-    ) {
+    if (['ECONNRESET', 'ETIMEDOUT', 'ENOTFOUND', 'EAI_AGAIN', 'ECONNREFUSED'].includes(code)) {
       return true;
     }
 
     const message = String(anyError.message || '').toLowerCase();
-    return /timeout|network|socket|temporarily unavailable|overloaded|rate limit/.test(
-      message,
-    );
+    return /timeout|network|socket|temporarily unavailable|overloaded|rate limit/.test(message);
   }
 
-  private buildFallbackArchitectureResult(
-    message: string,
-  ): ArchitectureAgentResult {
-    const summary = message.replace(/\s+/g, ' ').trim().slice(0, 340);
+  private buildFallbackArchitectureResult(message: string): ArchitectureAgentResult {
+    const summary = message
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 340);
 
     const description =
       `Fallback architecture generated due to temporary AI provider unavailability.\n\n` +
@@ -483,7 +438,7 @@ export class AiService {
 
       const userPrompt = userPromptParts.join('\n\n');
 
-      let parsed: ArchitectureAgentResult | null = null;
+          let parsed: ArchitectureAgentResult | null = null;
       let inputTokens = 0;
       let outputTokens = 0;
       let totalTokens = 0;
@@ -549,17 +504,14 @@ export class AiService {
         throw new InternalServerErrorException('Architecture result is empty');
       }
 
-      const docxBuffer =
-        await this.docxGeneratorService.generateArchitectureReport({
-          title: 'System Architecture Report',
-          description: parsed.description,
-          svg: parsed.svg,
-          generatedAt: new Date(),
-        });
+      const docxBuffer = await this.docxGeneratorService.generateArchitectureReport({
+        title: 'System Architecture Report',
+        description: parsed.description,
+        svg: parsed.svg,
+        generatedAt: new Date(),
+      });
 
-      const estimatedCostUsd = fallbackUsed
-        ? 0
-        : this.estimateCostUsd(inputTokens, outputTokens);
+      const estimatedCostUsd = fallbackUsed ? 0 : this.estimateCostUsd(inputTokens, outputTokens);
 
       await this.logAiAudit({
         feature: AiFeature.ARCHITECTURE_DIAGRAM,
@@ -598,8 +550,7 @@ export class AiService {
         userId,
         model: 'claude-sonnet-4-20250514',
         success: false,
-        errorMessage:
-          error instanceof Error ? error.message : 'Unknown AI error',
+        errorMessage: error instanceof Error ? error.message : 'Unknown AI error',
         durationMs: Date.now() - startedAt,
         metadata: {
           hasFile: Boolean(file),
@@ -609,8 +560,7 @@ export class AiService {
 
       if (
         error instanceof BadRequestException ||
-        (error instanceof HttpException &&
-          error.getStatus() === HttpStatus.TOO_MANY_REQUESTS)
+        (error instanceof HttpException && error.getStatus() === HttpStatus.TOO_MANY_REQUESTS)
       ) {
         throw error;
       }
@@ -619,44 +569,41 @@ export class AiService {
         'Architecture diagram generation failed',
         error instanceof Error ? error.stack : undefined,
       );
-      throw new InternalServerErrorException(
-        'Failed to generate architecture diagram',
-      );
+      throw new InternalServerErrorException('Failed to generate architecture diagram');
     }
   }
 
   private async buildOperationalSnapshot(userId: string, userRole?: UserRole) {
     // Client role only sees their own operational metrics.
     if (userRole === UserRole.CLIENT) {
-      const [clientProjects, clientTasksInProgress] =
-        await this.prisma.$transaction([
-          this.prisma.project.count({
-            where: {
-              clientId: userId,
-              status: {
-                in: [
-                  ProjectStatus.PROPOSAL_SENT,
-                  ProjectStatus.IN_PROGRESS,
-                  ProjectStatus.ON_HOLD,
-                  ProjectStatus.REVIEW,
-                ],
-              },
+      const [clientProjects, clientTasksInProgress] = await this.prisma.$transaction([
+        this.prisma.project.count({
+          where: {
+            clientId: userId,
+            status: {
+              in: [
+                ProjectStatus.PROPOSAL_SENT,
+                ProjectStatus.IN_PROGRESS,
+                ProjectStatus.ON_HOLD,
+                ProjectStatus.REVIEW,
+              ],
             },
-          }),
-          this.prisma.task.count({
-            where: {
-              project: { clientId: userId },
-              status: {
-                in: [
-                  TaskStatus.TODO,
-                  TaskStatus.IN_PROGRESS,
-                  TaskStatus.IN_REVIEW,
-                  TaskStatus.BLOCKED,
-                ],
-              },
+          },
+        }),
+        this.prisma.task.count({
+          where: {
+            project: { clientId: userId },
+            status: {
+              in: [
+                TaskStatus.TODO,
+                TaskStatus.IN_PROGRESS,
+                TaskStatus.IN_REVIEW,
+                TaskStatus.BLOCKED,
+              ],
             },
-          }),
-        ]);
+          },
+        }),
+      ]);
 
       return {
         scope: 'CLIENT_ONLY',
@@ -720,12 +667,7 @@ export class AiService {
 
   // ==================== CHAT ====================
 
-  async chat(
-    userId: string,
-    message: string,
-    conversationId?: string,
-    userRole?: UserRole,
-  ) {
+  async chat(userId: string, message: string, conversationId?: string, userRole?: UserRole) {
     const promptConfig = await this.getPromptConfig();
     const sanitizedMessage = this.maskSensitiveData(message);
 
@@ -787,10 +729,7 @@ export class AiService {
       orderBy: { updatedAt: 'desc' },
     });
 
-    const operationalSnapshot = await this.buildOperationalSnapshot(
-      userId,
-      userRole,
-    );
+    const operationalSnapshot = await this.buildOperationalSnapshot(userId, userRole);
 
     const projectContext = projects.length
       ? `\n\nCOMPANY PROJECTS (current data from database):\n${projects
@@ -808,9 +747,7 @@ export class AiService {
     const accessDirective = `\n\nACCESS DIRECTIVE:\n- You DO have direct access to current system data via the provided snapshots.\n- Do NOT claim you cannot access the system/database when snapshot data exists.\n- If user asks for KPI report, answer with exact numbers from snapshots first, then recommendations.`;
 
     const systemPrompt =
-      (userRole === 'CLIENT'
-        ? promptConfig.clientAssistant
-        : promptConfig.generalAssistant) +
+      (userRole === 'CLIENT' ? promptConfig.clientAssistant : promptConfig.generalAssistant) +
       promptConfig.professionalOutputRules +
       this.roleDirective(userRole) +
       projectContext +
@@ -828,8 +765,7 @@ export class AiService {
       });
 
       const assistantMessage = this.extractText(response);
-      const totalTokens =
-        response.usage.input_tokens + response.usage.output_tokens;
+      const totalTokens = response.usage.input_tokens + response.usage.output_tokens;
 
       await this.prisma.aiMessage.create({
         data: {
@@ -870,8 +806,7 @@ export class AiService {
         userId,
         model: 'claude-sonnet-4-20250514',
         success: false,
-        errorMessage:
-          error instanceof Error ? error.message : 'Unknown AI error',
+        errorMessage: error instanceof Error ? error.message : 'Unknown AI error',
         durationMs: Date.now() - startedAt,
         metadata: {
           conversationId: conversation.id,
@@ -938,8 +873,7 @@ export class AiService {
         userId,
         model: 'claude-sonnet-4-20250514',
         success: false,
-        errorMessage:
-          error instanceof Error ? error.message : 'Unknown AI error',
+        errorMessage: error instanceof Error ? error.message : 'Unknown AI error',
         durationMs: Date.now() - startedAt,
         metadata: { locale },
       });
@@ -995,8 +929,7 @@ export class AiService {
         userId,
         model: 'claude-sonnet-4-20250514',
         success: false,
-        errorMessage:
-          error instanceof Error ? error.message : 'Unknown AI error',
+        errorMessage: error instanceof Error ? error.message : 'Unknown AI error',
         durationMs: Date.now() - startedAt,
       });
       throw error;
@@ -1052,8 +985,7 @@ export class AiService {
         userId,
         model: 'claude-sonnet-4-20250514',
         success: false,
-        errorMessage:
-          error instanceof Error ? error.message : 'Unknown AI error',
+        errorMessage: error instanceof Error ? error.message : 'Unknown AI error',
         durationMs: Date.now() - startedAt,
         metadata: { language },
       });
@@ -1084,9 +1016,7 @@ export class AiService {
           promptConfig.professionalOutputRules +
           this.roleDirective(role) +
           langNote,
-        messages: [
-          { role: 'user', content: this.maskSensitiveData(requirements) },
-        ],
+        messages: [{ role: 'user', content: this.maskSensitiveData(requirements) }],
       });
 
       await this.logAiAudit({
@@ -1113,8 +1043,7 @@ export class AiService {
         userId,
         model: 'claude-sonnet-4-20250514',
         success: false,
-        errorMessage:
-          error instanceof Error ? error.message : 'Unknown AI error',
+        errorMessage: error instanceof Error ? error.message : 'Unknown AI error',
         durationMs: Date.now() - startedAt,
         metadata: { locale },
       });
@@ -1142,8 +1071,7 @@ export class AiService {
     const taskSummary = {
       total: project.tasks.length,
       done: project.tasks.filter((t) => t.status === 'DONE').length,
-      inProgress: project.tasks.filter((t) => t.status === 'IN_PROGRESS')
-        .length,
+      inProgress: project.tasks.filter((t) => t.status === 'IN_PROGRESS').length,
       blocked: project.tasks.filter((t) => t.status === 'BLOCKED').length,
     };
 
@@ -1196,8 +1124,7 @@ export class AiService {
         projectId,
         model: 'claude-sonnet-4-20250514',
         success: false,
-        errorMessage:
-          error instanceof Error ? error.message : 'Unknown AI error',
+        errorMessage: error instanceof Error ? error.message : 'Unknown AI error',
         durationMs: Date.now() - startedAt,
         metadata: { locale },
       });
@@ -1230,12 +1157,7 @@ export class AiService {
               },
             },
             milestones: {
-              select: {
-                id: true,
-                title: true,
-                dueDate: true,
-                isCompleted: true,
-              },
+              select: { id: true, title: true, dueDate: true, isCompleted: true },
             },
             invoices: {
               select: {
@@ -1260,9 +1182,7 @@ export class AiService {
     }
 
     if (project && role === UserRole.MEMBER) {
-      const hasAssignedTask = project.tasks.some(
-        (task) => task.assigneeId === userId,
-      );
+      const hasAssignedTask = project.tasks.some((task) => task.assigneeId === userId);
       if (!hasAssignedTask) throw new ForbiddenException();
     }
 
@@ -1270,10 +1190,8 @@ export class AiService {
       ? {
           total: project.tasks.length,
           todo: project.tasks.filter((t) => t.status === 'TODO').length,
-          inProgress: project.tasks.filter((t) => t.status === 'IN_PROGRESS')
-            .length,
-          inReview: project.tasks.filter((t) => t.status === 'IN_REVIEW')
-            .length,
+          inProgress: project.tasks.filter((t) => t.status === 'IN_PROGRESS').length,
+          inReview: project.tasks.filter((t) => t.status === 'IN_REVIEW').length,
           done: project.tasks.filter((t) => t.status === 'DONE').length,
           blocked: project.tasks.filter((t) => t.status === 'BLOCKED').length,
         }
@@ -1287,9 +1205,8 @@ export class AiService {
               invoice.status === 'OVERDUE' ||
               (invoice.status !== 'PAID' && invoice.dueDate < new Date()),
           ).length,
-          paidInvoices: project.invoices.filter(
-            (invoice) => invoice.status === 'PAID',
-          ).length,
+          paidInvoices: project.invoices.filter((invoice) => invoice.status === 'PAID')
+            .length,
         }
       : null;
 
@@ -1332,9 +1249,7 @@ export class AiService {
                       taskSummary,
                       milestoneSummary: {
                         total: project.milestones.length,
-                        completed: project.milestones.filter(
-                          (m) => m.isCompleted,
-                        ).length,
+                        completed: project.milestones.filter((m) => m.isCompleted).length,
                       },
                       commercialSummary,
                     }
@@ -1348,10 +1263,7 @@ export class AiService {
       const content = this.extractText(response);
       const parsed = this.tryParseJson(content);
 
-      if (
-        !dto.includeRiskMatrix &&
-        'riskMatrix' in (parsed as Record<string, unknown>)
-      ) {
+      if (!dto.includeRiskMatrix && 'riskMatrix' in (parsed as Record<string, unknown>)) {
         delete (parsed as Record<string, unknown>).riskMatrix;
       }
 
@@ -1390,8 +1302,7 @@ export class AiService {
         projectId: project?.id,
         model: 'claude-sonnet-4-20250514',
         success: false,
-        errorMessage:
-          error instanceof Error ? error.message : 'Unknown AI error',
+        errorMessage: error instanceof Error ? error.message : 'Unknown AI error',
         durationMs: Date.now() - startedAt,
         metadata: {
           locale,
@@ -1423,7 +1334,7 @@ export class AiService {
 
     if (!project) throw new NotFoundException('Project not found');
 
-    const plan = dto.plan || {};
+    const plan = (dto.plan || {}) as Record<string, unknown>;
     const priorityActions = Array.isArray(plan.priorityActions)
       ? (plan.priorityActions as Record<string, unknown>[])
       : [];
@@ -1440,11 +1351,7 @@ export class AiService {
       ? (deliveryPlan.next30Days as string[])
       : [];
 
-    if (
-      priorityActions.length === 0 &&
-      next7Days.length === 0 &&
-      next30Days.length === 0
-    ) {
+    if (priorityActions.length === 0 && next7Days.length === 0 && next30Days.length === 0) {
       throw new BadRequestException('Plan does not contain actionable items');
     }
 
@@ -1527,9 +1434,7 @@ export class AiService {
     notes?: string,
   ) {
     if (role !== UserRole.OWNER) {
-      throw new ForbiddenException(
-        'Only OWNER can approve/reject apply requests',
-      );
+      throw new ForbiddenException('Only OWNER can approve/reject apply requests');
     }
 
     const request = await this.prisma.aiApplyRequest.findUnique({
@@ -1572,12 +1477,15 @@ export class AiService {
       return rejected;
     }
 
-    const summary = await this.executeStrategicPlanApply(request.requesterId, {
-      projectId: request.projectId,
-      plan: request.plan as Record<string, unknown>,
-      objective: request.objective || undefined,
-      constraints: request.constraints || undefined,
-    });
+    const summary = await this.executeStrategicPlanApply(
+      request.requesterId,
+      {
+        projectId: request.projectId,
+        plan: request.plan as Record<string, unknown>,
+        objective: request.objective || undefined,
+        constraints: request.constraints || undefined,
+      },
+    );
 
     const approved = await this.prisma.aiApplyRequest.update({
       where: { id: requestId },
@@ -1621,7 +1529,7 @@ export class AiService {
 
     if (!project) throw new NotFoundException('Project not found');
 
-    const plan = dto.plan || {};
+    const plan = (dto.plan || {}) as Record<string, unknown>;
     const priorityActions = Array.isArray(plan.priorityActions)
       ? (plan.priorityActions as Record<string, unknown>[])
       : [];
@@ -1697,14 +1605,8 @@ export class AiService {
       createdMilestones.push(title);
     };
 
-    await createMilestoneIfNeeded(
-      'AI Plan - Next 7 Days',
-      new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    );
-    await createMilestoneIfNeeded(
-      'AI Plan - Next 30 Days',
-      new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-    );
+    await createMilestoneIfNeeded('AI Plan - Next 7 Days', new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
+    await createMilestoneIfNeeded('AI Plan - Next 30 Days', new Date(Date.now() + 30 * 24 * 60 * 60 * 1000));
 
     const createTaskIfNeeded = async (task: {
       title: string;
@@ -1807,11 +1709,7 @@ export class AiService {
     role: UserRole,
     dto: ApplyStrategicPlanDto,
   ) {
-    const request = await this.createApplyStrategicPlanRequest(
-      userId,
-      role,
-      dto,
-    );
+    const request = await this.createApplyStrategicPlanRequest(userId, role, dto);
     return {
       requestId: request.id,
       status: request.status,
@@ -1871,15 +1769,11 @@ export class AiService {
     const avgDurationMs =
       totalRequests > 0
         ? Math.round(
-            logs.reduce((sum, l) => sum + (l.durationMs || 0), 0) /
-              totalRequests,
+            logs.reduce((sum, l) => sum + (l.durationMs || 0), 0) / totalRequests,
           )
         : 0;
 
-    const byFeatureMap = new Map<
-      string,
-      { requests: number; success: number; costUsd: number }
-    >();
+    const byFeatureMap = new Map<string, { requests: number; success: number; costUsd: number }>();
     for (const log of logs) {
       const entry = byFeatureMap.get(log.feature) || {
         requests: 0,
@@ -1892,14 +1786,12 @@ export class AiService {
       byFeatureMap.set(log.feature, entry);
     }
 
-    const byFeature = Array.from(byFeatureMap.entries()).map(
-      ([feature, value]) => ({
-        feature,
-        requests: value.requests,
-        successRate: value.requests ? value.success / value.requests : 0,
-        costUsd: Number(value.costUsd.toFixed(4)),
-      }),
-    );
+    const byFeature = Array.from(byFeatureMap.entries()).map(([feature, value]) => ({
+      feature,
+      requests: value.requests,
+      successRate: value.requests ? value.success / value.requests : 0,
+      costUsd: Number(value.costUsd.toFixed(4)),
+    }));
 
     return {
       rangeDays: safeDays,
@@ -1950,11 +1842,7 @@ export class AiService {
 
     if (!audit) throw new NotFoundException('AI audit record not found');
 
-    if (
-      role !== UserRole.OWNER &&
-      role !== UserRole.ADMIN &&
-      audit.userId !== userId
-    ) {
+    if (role !== UserRole.OWNER && role !== UserRole.ADMIN && audit.userId !== userId) {
       throw new ForbiddenException();
     }
 
@@ -1970,6 +1858,7 @@ export class AiService {
   }
 
   private async purgeAiAuditLogsInternal(retentionDays = 90) {
+
     const safeRetention = Math.max(1, Math.min(retentionDays, 3650));
     const cutoff = new Date(Date.now() - safeRetention * 24 * 60 * 60 * 1000);
 
@@ -1991,13 +1880,7 @@ export class AiService {
         where: {
           isActive: true,
           section: {
-            in: [
-              'about',
-              'services',
-              'portfolio',
-              'founder-profile',
-              'founder_cv',
-            ],
+            in: ['about', 'services', 'portfolio', 'founder-profile', 'founder_cv'],
           },
         },
         select: {
@@ -2025,8 +1908,7 @@ export class AiService {
 
     const aboutData = getSectionData('about') || {};
     const servicesData = getSectionData('services') || {};
-    const founderData =
-      getSectionData('founder-profile') || getSectionData('founder_cv') || {};
+    const founderData = getSectionData('founder-profile') || getSectionData('founder_cv') || {};
 
     const services = Array.isArray(servicesData['items'])
       ? (servicesData['items'] as Array<Record<string, unknown>>)
@@ -2035,10 +1917,7 @@ export class AiService {
       : [];
 
     const aboutSummary = String(
-      aboutData['summary'] ||
-        aboutData['description'] ||
-        aboutData['mission'] ||
-        '',
+      aboutData['summary'] || aboutData['description'] || aboutData['mission'] || '',
     ).trim();
 
     const founderProfileFromEnv = String(
@@ -2094,9 +1973,7 @@ export class AiService {
 
   @Cron(CronExpression.EVERY_DAY_AT_2AM)
   async handleAuditRetentionCron() {
-    const retentionFromEnv = Number(
-      this.configService.get('AI_AUDIT_RETENTION_DAYS') || 90,
-    );
+    const retentionFromEnv = Number(this.configService.get('AI_AUDIT_RETENTION_DAYS') || 90);
     const result = await this.purgeAiAuditLogsInternal(retentionFromEnv);
     this.logger.log(
       `AI audit retention cron executed. Deleted ${result.deletedCount} records older than ${result.retentionDays} day(s).`,
@@ -2146,8 +2023,7 @@ export class AiService {
         feature: AiFeature.PUBLIC_CHAT,
         model: 'claude-sonnet-4-20250514',
         success: false,
-        errorMessage:
-          error instanceof Error ? error.message : 'Unknown AI error',
+        errorMessage: error instanceof Error ? error.message : 'Unknown AI error',
         durationMs: Date.now() - startedAt,
       });
       throw error;

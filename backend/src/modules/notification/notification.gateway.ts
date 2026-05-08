@@ -44,15 +44,10 @@ export class NotificationGateway
   handleConnection(client: Socket) {
     try {
       const tokenFromAuth = client.handshake.auth.token as string | undefined;
-      const tokenFromCookie = getCookieValue(
-        client.handshake.headers.cookie,
-        'accessToken',
-      );
+      const tokenFromCookie = getCookieValue(client.handshake.headers.cookie, 'accessToken');
       const token = tokenFromCookie || tokenFromAuth;
       if (!token) {
-        this.logger.warn(
-          `Client ${client.id} connected without token (no cookie or auth token)`,
-        );
+        this.logger.warn(`Client ${client.id} connected without token (no cookie or auth token)`);
         client.disconnect();
         return;
       }
@@ -61,13 +56,9 @@ export class NotificationGateway
       });
       this.connectedUsers.set(payload.sub, client.id);
       void client.join(`user:${payload.sub}`);
-      this.logger.log(
-        `User ${payload.sub} connected (source: ${tokenFromCookie ? 'cookie' : 'auth'})`,
-      );
+      this.logger.log(`User ${payload.sub} connected (source: ${tokenFromCookie ? 'cookie' : 'auth'})`);
     } catch (error) {
-      this.logger.warn(
-        `Client ${client.id} token verification failed: ${error instanceof Error ? error.message : 'unknown'}`,
-      );
+      this.logger.warn(`Client ${client.id} token verification failed: ${error instanceof Error ? error.message : 'unknown'}`);
       client.disconnect();
     }
   }

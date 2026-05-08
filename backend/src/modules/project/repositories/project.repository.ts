@@ -20,35 +20,26 @@ export class ProjectRepository {
         orderBy: { createdAt: 'desc' },
       });
     } catch (error) {
-      throw new Error(
-        `Failed to fetch projects: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      throw new Error(`Failed to fetch projects: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
   /**
    * Find all projects with includes
    */
-  async findAllWithIncludes(
-    where?: Prisma.ProjectWhereInput,
-    includeRelations: boolean = true,
-  ): Promise<any[]> {
+  async findAllWithIncludes(where?: Prisma.ProjectWhereInput, includeRelations: boolean = true): Promise<any[]> {
     try {
       return await this.prisma.project.findMany({
         where,
-        include: includeRelations
-          ? {
-              client: { select: { id: true, name: true, email: true } },
-              tasks: { select: { id: true, status: true } },
-              _count: { select: { tasks: true, invoices: true } },
-            }
-          : undefined,
+        include: includeRelations ? {
+          client: { select: { id: true, name: true, email: true } },
+          tasks: { select: { id: true, status: true } },
+          _count: { select: { tasks: true, invoices: true } },
+        } : undefined,
         orderBy: { updatedAt: 'desc' },
       });
     } catch (error) {
-      throw new Error(
-        `Failed to fetch projects: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      throw new Error(`Failed to fetch projects: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -59,9 +50,7 @@ export class ProjectRepository {
     try {
       return await this.prisma.project.findUnique({ where: { id } });
     } catch (error) {
-      throw new Error(
-        `Failed to find project: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      throw new Error(`Failed to find project: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -87,9 +76,7 @@ export class ProjectRepository {
         },
       });
     } catch (error) {
-      throw new Error(
-        `Failed to find project: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      throw new Error(`Failed to find project: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -100,9 +87,7 @@ export class ProjectRepository {
     try {
       return await this.prisma.project.create({ data });
     } catch (error) {
-      throw new Error(
-        `Failed to create project: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      throw new Error(`Failed to create project: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -116,15 +101,10 @@ export class ProjectRepository {
         data,
       });
     } catch (error) {
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2025'
-      ) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
         throw new Error('Project not found');
       }
-      throw new Error(
-        `Failed to update project: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      throw new Error(`Failed to update project: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -136,31 +116,22 @@ export class ProjectRepository {
       await this.prisma.project.delete({ where: { id } });
       return true;
     } catch (error) {
-      throw new Error(
-        `Failed to delete project: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      throw new Error(`Failed to delete project: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
   /**
    * Find projects by client
    */
-  async findByClient(
-    clientId: string,
-    withIncludes: boolean = true,
-  ): Promise<any[]> {
+  async findByClient(clientId: string, withIncludes: boolean = true): Promise<any[]> {
     try {
       return await this.prisma.project.findMany({
         where: { clientId },
-        include: withIncludes
-          ? { tasks: { select: { id: true, status: true } } }
-          : undefined,
+        include: withIncludes ? { tasks: { select: { id: true, status: true } } } : undefined,
         orderBy: { updatedAt: 'desc' },
       });
     } catch (error) {
-      throw new Error(
-        `Failed to find client projects: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      throw new Error(`Failed to find client projects: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -173,9 +144,7 @@ export class ProjectRepository {
         where: { status },
       });
     } catch (error) {
-      throw new Error(
-        `Failed to find projects by status: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      throw new Error(`Failed to find projects by status: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -199,9 +168,8 @@ export class ProjectRepository {
         orderBy: { showcaseOrder: 'asc' },
       });
     } catch (error) {
-      throw new Error(
-        `Failed to find showcase projects: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      throw new Error(`Failed to find showcase projects: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 }
+

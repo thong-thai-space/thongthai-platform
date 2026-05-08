@@ -32,9 +32,7 @@ export class NotificationService {
 
     // Pattern: Authorization - Ownership check
     if (notification.userId !== userId) {
-      throw new ForbiddenException(
-        'You do not have permission to modify this notification',
-      );
+      throw new ForbiddenException('You do not have permission to modify this notification');
     }
 
     return this.prisma.notification.update({
@@ -68,9 +66,7 @@ export class NotificationService {
 
     // Pattern: Authorization - Ownership check
     if (notification.userId !== userId) {
-      throw new ForbiddenException(
-        'You do not have permission to delete this notification',
-      );
+      throw new ForbiddenException('You do not have permission to delete this notification');
     }
 
     return this.prisma.notification.delete({ where: { id } });

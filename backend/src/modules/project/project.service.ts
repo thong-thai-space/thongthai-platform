@@ -5,12 +5,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { NotificationService } from '../notification/notification.service';
-import {
-  UserRole,
-  NotificationType,
-  ProjectStatus,
-  Prisma,
-} from '@prisma/client';
+import { UserRole, NotificationType, ProjectStatus, Prisma } from '@prisma/client';
 import { CreateProjectDto, UpdateProjectDto } from './dto/project.dto';
 import { CreateProjectRequestDto } from './dto/create-project-request.dto';
 import { UpdateProjectClientDto } from './dto/update-project-client.dto';
@@ -52,9 +47,7 @@ export class ProjectService {
 
     // MEMBER: can only view projects where they have assigned tasks
     if (role === UserRole.MEMBER) {
-      const hasAssignedTask = project.tasks.some(
-        (t: any) => t.assignee?.id === userId,
-      );
+      const hasAssignedTask = project.tasks.some((t: any) => t.assignee?.id === userId);
       if (!hasAssignedTask) throw new ForbiddenException();
     }
 
@@ -229,11 +222,7 @@ export class ProjectService {
     return updated;
   }
 
-  async updateByClient(
-    projectId: string,
-    clientId: string,
-    dto: UpdateProjectClientDto,
-  ) {
+  async updateByClient(projectId: string, clientId: string, dto: UpdateProjectClientDto) {
     const project = await this.projectRepository.findById(projectId);
 
     if (!project) throw new NotFoundException('Project not found');

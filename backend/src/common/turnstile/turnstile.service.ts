@@ -16,9 +16,7 @@ export class TurnstileService {
   }
 
   async verifyToken(token: string, remoteIp?: string): Promise<boolean> {
-    const secret = this.configService
-      .get<string>('TURNSTILE_SECRET_KEY')
-      ?.trim();
+    const secret = this.configService.get<string>('TURNSTILE_SECRET_KEY')?.trim();
     if (!secret) {
       return true;
     }

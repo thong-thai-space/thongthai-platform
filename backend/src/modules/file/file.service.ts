@@ -22,7 +22,7 @@ export class FileService {
   }
 
   async findOne(id: string, userId: string, role: UserRole) {
-    const file = await this.prisma.projectFile.findUnique({
+    const file = await this.prisma.projectFile.findUnique({ 
       where: { id },
       include: { project: { select: { id: true, clientId: true } } },
     });

@@ -27,10 +27,7 @@ export class ResponseEnvelopeInterceptor implements NestInterceptor {
     return next.handle().pipe(
       map((data) => {
         // If response is already an ApiResponse or null/undefined, return as-is
-        if (
-          !data ||
-          (typeof data === 'object' && 'success' in data && 'data' in data)
-        ) {
+        if (!data || (typeof data === 'object' && 'success' in data && 'data' in data)) {
           return data;
         }
 

@@ -76,12 +76,7 @@ export class AiController {
     @CurrentUser('id') userId: string,
     @CurrentUser('role') role: UserRole,
   ) {
-    return this.aiService.generateArchitectureDiagram(
-      userId,
-      role,
-      dto.message,
-      file,
-    );
+    return this.aiService.generateArchitectureDiagram(userId, role, dto.message, file);
   }
 
   @Post('chat')
@@ -150,12 +145,7 @@ export class AiController {
     @CurrentUser('id') userId: string,
     @CurrentUser('role') role: UserRole,
   ) {
-    return this.aiService.estimateProject(
-      userId,
-      role,
-      dto.requirements,
-      dto.locale,
-    );
+    return this.aiService.estimateProject(userId, role, dto.requirements, dto.locale);
   }
 
   @Post('progress-report/:projectId')
@@ -213,13 +203,7 @@ export class AiController {
     @CurrentUser('id') userId: string,
     @CurrentUser('role') role: UserRole,
   ) {
-    return this.aiService.reviewApplyRequest(
-      id,
-      userId,
-      role,
-      dto.approve,
-      dto.notes,
-    );
+    return this.aiService.reviewApplyRequest(id, userId, role, dto.approve, dto.notes);
   }
 
   @Post('audit')

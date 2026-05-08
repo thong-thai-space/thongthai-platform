@@ -21,7 +21,10 @@ export class MessageController {
   constructor(private messageService: MessageService) {}
 
   @Post()
-  create(@CurrentUser('id') userId: string, @Body() dto: CreateMessageDto) {
+  create(
+    @CurrentUser('id') userId: string,
+    @Body() dto: CreateMessageDto,
+  ) {
     return this.messageService.create(userId, dto);
   }
 
@@ -57,7 +60,10 @@ export class MessageController {
   }
 
   @Patch(':id/read')
-  markAsRead(@Param('id') id: string, @CurrentUser('id') userId: string) {
+  markAsRead(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+  ) {
     return this.messageService.markAsRead(id, userId);
   }
 

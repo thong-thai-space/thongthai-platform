@@ -97,10 +97,8 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { user, accessToken, refreshToken } = await this.authService.login(
-      dto,
-      this.getClientIp(req),
-    );
+    const { user, accessToken, refreshToken } =
+      await this.authService.login(dto, this.getClientIp(req));
     this.setAuthCookies(res, accessToken, refreshToken);
     return { user };
   }
@@ -168,7 +166,8 @@ export class AuthController {
     this.setAuthCookies(res, accessToken, refreshToken);
 
     const frontendUrl =
-      this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+      this.configService.get<string>('FRONTEND_URL') ||
+      'http://localhost:3000';
     const callbackUrl = new URL('/auth/google/callback', frontendUrl);
     callbackUrl.searchParams.set('state', 'success');
 

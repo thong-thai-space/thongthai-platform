@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Delete,
-  Param,
-  Body,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { NotificationService } from './notification.service';
@@ -75,14 +66,20 @@ export class NotificationController {
   @Patch(':id/read')
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
-  markAsRead(@Param('id') id: string, @CurrentUser('id') userId: string) {
+  markAsRead(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+  ) {
     return this.notificationService.markAsRead(id, userId);
   }
 
   @Delete(':id')
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
-  remove(@Param('id') id: string, @CurrentUser('id') userId: string) {
+  remove(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+  ) {
     return this.notificationService.remove(id, userId);
   }
 }

@@ -43,9 +43,7 @@ describe('API Architecture (Integration)', () => {
     });
 
     it('should return standardized error for 404', async () => {
-      const res = await request(app.getHttpServer()).get(
-        '/api/v1/nonexistent-route',
-      );
+      const res = await request(app.getHttpServer()).get('/api/v1/nonexistent-route');
 
       expect(res.status).toBe(404);
       expect(res.body.success).toBe(false);
@@ -108,12 +106,14 @@ describe('API Architecture (Integration)', () => {
       const requests = Array(6)
         .fill(null)
         .map(() =>
-          request(app.getHttpServer()).post('/api/v1/auth/register').send({
-            email: 'test@example.com',
-            password: 'TestPass123!',
-            name: 'Test User',
-            acceptTerms: true,
-          }),
+          request(app.getHttpServer())
+            .post('/api/v1/auth/register')
+            .send({
+              email: 'test@example.com',
+              password: 'TestPass123!',
+              name: 'Test User',
+              acceptTerms: true,
+            }),
         );
 
       const responses = await Promise.all(requests);

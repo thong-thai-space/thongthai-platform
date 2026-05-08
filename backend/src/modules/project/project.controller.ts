@@ -52,7 +52,10 @@ export class ProjectController {
   @Patch(':id/accept')
   @UseGuards(RolesGuard)
   @Roles(UserRole.OWNER, UserRole.ADMIN)
-  acceptRequest(@Param('id') id: string, @CurrentUser('id') userId: string) {
+  acceptRequest(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+  ) {
     return this.projectService.acceptRequest(id, userId);
   }
 

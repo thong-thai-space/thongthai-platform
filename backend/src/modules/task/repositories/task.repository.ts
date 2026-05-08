@@ -20,9 +20,7 @@ export class TaskRepository {
         orderBy: [{ dueDate: 'asc' }, { createdAt: 'desc' }],
       });
     } catch (error) {
-      throw new Error(
-        `Failed to fetch tasks: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      throw new Error(`Failed to fetch tasks: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -42,9 +40,7 @@ export class TaskRepository {
         orderBy: [{ dueDate: 'asc' }, { createdAt: 'desc' }],
       });
     } catch (error) {
-      throw new Error(
-        `Failed to fetch tasks: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      throw new Error(`Failed to fetch tasks: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -55,9 +51,7 @@ export class TaskRepository {
     try {
       return await this.prisma.task.findUnique({ where: { id } });
     } catch (error) {
-      throw new Error(
-        `Failed to find task: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      throw new Error(`Failed to find task: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -84,9 +78,7 @@ export class TaskRepository {
         },
       });
     } catch (error) {
-      throw new Error(
-        `Failed to find task: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      throw new Error(`Failed to find task: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -97,9 +89,7 @@ export class TaskRepository {
     try {
       return await this.prisma.task.create({ data });
     } catch (error) {
-      throw new Error(
-        `Failed to create task: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      throw new Error(`Failed to create task: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -113,15 +103,10 @@ export class TaskRepository {
         data,
       });
     } catch (error) {
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2025'
-      ) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
         throw new Error('Task not found');
       }
-      throw new Error(
-        `Failed to update task: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      throw new Error(`Failed to update task: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -133,9 +118,7 @@ export class TaskRepository {
       await this.prisma.task.delete({ where: { id } });
       return true;
     } catch (error) {
-      throw new Error(
-        `Failed to delete task: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      throw new Error(`Failed to delete task: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -148,9 +131,7 @@ export class TaskRepository {
         where: { projectId },
       });
     } catch (error) {
-      throw new Error(
-        `Failed to find project tasks: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      throw new Error(`Failed to find project tasks: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -167,9 +148,7 @@ export class TaskRepository {
         orderBy: [{ priority: 'desc' }, { dueDate: 'asc' }],
       });
     } catch (error) {
-      throw new Error(
-        `Failed to find assigned tasks: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      throw new Error(`Failed to find assigned tasks: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -186,20 +165,17 @@ export class TaskRepository {
         visited.add(currentId);
         if (currentId === taskId) return true; // Circular!
 
-        const parent: { parentId: string | null } | null =
-          await this.prisma.task.findUnique({
-            where: { id: currentId },
-            select: { parentId: true },
-          });
+        const parent: { parentId: string | null } | null = await this.prisma.task.findUnique({
+          where: { id: currentId },
+          select: { parentId: true },
+        });
 
         currentId = parent?.parentId || null;
       }
 
       return false;
     } catch (error) {
-      throw new Error(
-        `Failed to check circular subtask: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      throw new Error(`Failed to check circular subtask: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -216,19 +192,14 @@ export class TaskRepository {
         },
       });
     } catch (error) {
-      throw new Error(
-        `Failed to create task: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      throw new Error(`Failed to create task: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
   /**
    * Update task with includes (for response)
    */
-  async updateWithIncludes(
-    id: string,
-    data: Prisma.TaskUpdateInput,
-  ): Promise<any> {
+  async updateWithIncludes(id: string, data: Prisma.TaskUpdateInput): Promise<any> {
     try {
       return await this.prisma.task.update({
         where: { id },
@@ -238,15 +209,11 @@ export class TaskRepository {
         },
       });
     } catch (error) {
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2025'
-      ) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
         throw new Error('Task not found');
       }
-      throw new Error(
-        `Failed to update task: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      throw new Error(`Failed to update task: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 }
+

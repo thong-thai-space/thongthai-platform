@@ -5,9 +5,8 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../../prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
 
-const extractRefreshTokenFromCookie = (req: {
-  cookies?: Record<string, string>;
-}) => req?.cookies?.refreshToken ?? null;
+const extractRefreshTokenFromCookie = (req: { cookies?: Record<string, string> }) =>
+  req?.cookies?.refreshToken ?? null;
 
 const extractBearerToken = (req: { headers?: Record<string, string> }) => {
   const authHeader = req?.headers?.authorization;
@@ -42,8 +41,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
       throw new UnauthorizedException('Invalid token type');
     }
 
-    const rawRefreshToken =
-      extractRefreshTokenFromCookie(req) || extractBearerToken(req);
+    const rawRefreshToken = extractRefreshTokenFromCookie(req) || extractBearerToken(req);
     if (!rawRefreshToken) {
       throw new UnauthorizedException('Missing refresh token');
     }
@@ -64,10 +62,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
       throw new UnauthorizedException();
     }
 
-    const isValid = await bcrypt.compare(
-      rawRefreshToken,
-      user.refreshTokenHash,
-    );
+    const isValid = await bcrypt.compare(rawRefreshToken, user.refreshTokenHash);
     if (!isValid) {
       throw new UnauthorizedException('Invalid refresh token');
     }
