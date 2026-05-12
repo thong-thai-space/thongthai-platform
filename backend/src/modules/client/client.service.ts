@@ -3,98 +3,43 @@ import {
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import { UserRole } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { CreateClientDto, UpdateClientDto } from './dto/client.dto';
+import { ClientRepository } from './repositories/client.repository';
 
 @Injectable()
 export class ClientService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private clientRepository: ClientRepository) {}
 
   async findAll() {
-    return this.prisma.user.findMany({
-      where: { role: UserRole.CLIENT },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        phone: true,
-        avatar: true,
-        isActive: true,
-        createdAt: true,
-        _count: { select: { clientProjects: true, clientInvoices: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+    return this.clientRepository.findAllClients();
   }
 
   async findOne(id: string) {
-    const client = await this.prisma.user.findUnique({
-      where: { id, role: UserRole.CLIENT },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        phone: true,
-        avatar: true,
-        isActive: true,
-        createdAt: true,
-        clientProjects: {
-          select: { id: true, name: true, status: true },
-        },
-        clientInvoices: {
-          select: { id: true, invoiceNumber: true, status: true, total: true },
-        },
-      },
-    });
+    const client = await this.clientRepository.findClientById(id);
     if (!client) throw new NotFoundException('Client not found');
     return client;
   }
 
   async create(dto: CreateClientDto) {
-    const existing = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-    });
+    const existing = await this.clientRepository.findClientByEmail(dto.email);
     if (existing) throw new ConflictException('Email already exists');
 
     const hashedPassword = await bcrypt.hash(dto.password, 12);
 
-    return this.prisma.user.create({
-      data: {
-        ...dto,
-        password: hashedPassword,
-        role: UserRole.CLIENT,
-      },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        phone: true,
-        role: true,
-      },
+    return this.clientRepository.createClient({
+      ...dto,
+      password: hashedPassword,
+      role: UserRole.CLIENT,
     });
   }
 
   async update(id: string, dto: UpdateClientDto) {
-    return this.prisma.user.update({
-      where: { id },
-      data: dto,
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        phone: true,
-        avatar: true,
-      },
-    });
+    return this.clientRepository.updateClient(id, dto);
   }
 
   async remove(id: string) {
-    return this.prisma.user.update({
-      where: { id, role: UserRole.CLIENT },
-      data: { isActive: false },
-      select: { id: true, email: true, isActive: true },
-    });
+    return this.clientRepository.deactivateClient(id);
   }
 }

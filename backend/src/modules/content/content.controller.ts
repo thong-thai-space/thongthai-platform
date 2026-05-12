@@ -16,6 +16,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
 import { memoryStorage } from 'multer';
 import { ContentService } from './content.service';
+import { UpdateContentDto } from './dto/update-content.dto';
 import { Roles } from '../../shared/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { R2StorageService } from '../../shared/storage/r2-storage.service';
@@ -44,7 +45,7 @@ export class ContentController {
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   upsert(
     @Param('section') section: string,
-    @Body() body: { data: any; isActive?: boolean },
+    @Body() body: UpdateContentDto,
   ) {
     return this.contentService.upsert(section, body.data, body.isActive);
   }

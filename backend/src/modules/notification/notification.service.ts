@@ -1,33 +1,26 @@
-import { Injectable, ForbiddenException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { NotificationGateway } from './notification.gateway';
 import { PushService } from './push.service';
 import { NotificationType, Prisma } from '@prisma/client';
+import { NotificationRepository } from './repositories/notification.repository';
 
 @Injectable()
 export class NotificationService {
   constructor(
-    private prisma: PrismaService,
+    private notificationRepository: NotificationRepository,
     private gateway: NotificationGateway,
     private pushService: PushService,
   ) {}
 
   async findByUser(userId: string) {
-    return this.prisma.notification.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
-      take: 50,
-    });
+    return this.notificationRepository.findByUser(userId);
   }
 
   async markAsRead(id: string, userId: string) {
-    const notification = await this.prisma.notification.findUnique({
-      where: { id },
-      select: { userId: true },
-    });
+    const notification = await this.notificationRepository.findById(id);
 
     if (!notification) {
-      throw new Error('Notification not found');
+      throw new NotFoundException('Notification not found');
     }
 
     // Pattern: Authorization - Ownership check
@@ -35,33 +28,22 @@ export class NotificationService {
       throw new ForbiddenException('You do not have permission to modify this notification');
     }
 
-    return this.prisma.notification.update({
-      where: { id },
-      data: { isRead: true },
-    });
+    return this.notificationRepository.markAsRead(id);
   }
 
   async markAllAsRead(userId: string) {
-    return this.prisma.notification.updateMany({
-      where: { userId, isRead: false },
-      data: { isRead: true },
-    });
+    return this.notificationRepository.markAllAsRead(userId);
   }
 
   async getUnreadCount(userId: string) {
-    return this.prisma.notification.count({
-      where: { userId, isRead: false },
-    });
+    return this.notificationRepository.countUnread(userId);
   }
 
   async remove(id: string, userId: string) {
-    const notification = await this.prisma.notification.findUnique({
-      where: { id },
-      select: { userId: true },
-    });
+    const notification = await this.notificationRepository.findById(id);
 
     if (!notification) {
-      throw new Error('Notification not found');
+      throw new NotFoundException('Notification not found');
     }
 
     // Pattern: Authorization - Ownership check
@@ -69,7 +51,7 @@ export class NotificationService {
       throw new ForbiddenException('You do not have permission to delete this notification');
     }
 
-    return this.prisma.notification.delete({ where: { id } });
+    return this.notificationRepository.deleteById(id);
   }
 
   async create(data: {
@@ -79,7 +61,7 @@ export class NotificationService {
     userId: string;
     data?: Prisma.InputJsonValue;
   }) {
-    const notification = await this.prisma.notification.create({ data });
+    const notification = await this.notificationRepository.create(data);
     this.gateway.sendToUser(data.userId, 'notification', notification);
 
     // Send browser push notification for offline delivery

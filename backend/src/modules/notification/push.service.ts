@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PrismaService } from '../../prisma/prisma.service';
 import * as webPush from 'web-push';
+import { PushRepository } from './repositories/push.repository';
 
 @Injectable()
 export class PushService {
@@ -9,7 +9,7 @@ export class PushService {
   private readonly vapidConfigured: boolean;
 
   constructor(
-    private prisma: PrismaService,
+    private pushRepository: PushRepository,
     private configService: ConfigService,
   ) {
     const publicKey = this.configService.get<string>('VAPID_PUBLIC_KEY');
@@ -27,35 +27,17 @@ export class PushService {
   }
 
   async subscribe(userId: string, subscription: { endpoint: string; keys: { p256dh: string; auth: string } }) {
-    return this.prisma.pushSubscription.upsert({
-      where: {
-        userId_endpoint: { userId, endpoint: subscription.endpoint },
-      },
-      update: {
-        p256dh: subscription.keys.p256dh,
-        auth: subscription.keys.auth,
-      },
-      create: {
-        userId,
-        endpoint: subscription.endpoint,
-        p256dh: subscription.keys.p256dh,
-        auth: subscription.keys.auth,
-      },
-    });
+    return this.pushRepository.upsertSubscription(userId, subscription);
   }
 
   async unsubscribe(userId: string, endpoint: string) {
-    return this.prisma.pushSubscription.deleteMany({
-      where: { userId, endpoint },
-    });
+    return this.pushRepository.deleteSubscription(userId, endpoint);
   }
 
   async sendPush(userId: string, payload: { title: string; body: string; url?: string }) {
     if (!this.vapidConfigured) return;
 
-    const subscriptions = await this.prisma.pushSubscription.findMany({
-      where: { userId },
-    });
+    const subscriptions = await this.pushRepository.findSubscriptions(userId);
 
     const results = await Promise.allSettled(
       subscriptions.map((sub) =>
@@ -83,9 +65,7 @@ export class PushService {
     });
 
     if (toRemove.length > 0) {
-      await this.prisma.pushSubscription.deleteMany({
-        where: { id: { in: toRemove } },
-      });
+      await this.pushRepository.deleteSubscriptionsByIds(toRemove);
       this.logger.log(`Removed ${toRemove.length} expired push subscriptions`);
     }
   }

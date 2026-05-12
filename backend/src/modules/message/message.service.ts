@@ -1,46 +1,35 @@
 import { Injectable, ForbiddenException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationService } from '../notification/notification.service';
 import { NotificationGateway } from '../notification/notification.gateway';
 import { NotificationType, UserRole } from '@prisma/client';
 import { CreateMessageDto } from './dto/message.dto';
+import { MessageRepository } from './repositories/message.repository';
 
 @Injectable()
 export class MessageService {
   constructor(
-    private prisma: PrismaService,
+    private messageRepository: MessageRepository,
     private notificationService: NotificationService,
     private gateway: NotificationGateway,
   ) {}
 
   async create(senderId: string, dto: CreateMessageDto) {
-    const message = await this.prisma.message.create({
-      data: {
-        content: dto.content,
-        senderId,
-        receiverId: dto.receiverId,
-        projectId: dto.projectId,
-      },
-      include: {
-        sender: { select: { id: true, name: true, avatar: true } },
-      },
+    const message = await this.messageRepository.createMessage({
+      content: dto.content,
+      senderId,
+      receiverId: dto.receiverId,
+      ...(dto.projectId ? { projectId: dto.projectId } : {}),
     });
 
     // Push real-time message via WebSocket
     this.gateway.sendToUser(dto.receiverId, 'new-message', message);
 
     // Create notification for receiver(s)
-    const sender = await this.prisma.user.findUnique({
-      where: { id: senderId },
-      select: { name: true },
-    });
+    const sender = await this.messageRepository.findUserName(senderId);
 
     let projectName = '';
     if (dto.projectId) {
-      const proj = await this.prisma.project.findUnique({
-        where: { id: dto.projectId },
-        select: { name: true },
-      });
+      const proj = await this.messageRepository.findProjectName(dto.projectId);
       projectName = proj?.name || '';
     }
 
@@ -53,14 +42,7 @@ export class MessageService {
 
     // For project chat, also notify internal participants so admin/member can see badge updates.
     if (dto.projectId) {
-      const project = await this.prisma.project.findUnique({
-        where: { id: dto.projectId },
-        select: {
-          ownerId: true,
-          clientId: true,
-          tasks: { select: { assigneeId: true } },
-        },
-      });
+      const project = await this.messageRepository.findProjectParticipants(dto.projectId);
 
       if (project?.ownerId) receivers.add(project.ownerId);
       if (project?.clientId) receivers.add(project.clientId);
@@ -68,13 +50,7 @@ export class MessageService {
         if (task.assigneeId) receivers.add(task.assigneeId);
       }
 
-      const admins = await this.prisma.user.findMany({
-        where: {
-          role: { in: [UserRole.OWNER, UserRole.ADMIN] },
-          isActive: true,
-        },
-        select: { id: true },
-      });
+      const admins = await this.messageRepository.findAdminIds();
       for (const admin of admins) receivers.add(admin.id);
     }
 
@@ -97,49 +73,30 @@ export class MessageService {
 
   async findConversations(userId: string) {
     // Find distinct user IDs the current user has messaged with
-    const sent = await this.prisma.message.findMany({
-      where: { senderId: userId },
-      select: { receiverId: true },
-      distinct: ['receiverId'],
-    });
+    const sent = await this.messageRepository.findDistinctSentReceivers(userId);
 
-    const received = await this.prisma.message.findMany({
-      where: { receiverId: userId },
-      select: { senderId: true },
-      distinct: ['senderId'],
-    });
+    const received = await this.messageRepository.findDistinctReceivedSenders(userId);
 
     const userIds = [
       ...new Set([
-        ...sent.map((m) => m.receiverId),
-        ...received.map((m) => m.senderId),
+        ...sent.map((m) => m.receiverId).filter(Boolean),
+        ...received.map((m) => m.senderId).filter(Boolean),
       ]),
     ];
 
     const conversations = await Promise.all(
       userIds.map(async (otherUserId) => {
-        const otherUser = await this.prisma.user.findUnique({
-          where: { id: otherUserId },
-          select: { id: true, name: true, avatar: true, role: true },
-        });
+        const otherUser = await this.messageRepository.findUserSummary(otherUserId);
 
-        const lastMessage = await this.prisma.message.findFirst({
-          where: {
-            OR: [
-              { senderId: userId, receiverId: otherUserId },
-              { senderId: otherUserId, receiverId: userId },
-            ],
-          },
-          orderBy: { createdAt: 'desc' },
-        });
+        const lastMessage = await this.messageRepository.findLastMessageBetween(
+          userId,
+          otherUserId,
+        );
 
-        const unreadCount = await this.prisma.message.count({
-          where: {
-            senderId: otherUserId,
-            receiverId: userId,
-            isRead: false,
-          },
-        });
+        const unreadCount = await this.messageRepository.countUnreadFromUser(
+          otherUserId,
+          userId,
+        );
 
         return {
           userId: otherUserId,
@@ -160,141 +117,52 @@ export class MessageService {
   async findConversation(userId: string, otherUserId: string) {
     // Pattern: Authorization - Ownership check
     // Only the participants of a conversation can view it
-    return this.prisma.message.findMany({
-      where: {
-        OR: [
-          { senderId: userId, receiverId: otherUserId },
-          { senderId: otherUserId, receiverId: userId },
-        ],
-      },
-      include: {
-        sender: { select: { id: true, name: true, avatar: true } },
-      },
-      orderBy: { createdAt: 'asc' },
-      take: 100,
-    });
+    return this.messageRepository.findConversationMessages(userId, otherUserId);
   }
 
   async findProjectConversation(projectId: string, userId: string) {
     // Verify user is a participant of the project
-    const project = await this.prisma.project.findUnique({
-      where: { id: projectId },
-      select: { ownerId: true, clientId: true },
-    });
+    const project = await this.messageRepository.findProjectById(projectId);
 
     if (!project) return [];
     if (project.ownerId !== userId && project.clientId !== userId) {
       // Check if user is OWNER or ADMIN (team member)
-      const user = await this.prisma.user.findUnique({
-        where: { id: userId },
-        select: { role: true },
-      });
+      const user = await this.messageRepository.findUserRole(userId);
       if (!user || !['OWNER', 'ADMIN', 'MEMBER'].includes(user.role)) {
         throw new ForbiddenException();
       }
     }
 
-    return this.prisma.message.findMany({
-      where: { projectId },
-      include: {
-        sender: { select: { id: true, name: true, avatar: true } },
-      },
-      orderBy: { createdAt: 'asc' },
-      take: 200,
-    });
+    return this.messageRepository.findProjectConversationMessages(projectId);
   }
 
   async markAsRead(messageId: string, userId: string) {
-    const result = await this.prisma.message.updateMany({
-      where: { id: messageId, receiverId: userId },
-      data: { isRead: true },
-    });
+    const result = await this.messageRepository.markMessageRead(messageId, userId);
 
     // Keep message-related notifications in sync with message read state.
-    await this.prisma.notification.updateMany({
-      where: {
-        userId,
-        isRead: false,
-        type: NotificationType.CLIENT_MESSAGE,
-        data: {
-          path: ['messageId'],
-          equals: messageId,
-        },
-      },
-      data: { isRead: true },
-    });
+    await this.messageRepository.markNotificationsReadByMessageId(userId, messageId);
 
     return result;
   }
 
   async markConversationRead(userId: string, otherUserId: string) {
-    const result = await this.prisma.message.updateMany({
-      where: {
-        senderId: otherUserId,
-        receiverId: userId,
-        isRead: false,
-      },
-      data: { isRead: true },
-    });
+    const result = await this.messageRepository.markMessagesReadFromUser(otherUserId, userId);
 
-    await this.prisma.notification.updateMany({
-      where: {
-        userId,
-        isRead: false,
-        type: NotificationType.CLIENT_MESSAGE,
-        data: {
-          path: ['senderId'],
-          equals: otherUserId,
-        },
-      },
-      data: { isRead: true },
-    });
+    await this.messageRepository.markNotificationsReadBySenderId(userId, otherUserId);
 
     return result;
   }
 
   async markProjectConversationRead(userId: string, projectId: string) {
-    const [messageResult] = await this.prisma.$transaction([
-      this.prisma.message.updateMany({
-        where: {
-          projectId,
-          receiverId: userId,
-          isRead: false,
-        },
-        data: { isRead: true },
-      }),
-      this.prisma.notification.updateMany({
-        where: {
-          userId,
-          isRead: false,
-          type: NotificationType.CLIENT_MESSAGE,
-          data: {
-            path: ['projectId'],
-            equals: projectId,
-          },
-        },
-        data: { isRead: true },
-      }),
-    ]);
-
-    return messageResult;
+    return this.messageRepository.markProjectConversationRead(userId, projectId);
   }
 
   async getUnreadCount(userId: string) {
-    return this.prisma.message.count({
-      where: { receiverId: userId, isRead: false },
-    });
+    return this.messageRepository.countUnreadMessages(userId);
   }
 
   async getUnreadByProject(userId: string) {
-    const unreadNotifications = await this.prisma.notification.findMany({
-      where: {
-        userId,
-        type: NotificationType.CLIENT_MESSAGE,
-        isRead: false,
-      },
-      select: { data: true },
-    });
+    const unreadNotifications = await this.messageRepository.findUnreadMessageNotifications(userId);
 
     const counter = new Map<string, number>();
     for (const item of unreadNotifications) {
@@ -308,10 +176,7 @@ export class MessageService {
 
     const projectIds = Array.from(counter.keys());
 
-    const projects = await this.prisma.project.findMany({
-      where: { id: { in: projectIds } },
-      select: { id: true, name: true },
-    });
+    const projects = await this.messageRepository.findProjectsByIds(projectIds);
 
     const projectMap = new Map(projects.map((p) => [p.id, p.name]));
 

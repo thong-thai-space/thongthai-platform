@@ -1,6 +1,57 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { Project, ProjectStatus, Prisma } from '@prisma/client';
+import { Project, ProjectStatus, Prisma, UserRole } from '@prisma/client';
+
+const projectListIncludes = Prisma.validator<Prisma.ProjectDefaultArgs>()({
+  include: {
+    client: { select: { id: true, name: true, email: true } },
+    tasks: { select: { id: true, status: true } },
+    _count: { select: { tasks: true, invoices: true } },
+  },
+});
+
+const projectDetailsIncludes = Prisma.validator<Prisma.ProjectDefaultArgs>()({
+  include: {
+    owner: { select: { id: true, name: true, email: true } },
+    client: { select: { id: true, name: true, email: true } },
+    tasks: {
+      orderBy: { order: 'asc' },
+      include: {
+        assignee: { select: { id: true, name: true, avatar: true } },
+      },
+    },
+    milestones: { orderBy: { dueDate: 'asc' } },
+    invoices: true,
+    files: true,
+  },
+});
+
+const projectShowcaseSelect = Prisma.validator<Prisma.ProjectDefaultArgs>()({
+  select: {
+    id: true,
+    name: true,
+    description: true,
+    techStack: true,
+    liveUrl: true,
+    thumbnailUrl: true,
+    screenshots: true,
+    showcaseOrder: true,
+  },
+});
+
+export type ProjectListWithIncludes = Prisma.ProjectGetPayload<
+  typeof projectListIncludes
+>;
+export type ProjectWithIncludes = Prisma.ProjectGetPayload<
+  typeof projectDetailsIncludes
+>;
+export type ProjectShowcase = Prisma.ProjectGetPayload<
+  typeof projectShowcaseSelect
+>;
 
 /**
  * Pattern: Repository Pattern
@@ -20,26 +71,22 @@ export class ProjectRepository {
         orderBy: { createdAt: 'desc' },
       });
     } catch (error) {
-      throw new Error(`Failed to fetch projects: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new InternalServerErrorException('Failed to fetch projects');
     }
   }
 
   /**
    * Find all projects with includes
    */
-  async findAllWithIncludes(where?: Prisma.ProjectWhereInput, includeRelations: boolean = true): Promise<any[]> {
+  async findAllWithIncludes(where?: Prisma.ProjectWhereInput): Promise<ProjectListWithIncludes[]> {
     try {
       return await this.prisma.project.findMany({
         where,
-        include: includeRelations ? {
-          client: { select: { id: true, name: true, email: true } },
-          tasks: { select: { id: true, status: true } },
-          _count: { select: { tasks: true, invoices: true } },
-        } : undefined,
+        include: projectListIncludes.include,
         orderBy: { updatedAt: 'desc' },
       });
     } catch (error) {
-      throw new Error(`Failed to fetch projects: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new InternalServerErrorException('Failed to fetch projects');
     }
   }
 
@@ -50,33 +97,21 @@ export class ProjectRepository {
     try {
       return await this.prisma.project.findUnique({ where: { id } });
     } catch (error) {
-      throw new Error(`Failed to find project: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new InternalServerErrorException('Failed to find project');
     }
   }
 
   /**
    * Find project by ID with full includes
    */
-  async findByIdWithIncludes(id: string): Promise<any> {
+  async findByIdWithIncludes(id: string): Promise<ProjectWithIncludes | null> {
     try {
       return await this.prisma.project.findUnique({
         where: { id },
-        include: {
-          owner: { select: { id: true, name: true, email: true } },
-          client: { select: { id: true, name: true, email: true } },
-          tasks: {
-            orderBy: { order: 'asc' },
-            include: {
-              assignee: { select: { id: true, name: true, avatar: true } },
-            },
-          },
-          milestones: { orderBy: { dueDate: 'asc' } },
-          invoices: true,
-          files: true,
-        },
+        include: projectDetailsIncludes.include,
       });
     } catch (error) {
-      throw new Error(`Failed to find project: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new InternalServerErrorException('Failed to find project');
     }
   }
 
@@ -87,7 +122,7 @@ export class ProjectRepository {
     try {
       return await this.prisma.project.create({ data });
     } catch (error) {
-      throw new Error(`Failed to create project: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new InternalServerErrorException('Failed to create project');
     }
   }
 
@@ -102,9 +137,9 @@ export class ProjectRepository {
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        throw new Error('Project not found');
+        throw new NotFoundException('Project not found');
       }
-      throw new Error(`Failed to update project: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new InternalServerErrorException('Failed to update project');
     }
   }
 
@@ -116,22 +151,25 @@ export class ProjectRepository {
       await this.prisma.project.delete({ where: { id } });
       return true;
     } catch (error) {
-      throw new Error(`Failed to delete project: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+        throw new NotFoundException('Project not found');
+      }
+      throw new InternalServerErrorException('Failed to delete project');
     }
   }
 
   /**
    * Find projects by client
    */
-  async findByClient(clientId: string, withIncludes: boolean = true): Promise<any[]> {
+  async findByClient(clientId: string): Promise<ProjectListWithIncludes[]> {
     try {
       return await this.prisma.project.findMany({
         where: { clientId },
-        include: withIncludes ? { tasks: { select: { id: true, status: true } } } : undefined,
+        include: projectListIncludes.include,
         orderBy: { updatedAt: 'desc' },
       });
     } catch (error) {
-      throw new Error(`Failed to find client projects: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new InternalServerErrorException('Failed to find client projects');
     }
   }
 
@@ -144,31 +182,51 @@ export class ProjectRepository {
         where: { status },
       });
     } catch (error) {
-      throw new Error(`Failed to find projects by status: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new InternalServerErrorException('Failed to find projects by status');
     }
   }
 
   /**
    * Find showcase projects
    */
-  async findShowcase(): Promise<any[]> {
+  async findShowcase(): Promise<ProjectShowcase[]> {
     try {
       return await this.prisma.project.findMany({
         where: { isShowcase: true },
-        select: {
-          id: true,
-          name: true,
-          description: true,
-          techStack: true,
-          liveUrl: true,
-          thumbnailUrl: true,
-          screenshots: true,
-          showcaseOrder: true,
-        },
+        select: projectShowcaseSelect.select,
         orderBy: { showcaseOrder: 'asc' },
       });
     } catch (error) {
-      throw new Error(`Failed to find showcase projects: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new InternalServerErrorException('Failed to find showcase projects');
+    }
+  }
+
+  async findActiveAdminIds(excludeUserId?: string): Promise<string[]> {
+    try {
+      const admins = await this.prisma.user.findMany({
+        where: {
+          role: { in: [UserRole.OWNER, UserRole.ADMIN] },
+          isActive: true,
+          ...(excludeUserId ? { id: { not: excludeUserId } } : {}),
+        },
+        select: { id: true },
+      });
+
+      return admins.map((admin) => admin.id);
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to fetch admin users');
+    }
+  }
+
+  async findUserNameById(userId: string): Promise<string | null> {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { name: true },
+      });
+      return user?.name || null;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to fetch user');
     }
   }
 }

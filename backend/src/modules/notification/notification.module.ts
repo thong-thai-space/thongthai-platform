@@ -6,6 +6,8 @@ import { NotificationController } from './notification.controller';
 import { NotificationGateway } from './notification.gateway';
 import { PushService } from './push.service';
 import { PrismaModule } from '../../prisma/prisma.module';
+import { NotificationRepository } from './repositories/notification.repository';
+import { PushRepository } from './repositories/push.repository';
 
 @Module({
   imports: [
@@ -19,7 +21,13 @@ import { PrismaModule } from '../../prisma/prisma.module';
     }),
   ],
   controllers: [NotificationController],
-  providers: [NotificationService, NotificationGateway, PushService],
+  providers: [
+    NotificationService,
+    NotificationGateway,
+    PushService,
+    NotificationRepository,
+    PushRepository,
+  ],
   exports: [NotificationService, NotificationGateway, PushService],
 })
 export class NotificationModule {}

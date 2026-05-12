@@ -1,10 +1,9 @@
-import { IsString, IsOptional, IsBoolean } from 'class-validator';
+import { IsDefined, IsOptional, IsBoolean } from 'class-validator';
+import { Prisma } from '@prisma/client';
 
 export class UpdateContentDto {
-  @IsString()
-  section: string;
-
-  data: any;
+  @IsDefined()
+  data: Prisma.InputJsonValue;
 
   @IsOptional()
   @IsBoolean()

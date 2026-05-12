@@ -3,29 +3,23 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import { R2StorageService } from '../../shared/storage/r2-storage.service';
 import { UserRole } from '@prisma/client';
+import { FileRepository } from './repositories/file.repository';
 
 @Injectable()
 export class FileService {
   constructor(
-    private prisma: PrismaService,
+    private fileRepository: FileRepository,
     private r2StorageService: R2StorageService,
   ) {}
 
   async findByProject(projectId: string) {
-    return this.prisma.projectFile.findMany({
-      where: { projectId },
-      orderBy: { createdAt: 'desc' },
-    });
+    return this.fileRepository.findByProject(projectId);
   }
 
   async findOne(id: string, userId: string, role: UserRole) {
-    const file = await this.prisma.projectFile.findUnique({ 
-      where: { id },
-      include: { project: { select: { id: true, clientId: true } } },
-    });
+    const file = await this.fileRepository.findFileWithProject(id);
     if (!file) throw new NotFoundException('File not found');
 
     // Pattern: Authorization - Per-resource access control
@@ -42,7 +36,14 @@ export class FileService {
     projectId: string;
     uploadedBy: string;
   }) {
-    return this.prisma.projectFile.create({ data });
+    return this.fileRepository.createFile({
+      name: data.name,
+      url: data.url,
+      mimeType: data.mimeType,
+      size: data.size,
+      project: { connect: { id: data.projectId } },
+      uploader: { connect: { id: data.uploadedBy } },
+    });
   }
 
   async uploadProjectFile(params: {
@@ -61,29 +62,24 @@ export class FileService {
       keyPrefix: projectId,
     });
 
-    return this.prisma.projectFile.create({
-      data: {
-        name: file.originalname || `file-${Date.now()}`,
-        url,
-        mimeType: file.mimetype || 'application/octet-stream',
-        size: file.size || 0,
-        projectId,
-        uploadedBy,
-      },
+    return this.fileRepository.createFile({
+      name: file.originalname || `file-${Date.now()}`,
+      url,
+      mimeType: file.mimetype || 'application/octet-stream',
+      size: file.size || 0,
+      project: { connect: { id: projectId } },
+      uploader: { connect: { id: uploadedBy } },
     });
   }
 
   async remove(id: string, userId: string, role: UserRole) {
-    const file = await this.prisma.projectFile.findUnique({
-      where: { id },
-      select: { projectId: true },
-    });
+    const file = await this.fileRepository.findFileProjectId(id);
     if (!file) throw new NotFoundException('File not found');
 
     // Pattern: Authorization - Per-resource access control
     await this.assertProjectAccess(file.projectId, userId, role);
 
-    return this.prisma.projectFile.delete({ where: { id } });
+    return this.fileRepository.deleteFile(id);
   }
 
   private async assertProjectAccess(
@@ -93,17 +89,7 @@ export class FileService {
   ) {
     if (role === UserRole.OWNER || role === UserRole.ADMIN) return;
 
-    const project = await this.prisma.project.findUnique({
-      where: { id: projectId },
-      select: {
-        clientId: true,
-        tasks: {
-          where: { assigneeId: userId },
-          select: { id: true },
-          take: 1,
-        },
-      },
-    });
+    const project = await this.fileRepository.findProjectAccess(projectId, userId);
 
     if (!project) throw new NotFoundException('Project not found');
 

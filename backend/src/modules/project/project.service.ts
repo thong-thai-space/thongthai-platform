@@ -4,25 +4,23 @@ import {
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
-import { NotificationService } from '../notification/notification.service';
-import { UserRole, NotificationType, ProjectStatus, Prisma } from '@prisma/client';
+import { UserRole, ProjectStatus, Prisma } from '@prisma/client';
 import { CreateProjectDto, UpdateProjectDto } from './dto/project.dto';
 import { CreateProjectRequestDto } from './dto/create-project-request.dto';
 import { UpdateProjectClientDto } from './dto/update-project-client.dto';
 import { ProjectRepository } from './repositories/project.repository';
-import { PrismaService } from '../../prisma/prisma.service';
+import { ProjectNotificationService } from './project-notification.service';
 
 @Injectable()
 export class ProjectService {
   constructor(
     private projectRepository: ProjectRepository,
-    private prisma: PrismaService,
-    private notificationService: NotificationService,
+    private projectNotificationService: ProjectNotificationService,
   ) {}
 
   async findAll(userId: string, role: UserRole) {
     if (role === UserRole.CLIENT) {
-      return this.projectRepository.findByClient(userId, true);
+      return this.projectRepository.findByClient(userId);
     }
 
     // MEMBER: only see projects where they have assigned tasks
@@ -30,10 +28,10 @@ export class ProjectService {
       const where: Prisma.ProjectWhereInput = {
         tasks: { some: { assigneeId: userId } },
       };
-      return this.projectRepository.findAllWithIncludes(where, true);
+      return this.projectRepository.findAllWithIncludes(where);
     }
 
-    return this.projectRepository.findAllWithIncludes({}, true);
+    return this.projectRepository.findAllWithIncludes({});
   }
 
   async findOne(id: string, userId: string, role: UserRole) {
@@ -47,7 +45,7 @@ export class ProjectService {
 
     // MEMBER: can only view projects where they have assigned tasks
     if (role === UserRole.MEMBER) {
-      const hasAssignedTask = project.tasks.some((t: any) => t.assignee?.id === userId);
+      const hasAssignedTask = project.tasks.some((task) => task.assignee?.id === userId);
       if (!hasAssignedTask) throw new ForbiddenException();
     }
 
@@ -55,57 +53,36 @@ export class ProjectService {
   }
 
   async create(dto: CreateProjectDto, userId: string) {
-    const { startDate, endDate, deadline, ...rest } = dto;
     const createData: Prisma.ProjectCreateInput = {
-      ...rest,
-      ownerId: userId,
-      startDate: startDate ? new Date(startDate) : undefined,
-      endDate: endDate ? new Date(endDate) : undefined,
-      deadline: deadline ? new Date(deadline) : undefined,
-    } as any;
+      name: dto.name,
+      description: dto.description,
+      status: dto.status,
+      startDate: dto.startDate ? new Date(dto.startDate) : undefined,
+      endDate: dto.endDate ? new Date(dto.endDate) : undefined,
+      deadline: dto.deadline ? new Date(dto.deadline) : undefined,
+      budget: dto.budget,
+      budgetUsd: dto.budgetUsd,
+      currency: dto.currency,
+      techStack: dto.techStack ?? [],
+      repoUrl: dto.repoUrl,
+      liveUrl: dto.liveUrl,
+      figmaUrl: dto.figmaUrl,
+      owner: { connect: { id: userId } },
+      ...(dto.clientId ? { client: { connect: { id: dto.clientId } } } : {}),
+    };
 
     const project = await this.projectRepository.create(createData);
 
-    // Notify OWNER and ADMIN users about new project
-    const admins = await this.prisma.user.findMany({
-      where: {
-        role: { in: [UserRole.OWNER, UserRole.ADMIN] },
-        isActive: true,
-        id: { not: userId },
-      },
-      select: { id: true },
-    });
-
-    for (const admin of admins) {
-      await this.notificationService.create({
-        type: NotificationType.PROJECT_UPDATE,
-        title: 'New project created',
-        message: `Project "${project.name}" has been created.`,
-        userId: admin.id,
-        data: { projectId: project.id },
-      });
-    }
-
-    // If a client is assigned, notify them
-    if (dto.clientId) {
-      await this.notificationService.create({
-        type: NotificationType.PROJECT_UPDATE,
-        title: 'New project assigned',
-        message: `Project "${project.name}" has been created for you.`,
-        userId: dto.clientId,
-        data: { projectId: project.id },
-      });
-    }
+    await this.projectNotificationService.notifyProjectCreated(
+      project,
+      userId,
+      dto.clientId,
+    );
 
     return project;
   }
 
   async createRequest(dto: CreateProjectRequestDto, clientId: string) {
-    const client = await this.prisma.user.findUnique({
-      where: { id: clientId },
-      select: { name: true },
-    });
-
     const createData: Prisma.ProjectCreateInput = {
       name: dto.name,
       description: dto.description,
@@ -113,31 +90,14 @@ export class ProjectService {
       currency: dto.currency,
       deadline: dto.deadline ? new Date(dto.deadline) : undefined,
       techStack: dto.techStack || [],
-      status: 'DRAFT',
+      status: ProjectStatus.DRAFT,
       owner: { connect: { id: clientId } },
       client: { connect: { id: clientId } },
-    } as any;
+    };
 
     const project = await this.projectRepository.create(createData);
 
-    // Notify all OWNER and ADMIN users about the client request
-    const admins = await this.prisma.user.findMany({
-      where: {
-        role: { in: [UserRole.OWNER, UserRole.ADMIN] },
-        isActive: true,
-      },
-      select: { id: true },
-    });
-
-    for (const admin of admins) {
-      await this.notificationService.create({
-        type: NotificationType.PROJECT_REQUEST,
-        title: 'New project request',
-        message: `Client ${client?.name || 'N/A'} submitted a project request: ${dto.name}`,
-        userId: admin.id,
-        data: { projectId: project.id, clientId },
-      });
-    }
+    await this.projectNotificationService.notifyProjectRequested(project, clientId);
 
     return project;
   }
@@ -207,17 +167,10 @@ export class ProjectService {
 
     const updated = await this.projectRepository.update(projectId, {
       owner: { connect: { id: adminUserId } },
-      status: 'IN_PROGRESS',
-    } as any);
-
-    // Notify the client that their request was accepted
-    await this.notificationService.create({
-      type: NotificationType.PROJECT_UPDATE,
-      title: 'Project request accepted',
-      message: `Project "${project.name}" has been accepted by Thong Thai Space and is now in progress.`,
-      userId: project.clientId,
-      data: { projectId: project.id },
+      status: ProjectStatus.IN_PROGRESS,
     });
+
+    await this.projectNotificationService.notifyRequestAccepted(project);
 
     return updated;
   }

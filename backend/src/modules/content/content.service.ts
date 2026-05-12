@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 import {
   ARCHITECTURE_DIAGRAM_PROMPT,
   CLIENT_ASSISTANT_PROMPT,
@@ -13,48 +13,42 @@ import {
   STRATEGIC_PLAN_PROMPT,
   TASK_BREAKDOWN_PROMPT,
 } from '../ai/prompts';
+import { ContentRepository } from './repositories/content.repository';
 
 @Injectable()
 export class ContentService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private contentRepository: ContentRepository) {}
 
   async findAll() {
-    return this.prisma.siteContent.findMany({
-      where: { isActive: true },
-      orderBy: { section: 'asc' },
-    });
+    return this.contentRepository.findAllActive();
   }
 
   async findBySection(section: string) {
-    return this.prisma.siteContent.findUnique({
-      where: { section },
-    });
+    return this.contentRepository.findBySection(section);
   }
 
-  async upsert(section: string, data: any, isActive = true) {
-    return this.prisma.siteContent.upsert({
-      where: { section },
-      update: { data, isActive },
-      create: { section, data, isActive },
-    });
+  async upsert(
+    section: string,
+    data: Prisma.InputJsonValue,
+    isActive = true,
+  ) {
+    return this.contentRepository.upsert(section, data, isActive);
   }
 
   async remove(section: string) {
-    const existing = await this.prisma.siteContent.findUnique({
-      where: { section },
-    });
+    const existing = await this.contentRepository.findBySection(section);
     if (!existing) throw new NotFoundException(`Content section "${section}" not found`);
-    return this.prisma.siteContent.delete({ where: { section } });
+    return this.contentRepository.deleteBySection(section);
   }
 
   async seed() {
     const sections = Object.entries(defaultContent);
     for (const [section, data] of sections) {
-      await this.prisma.siteContent.upsert({
-        where: { section },
-        update: {},
-        create: { section, data: data as any },
-      });
+      await this.contentRepository.upsert(
+        section,
+        data as Prisma.InputJsonValue,
+        true,
+      );
     }
     return { message: `Seeded ${sections.length} sections` };
   }
