@@ -1,0 +1,2 @@
+export const TASK_REPOSITORY = Symbol('TASK_REPOSITORY');
+export const TASK_NOTIFICATION_PORT = Symbol('TASK_NOTIFICATION_PORT');

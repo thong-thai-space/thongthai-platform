@@ -1,25 +1,25 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
 import { ProjectService } from './project.service';
-import { PrismaService } from '../../prisma/prisma.service';
-import { NotificationService } from '../notification/notification.service';
-import { UserRole } from '@prisma/client';
+import { ProjectRepository } from './repositories/project.repository';
+import { ProjectNotificationService } from './project-notification.service';
+import { UserRole, ProjectStatus } from '@prisma/client';
 
-const mockPrisma = {
-  project: {
-    findMany: jest.fn(),
-    findUnique: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-  },
-  user: {
-    findMany: jest.fn(),
-  },
+const mockRepository = {
+  findAllWithIncludes: jest.fn(),
+  findByClient: jest.fn(),
+  findByIdWithIncludes: jest.fn(),
+  findById: jest.fn(),
+  create: jest.fn(),
+  update: jest.fn(),
+  delete: jest.fn(),
+  findShowcase: jest.fn(),
 };
 
 const mockNotificationService = {
-  create: jest.fn(),
+  notifyProjectCreated: jest.fn(),
+  notifyProjectRequested: jest.fn(),
+  notifyRequestAccepted: jest.fn(),
 };
 
 describe('ProjectService', () => {
@@ -29,8 +29,8 @@ describe('ProjectService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ProjectService,
-        { provide: PrismaService, useValue: mockPrisma },
-        { provide: NotificationService, useValue: mockNotificationService },
+        { provide: ProjectRepository, useValue: mockRepository },
+        { provide: ProjectNotificationService, useValue: mockNotificationService },
       ],
     }).compile();
 
@@ -41,30 +41,20 @@ describe('ProjectService', () => {
   describe('findAll', () => {
     it('should return CLIENT projects only for CLIENT role', async () => {
       const projects = [{ id: 'p1', name: 'My Project' }];
-      mockPrisma.project.findMany.mockResolvedValue(projects);
+      mockRepository.findByClient.mockResolvedValue(projects);
 
       const result = await service.findAll('client-1', UserRole.CLIENT);
       expect(result).toEqual(projects);
-      expect(mockPrisma.project.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { clientId: 'client-1' },
-        }),
-      );
+      expect(mockRepository.findByClient).toHaveBeenCalledWith('client-1');
     });
 
     it('should return all projects for OWNER role', async () => {
       const projects = [{ id: 'p1' }, { id: 'p2' }];
-      mockPrisma.project.findMany.mockResolvedValue(projects);
+      mockRepository.findAllWithIncludes.mockResolvedValue(projects);
 
       const result = await service.findAll('owner-1', UserRole.OWNER);
       expect(result).toEqual(projects);
-      expect(mockPrisma.project.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          include: expect.objectContaining({
-            client: expect.any(Object),
-          }),
-        }),
-      );
+      expect(mockRepository.findAllWithIncludes).toHaveBeenCalled();
     });
   });
 
@@ -78,21 +68,21 @@ describe('ProjectService', () => {
     };
 
     it('should return project for owner/admin', async () => {
-      mockPrisma.project.findUnique.mockResolvedValue(project);
+      mockRepository.findByIdWithIncludes.mockResolvedValue(project);
 
       const result = await service.findOne('p1', 'owner-1', UserRole.OWNER);
       expect(result).toEqual(project);
     });
 
     it('should return project for correct CLIENT', async () => {
-      mockPrisma.project.findUnique.mockResolvedValue(project);
+      mockRepository.findByIdWithIncludes.mockResolvedValue(project);
 
       const result = await service.findOne('p1', 'client-1', UserRole.CLIENT);
       expect(result).toEqual(project);
     });
 
     it('should throw ForbiddenException for wrong CLIENT', async () => {
-      mockPrisma.project.findUnique.mockResolvedValue(project);
+      mockRepository.findByIdWithIncludes.mockResolvedValue(project);
 
       await expect(
         service.findOne('p1', 'client-2', UserRole.CLIENT),
@@ -100,7 +90,7 @@ describe('ProjectService', () => {
     });
 
     it('should throw NotFoundException for non-existent project', async () => {
-      mockPrisma.project.findUnique.mockResolvedValue(null);
+      mockRepository.findByIdWithIncludes.mockResolvedValue(null);
 
       await expect(
         service.findOne('nonexistent', 'user-1', UserRole.OWNER),
@@ -112,15 +102,15 @@ describe('ProjectService', () => {
     it('should create project with ownerId', async () => {
       const dto = { name: 'New Project', description: 'Desc' };
       const created = { id: 'p1', ...dto, ownerId: 'user-1' };
-      mockPrisma.project.create.mockResolvedValue(created);
-      mockPrisma.user.findMany.mockResolvedValue([]);
+      mockRepository.create.mockResolvedValue(created);
 
       const result = await service.create(dto as any, 'user-1');
       expect(result).toEqual(created);
-      expect(mockPrisma.project.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({ ownerId: 'user-1' }),
-        }),
+      expect(mockRepository.create).toHaveBeenCalled();
+      expect(mockNotificationService.notifyProjectCreated).toHaveBeenCalledWith(
+        created,
+        'user-1',
+        undefined,
       );
     });
 
@@ -131,17 +121,14 @@ describe('ProjectService', () => {
         endDate: '2026-06-01',
         deadline: '2026-05-15',
       };
-      mockPrisma.project.create.mockResolvedValue({ id: 'p1' });
-      mockPrisma.user.findMany.mockResolvedValue([]);
+      mockRepository.create.mockResolvedValue({ id: 'p1' });
 
       await service.create(dto as any, 'user-1');
-      expect(mockPrisma.project.create).toHaveBeenCalledWith(
+      expect(mockRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          data: expect.objectContaining({
-            startDate: expect.any(Date),
-            endDate: expect.any(Date),
-            deadline: expect.any(Date),
-          }),
+          startDate: expect.any(Date),
+          endDate: expect.any(Date),
+          deadline: expect.any(Date),
         }),
       );
     });
@@ -150,7 +137,8 @@ describe('ProjectService', () => {
   describe('update', () => {
     it('should update project', async () => {
       const updated = { id: 'p1', name: 'Updated' };
-      mockPrisma.project.update.mockResolvedValue(updated);
+      mockRepository.findById.mockResolvedValue({ id: 'p1', status: ProjectStatus.DRAFT });
+      mockRepository.update.mockResolvedValue(updated);
 
       const result = await service.update('p1', { name: 'Updated' } as any);
       expect(result).toEqual(updated);
@@ -159,29 +147,22 @@ describe('ProjectService', () => {
 
   describe('remove', () => {
     it('should delete project', async () => {
-      mockPrisma.project.delete.mockResolvedValue({ id: 'p1' });
+      mockRepository.delete.mockResolvedValue(true);
 
       const result = await service.remove('p1');
-      expect(result).toEqual({ id: 'p1' });
-      expect(mockPrisma.project.delete).toHaveBeenCalledWith({
-        where: { id: 'p1' },
-      });
+      expect(result).toEqual({ success: true });
+      expect(mockRepository.delete).toHaveBeenCalledWith('p1');
     });
   });
 
   describe('getShowcase', () => {
     it('should return showcase projects ordered by showcaseOrder', async () => {
       const showcases = [{ id: 'p1', name: 'Showcase 1', showcaseOrder: 1 }];
-      mockPrisma.project.findMany.mockResolvedValue(showcases);
+      mockRepository.findShowcase.mockResolvedValue(showcases);
 
       const result = await service.getShowcase();
       expect(result).toEqual(showcases);
-      expect(mockPrisma.project.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { isShowcase: true },
-          orderBy: { showcaseOrder: 'asc' },
-        }),
-      );
+      expect(mockRepository.findShowcase).toHaveBeenCalled();
     });
   });
 });

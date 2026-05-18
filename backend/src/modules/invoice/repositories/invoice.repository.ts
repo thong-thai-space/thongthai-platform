@@ -1,13 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { Invoice, InvoiceStatus, Prisma } from '@prisma/client';
+import { Invoice, InvoiceStatus, Prisma, UserRole } from '@prisma/client';
+import { InvoiceRepositoryPort } from '../domain/invoice.repository.port';
 
 /**
  * Pattern: Repository Pattern
  * Encapsulates all Invoice data access
  */
 @Injectable()
-export class InvoiceRepository {
+export class InvoiceRepository implements InvoiceRepositoryPort {
   constructor(private prisma: PrismaService) {}
 
   /**
@@ -20,7 +27,7 @@ export class InvoiceRepository {
         orderBy: [{ createdAt: 'desc' }],
       });
     } catch (error) {
-      throw new Error(`Failed to fetch invoices: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new InternalServerErrorException('Failed to fetch invoices');
     }
   }
 
@@ -33,7 +40,7 @@ export class InvoiceRepository {
         where: { id },
       });
     } catch (error) {
-      throw new Error(`Failed to find invoice: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new InternalServerErrorException('Failed to find invoice');
     }
   }
 
@@ -49,9 +56,12 @@ export class InvoiceRepository {
         error.code === 'P2002' &&
         (error.meta?.target as string[])?.includes('invoiceNumber')
       ) {
-        throw new Error('Invoice number already exists');
+        throw new ConflictException('Invoice number already exists');
       }
-      throw new Error(`Failed to create invoice: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
+        throw new BadRequestException('Invalid relation data (client/project)');
+      }
+      throw new InternalServerErrorException('Failed to create invoice');
     }
   }
 
@@ -66,9 +76,9 @@ export class InvoiceRepository {
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        throw new Error('Invoice not found');
+        throw new NotFoundException('Invoice not found');
       }
-      throw new Error(`Failed to update invoice: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new InternalServerErrorException('Failed to update invoice');
     }
   }
 
@@ -77,19 +87,13 @@ export class InvoiceRepository {
    */
   async delete(id: string): Promise<boolean> {
     try {
-      const invoice = await this.prisma.invoice.findUnique({
-        where: { id },
-        select: { status: true },
-      });
-
-      if (invoice?.status !== 'DRAFT') {
-        throw new Error('Can only delete draft invoices');
-      }
-
       await this.prisma.invoice.delete({ where: { id } });
       return true;
     } catch (error) {
-      throw new Error(`Failed to delete invoice: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+        throw new NotFoundException('Invoice not found');
+      }
+      throw new InternalServerErrorException('Failed to delete invoice');
     }
   }
 
@@ -103,7 +107,7 @@ export class InvoiceRepository {
         orderBy: [{ createdAt: 'desc' }],
       });
     } catch (error) {
-      throw new Error(`Failed to find client invoices: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new InternalServerErrorException('Failed to find client invoices');
     }
   }
 
@@ -117,7 +121,7 @@ export class InvoiceRepository {
         orderBy: [{ dueDate: 'asc' }, { createdAt: 'desc' }],
       });
     } catch (error) {
-      throw new Error(`Failed to find invoices by status: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new InternalServerErrorException('Failed to find invoices by status');
     }
   }
 
@@ -135,7 +139,7 @@ export class InvoiceRepository {
         },
       });
     } catch (error) {
-      throw new Error(`Failed to find overdue invoices: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new InternalServerErrorException('Failed to find overdue invoices');
     }
   }
 
@@ -146,7 +150,7 @@ export class InvoiceRepository {
     try {
       return await this.prisma.invoice.count({ where });
     } catch (error) {
-      throw new Error(`Failed to count invoices: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new InternalServerErrorException('Failed to count invoices');
     }
   }
 
@@ -167,7 +171,33 @@ export class InvoiceRepository {
 
       return `${prefix}${String(nextSeq).padStart(6, '0')}`;
     } catch (error) {
-      throw new Error(`Failed to generate invoice number: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new InternalServerErrorException('Failed to generate invoice number');
+    }
+  }
+
+  async findClientSummary(
+    clientId: string,
+  ): Promise<{ id: string; role: UserRole; isActive: boolean } | null> {
+    try {
+      return await this.prisma.user.findUnique({
+        where: { id: clientId },
+        select: { id: true, role: true, isActive: true },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to fetch client');
+    }
+  }
+
+  async findProjectSummary(
+    projectId: string,
+  ): Promise<{ id: string; clientId: string | null } | null> {
+    try {
+      return await this.prisma.project.findUnique({
+        where: { id: projectId },
+        select: { id: true, clientId: true },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to fetch project');
     }
   }
 }
