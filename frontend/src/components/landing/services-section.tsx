@@ -50,7 +50,7 @@ export function ServicesSection() {
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -top-16 right-0 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
       </div>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <MotionReveal className="mx-auto max-w-2xl text-center">
           <h2 className="tts-landing-title text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
             {c.title}
@@ -60,28 +60,32 @@ export function ServicesSection() {
           </p>
         </MotionReveal>
 
-        <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {c.items.map((service) => {
+        <div className="mt-16 flex flex-col gap-4">
+          {c.items.map((service, index) => {
             const Icon = iconMap[service.icon];
             return (
               <MotionCard
                 key={service.title}
-                delay={0.06 * c.items.indexOf(service)}
-                className="tts-brand-surface group rounded-2xl p-6 transition-all hover:border-primary/35 hover:shadow-[0_20px_45px_-28px_rgba(37,99,235,0.45)]"
+                delay={0.06 * index}
+                className="group flex items-start gap-5 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm transition-all hover:border-primary/35 hover:shadow-[0_8px_30px_-8px_rgba(37,99,235,0.25)] dark:border-slate-700/60 dark:bg-slate-900"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                  {Icon && <Icon className="h-6 w-6" />}
+                <div className="flex-shrink-0">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                    {Icon && <Icon className="h-6 w-6" />}
+                  </div>
                 </div>
-                <h3 className="mt-4 text-lg font-semibold text-slate-900 dark:text-white">{service.title}</h3>
-                <p className="tts-brand-body mt-2 text-sm">{service.description}</p>
-                <ul className="mt-4 space-y-1">
-                  {service.features.map((f) => (
-                    <li key={f} className="tts-brand-body flex items-center gap-2 text-sm">
-                      <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-base font-semibold text-slate-900 dark:text-white">{service.title}</h3>
+                  <p className="tts-brand-body mt-1 text-sm">{service.description}</p>
+                  <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
+                    {service.features.map((f) => (
+                      <li key={f} className="tts-brand-body flex items-center gap-1.5 text-sm">
+                        <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </MotionCard>
             );
           })}

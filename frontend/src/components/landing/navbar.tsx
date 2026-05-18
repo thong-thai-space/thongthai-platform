@@ -16,9 +16,9 @@ type HeaderContent = {
 const defaultHeader: HeaderContent = {
   navLinks: [
     { href: '/', label: 'Home' },
-    { href: '/about', label: 'About' },
-    { href: '/services', label: 'Services' },
-    { href: '/portfolio', label: 'Portfolio' },
+    // { href: '/about', label: 'About' },
+    // { href: '/services', label: 'Services' },
+    // { href: '/portfolio', label: 'Portfolio' },
     { href: '/contact', label: 'Contact' },
   ],
   ctaText: 'Get in touch',
@@ -37,7 +37,7 @@ export function Navbar() {
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <span className="inline-block h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_18px_color-mix(in_srgb,var(--primary)_45%,transparent)]" />
+          {/* <span className="inline-block h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_18px_color-mix(in_srgb,var(--primary)_45%,transparent)]" /> */}
           <span className="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
             Thong Thai <span className="text-primary">Space</span>
           </span>
