@@ -1,57 +1,74 @@
 # Thông Thái Space Platform
 
-A Vietnamese SaaS platform for managing freelance projects, with AI-assisted planning, proposals, task breakdowns, and strategic guidance.
+Nền tảng SaaS dành cho freelancer/agency Việt Nam để quản lý dự án, khách hàng và hóa đơn, tích hợp AI hỗ trợ lập kế hoạch, tạo proposal, tách việc và tư vấn chiến lược.
 
-## Key Features
+> Monorepo gồm **backend (NestJS)** và **frontend (Next.js)**.
 
-- JWT authentication + Google OAuth with refresh tokens
-- Project, task, client, and invoice management (multi-currency VND/USD)
+## Tính năng chính
+
+- Xác thực JWT (access 15m, refresh 7d) + Google OAuth
+- Quản lý dự án, công việc, khách hàng, hóa đơn (đa tiền tệ VND/USD)
 - AI assistant (chat, proposal, estimate, code review)
-- Realtime notifications + Web Push
-- File uploads (local or Cloudflare R2)
-- Client portal and public portfolio
+- Thông báo realtime + Web Push
+- Upload file (local hoặc Cloudflare R2)
+- Client portal & portfolio công khai
 
-## Repository Structure
+## Cấu trúc thư mục
 
 ```
 backend/    NestJS 11 + Prisma 7 + PostgreSQL + Redis
-frontend/   Next.js 15 + React 19 + TailwindCSS v4
-docs/       Documentation
-deploy/     Infrastructure & deployment configs
-nginx/      Nginx configs
+frontend/   Next.js 15 + React 19 + TailwindCSS + shadcn/ui
+docs/       Tài liệu
+deploy/     Hạ tầng & cấu hình triển khai
+nginx/      Cấu hình Nginx
 ```
 
-## Requirements
+## Yêu cầu hệ thống
 
 - Node.js 20+
 - pnpm
 - Docker (PostgreSQL + Redis)
 
-## Quick Start (Local)
+## Khởi chạy nhanh (Local)
 
 ```bash
-# 1. Infrastructure
+# 1) Hạ tầng
 docker compose up -d
 
-# 2. Backend
+# 2) Backend
 cd backend
 cp .env.example .env
 pnpm install
 npx prisma migrate dev
 pnpm start:dev
 
-# 3. Frontend (separate terminal)
+# 3) Frontend (terminal khác)
 cd frontend
 pnpm install
 pnpm dev
 ```
 
-Access:
-- Frontend: http://localhost:3000  
-- Backend API: http://localhost:4000/api  
+Truy cập:
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:4000/api
 - Swagger (non-prod): http://localhost:4000/api/docs
 
-## Common Scripts
+## Cấu hình môi trường
+
+- Backend: xem `backend/.env.example`
+- Frontend: tạo `frontend/.env.local`
+  - `NEXT_PUBLIC_API_URL` (mặc định: `http://localhost:4000/api`)
+  - `NEXT_PUBLIC_SOCKET_URL` (mặc định: `http://localhost:4000`)
+
+## Prisma 7.x (Lưu ý quan trọng)
+
+- **Không** khai báo `url` trong `datasource` (được cấu hình trong `prisma.config.ts`).
+- PrismaClient dùng **driver adapter**: `@prisma/adapter-pg` với `PrismaPg`.
+- **Không** dùng `datasourceUrl` — dùng adapter trong `prisma/prisma.service.ts`.
+- Generated client tại: `backend/generated/prisma/`.
+- Prisma Studio có thể không hoạt động với cấu hình này.
+
+## Scripts thường dùng
 
 ### Backend
 - `pnpm lint`
@@ -65,16 +82,9 @@ Access:
 - `pnpm build`
 - `pnpm dev`
 
-## Environment Configuration
+## Tài liệu & triển khai
 
-- Backend: see `backend/.env.example`
-- Frontend: create `frontend/.env.local`
-  - `NEXT_PUBLIC_API_URL` (default: `http://localhost:4000/api`)
-  - `NEXT_PUBLIC_SOCKET_URL` (default: `http://localhost:4000`)
-
-## Deployment
-
-See `docs/` and `deploy/` for deployment checklists and infrastructure configuration.
+- Xem thư mục `docs/` và `deploy/` để biết checklist triển khai và cấu hình hạ tầng.
 
 ## License
 
