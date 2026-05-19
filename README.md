@@ -106,7 +106,7 @@ NEXT_PUBLIC_SOCKET_URL=http://localhost:4000
 | `pnpm test` / `test:cov` / `test:e2e` | Jest unit / coverage / E2E |
 | `pnpm db:migrate:dev` | Create & apply Prisma migration |
 | `pnpm db:migrate:deploy` | Apply migrations (production) |
-| `pnpm db:studio` | Prisma Studio on :5555 |
+| `pnpm db:studio` | Attempt to open Prisma Studio on :5555 (may not work with this repo's Prisma `@prisma/adapter-pg` driver-adapter setup) |
 
 ### Frontend (`cd frontend`)
 
