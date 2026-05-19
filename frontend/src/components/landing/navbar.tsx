@@ -16,9 +16,9 @@ type HeaderContent = {
 const defaultHeader: HeaderContent = {
   navLinks: [
     { href: '/', label: 'Home' },
-    // { href: '/about', label: 'About' },
-    // { href: '/services', label: 'Services' },
-    // { href: '/portfolio', label: 'Portfolio' },
+    { href: '/about', label: 'About' },
+    { href: '/services', label: 'Services' },
+    { href: '/portfolio', label: 'Portfolio' },
     { href: '/contact', label: 'Contact' },
   ],
   ctaText: 'Get in touch',
