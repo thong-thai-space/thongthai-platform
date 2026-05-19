@@ -6,9 +6,11 @@ import {
 } from '@nestjs/common';
 import { Prisma, UserRole } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
+import type { ClientRepositoryPort } from '../domain/client.repository.port';
 
+// Pattern: Repository — concrete impl of ClientRepositoryPort
 @Injectable()
-export class ClientRepository {
+export class ClientRepository implements ClientRepositoryPort {
   constructor(private prisma: PrismaService) {}
 
   async findAllClients() {

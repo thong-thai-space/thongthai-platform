@@ -1,56 +1,44 @@
-import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { NotificationGateway } from './notification.gateway';
 import { PushService } from './push.service';
 import { NotificationType, Prisma } from '@prisma/client';
 import { NotificationRepository } from './repositories/notification.repository';
+import { NotificationOwnershipPolicy } from './policies/notification-ownership.policy';
 
 @Injectable()
 export class NotificationService {
   constructor(
-    private notificationRepository: NotificationRepository,
-    private gateway: NotificationGateway,
-    private pushService: PushService,
+    private readonly notificationRepository: NotificationRepository,
+    private readonly gateway: NotificationGateway,
+    private readonly pushService: PushService,
+    private readonly ownershipPolicy: NotificationOwnershipPolicy,
   ) {}
 
-  async findByUser(userId: string) {
+  findByUser(userId: string) {
     return this.notificationRepository.findByUser(userId);
   }
 
   async markAsRead(id: string, userId: string) {
     const notification = await this.notificationRepository.findById(id);
+    if (!notification) throw new NotFoundException('Notification not found');
 
-    if (!notification) {
-      throw new NotFoundException('Notification not found');
-    }
-
-    // Pattern: Authorization - Ownership check
-    if (notification.userId !== userId) {
-      throw new ForbiddenException('You do not have permission to modify this notification');
-    }
-
+    this.ownershipPolicy.assertOwned(notification, userId, 'modify');
     return this.notificationRepository.markAsRead(id);
   }
 
-  async markAllAsRead(userId: string) {
+  markAllAsRead(userId: string) {
     return this.notificationRepository.markAllAsRead(userId);
   }
 
-  async getUnreadCount(userId: string) {
+  getUnreadCount(userId: string) {
     return this.notificationRepository.countUnread(userId);
   }
 
   async remove(id: string, userId: string) {
     const notification = await this.notificationRepository.findById(id);
+    if (!notification) throw new NotFoundException('Notification not found');
 
-    if (!notification) {
-      throw new NotFoundException('Notification not found');
-    }
-
-    // Pattern: Authorization - Ownership check
-    if (notification.userId !== userId) {
-      throw new ForbiddenException('You do not have permission to delete this notification');
-    }
-
+    this.ownershipPolicy.assertOwned(notification, userId, 'delete');
     return this.notificationRepository.deleteById(id);
   }
 
@@ -61,7 +49,13 @@ export class NotificationService {
     userId: string;
     data?: Prisma.InputJsonValue;
   }) {
-    const notification = await this.notificationRepository.create(data);
+    const notification = await this.notificationRepository.create({
+      type: data.type,
+      title: data.title,
+      message: data.message,
+      user: { connect: { id: data.userId } },
+      data: data.data,
+    });
     this.gateway.sendToUser(data.userId, 'notification', notification);
 
     // Send browser push notification for offline delivery

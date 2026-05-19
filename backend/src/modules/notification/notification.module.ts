@@ -8,6 +8,7 @@ import { PushService } from './push.service';
 import { PrismaModule } from '../../prisma/prisma.module';
 import { NotificationRepository } from './repositories/notification.repository';
 import { PushRepository } from './repositories/push.repository';
+import { NotificationOwnershipPolicy } from './policies/notification-ownership.policy';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { PushRepository } from './repositories/push.repository';
     PushService,
     NotificationRepository,
     PushRepository,
+    NotificationOwnershipPolicy,
   ],
   exports: [NotificationService, NotificationGateway, PushService],
 })

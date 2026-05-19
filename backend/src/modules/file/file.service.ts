@@ -1,34 +1,21 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { R2StorageService } from '../../shared/storage/r2-storage.service';
+import { Injectable } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
-import { FileRepository } from './repositories/file.repository';
+import { FileUseCases } from './use-cases/file.use-cases';
 
+// Pattern: Facade — controllers depend on this; FileUseCases owns behavior
 @Injectable()
 export class FileService {
-  constructor(
-    private fileRepository: FileRepository,
-    private r2StorageService: R2StorageService,
-  ) {}
+  constructor(private readonly useCases: FileUseCases) {}
 
-  async findByProject(projectId: string) {
-    return this.fileRepository.findByProject(projectId);
+  findByProject(projectId: string) {
+    return this.useCases.findByProject(projectId);
   }
 
-  async findOne(id: string, userId: string, role: UserRole) {
-    const file = await this.fileRepository.findFileWithProject(id);
-    if (!file) throw new NotFoundException('File not found');
-
-    // Pattern: Authorization - Per-resource access control
-    await this.assertProjectAccess(file.projectId, userId, role);
-
-    return file;
+  findOne(id: string, userId: string, role: UserRole) {
+    return this.useCases.findOne(id, userId, role);
   }
 
-  async create(data: {
+  create(data: {
     name: string;
     url: string;
     mimeType: string;
@@ -36,66 +23,19 @@ export class FileService {
     projectId: string;
     uploadedBy: string;
   }) {
-    return this.fileRepository.createFile({
-      name: data.name,
-      url: data.url,
-      mimeType: data.mimeType,
-      size: data.size,
-      project: { connect: { id: data.projectId } },
-      uploader: { connect: { id: data.uploadedBy } },
-    });
+    return this.useCases.create(data);
   }
 
-  async uploadProjectFile(params: {
+  uploadProjectFile(params: {
     file: Express.Multer.File;
     projectId: string;
     uploadedBy: string;
     role: UserRole;
   }) {
-    const { file, projectId, uploadedBy, role } = params;
-
-    await this.assertProjectAccess(projectId, uploadedBy, role);
-
-    const url = await this.r2StorageService.uploadPublicFile({
-      folder: 'project-files',
-      file,
-      keyPrefix: projectId,
-    });
-
-    return this.fileRepository.createFile({
-      name: file.originalname || `file-${Date.now()}`,
-      url,
-      mimeType: file.mimetype || 'application/octet-stream',
-      size: file.size || 0,
-      project: { connect: { id: projectId } },
-      uploader: { connect: { id: uploadedBy } },
-    });
+    return this.useCases.uploadProjectFile(params);
   }
 
-  async remove(id: string, userId: string, role: UserRole) {
-    const file = await this.fileRepository.findFileProjectId(id);
-    if (!file) throw new NotFoundException('File not found');
-
-    // Pattern: Authorization - Per-resource access control
-    await this.assertProjectAccess(file.projectId, userId, role);
-
-    return this.fileRepository.deleteFile(id);
-  }
-
-  private async assertProjectAccess(
-    projectId: string,
-    userId: string,
-    role: UserRole,
-  ) {
-    if (role === UserRole.OWNER || role === UserRole.ADMIN) return;
-
-    const project = await this.fileRepository.findProjectAccess(projectId, userId);
-
-    if (!project) throw new NotFoundException('Project not found');
-
-    if (role === UserRole.CLIENT && project.clientId === userId) return;
-    if (role === UserRole.MEMBER && project.tasks.length > 0) return;
-
-    throw new ForbiddenException('You do not have permission for this project');
+  remove(id: string, userId: string, role: UserRole) {
+    return this.useCases.remove(id, userId, role);
   }
 }

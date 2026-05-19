@@ -1,65 +1,44 @@
-import { Injectable, NotFoundException, UnauthorizedException, ConflictException } from '@nestjs/common';
-import * as bcrypt from 'bcryptjs';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { UpdateProfileDto } from './dto/update-profile.dto';
+import { Injectable } from '@nestjs/common';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { CreateMemberDto } from './dto/create-member.dto';
-import { UserRole } from '@prisma/client';
-import { UserRepository } from './repositories/user.repository';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { UserUseCases } from './use-cases/user.use-cases';
 
+// Pattern: Facade — keeps the controller surface stable
 @Injectable()
 export class UserService {
-  constructor(private userRepository: UserRepository) {}
+  constructor(private readonly useCases: UserUseCases) {}
 
-  async findAll() {
-    return this.userRepository.findAll();
+  findAll() {
+    return this.useCases.findAll();
   }
 
-  async findOne(id: string) {
-    const user = await this.userRepository.findById(id);
-    if (!user) throw new NotFoundException('User not found');
-    return user;
+  findOne(id: string) {
+    return this.useCases.findOne(id);
   }
 
-  async update(id: string, dto: UpdateUserDto) {
-    return this.userRepository.update(id, dto);
+  update(id: string, dto: UpdateUserDto) {
+    return this.useCases.update(id, dto);
   }
 
-  async remove(id: string) {
-    return this.userRepository.update(id, { isActive: false });
+  remove(id: string) {
+    return this.useCases.remove(id);
   }
 
-  async getProfile(userId: string) {
-    return this.findOne(userId);
+  getProfile(userId: string) {
+    return this.useCases.getProfile(userId);
   }
 
-  async updateProfile(userId: string, dto: UpdateProfileDto) {
-    return this.userRepository.update(userId, dto);
+  updateProfile(userId: string, dto: UpdateProfileDto) {
+    return this.useCases.updateProfile(userId, dto);
   }
 
-  async changePassword(userId: string, dto: ChangePasswordDto) {
-    const user = await this.userRepository.findById(userId);
-    if (!user) throw new NotFoundException('User not found');
-
-    const isMatch = await bcrypt.compare(dto.currentPassword, user.password);
-    if (!isMatch) throw new UnauthorizedException('Current password is incorrect');
-
-    const hashedPassword = await bcrypt.hash(dto.newPassword, 12);
-    await this.userRepository.update(userId, { password: hashedPassword });
-
-    return { message: 'Password changed successfully' };
+  changePassword(userId: string, dto: ChangePasswordDto) {
+    return this.useCases.changePassword(userId, dto);
   }
 
-  async createMember(dto: CreateMemberDto) {
-    const existing = await this.userRepository.findByEmail(dto.email);
-    if (existing) throw new ConflictException('Email already exists');
-
-    const hashedPassword = await bcrypt.hash(dto.password, 12);
-
-    return this.userRepository.create({
-      ...dto,
-      password: hashedPassword,
-      role: UserRole.MEMBER,
-    });
+  createMember(dto: CreateMemberDto) {
+    return this.useCases.createMember(dto);
   }
 }
