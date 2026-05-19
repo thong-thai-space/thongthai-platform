@@ -72,17 +72,17 @@ pnpm dev                        # http://localhost:3000
 
 ## Environment
 
-Backend variables are documented in [backend/.env.example](backend/.env.example). Required for boot:
+Backend variables are documented in [backend/.env.example](backend/.env.example).
 
-| Variable | Purpose |
-|---|---|
-| `NODE_ENV` | `development` \| `test` \| `production` |
-| `DATABASE_URL` | PostgreSQL connection string |
-| `REDIS_URL` | Cache, rate-limit store, Socket.IO adapter |
-| `JWT_SECRET`, `JWT_REFRESH_SECRET` | 32+ char signing keys |
-| `ANTHROPIC_API_KEY` | Claude AI features |
-| `FRONTEND_URL` | CORS origin |
-| `PORT` | API port (default `4000`) |
+| Variable | Required for boot | Purpose |
+|---|---|---|
+| `DATABASE_URL` | Yes | PostgreSQL connection string |
+| `REDIS_URL` | Yes | Cache, rate-limit store, Socket.IO adapter |
+| `JWT_SECRET`, `JWT_REFRESH_SECRET` | Yes | 32+ char signing keys |
+| `ANTHROPIC_API_KEY` | Yes | Claude AI features |
+| `FRONTEND_URL` | Yes | CORS origin |
+| `NODE_ENV` | No | `development` \| `test` \| `production` (defaults to `development`) |
+| `PORT` | No | API port (defaults to `4000`) |
 
 Feature-gated: `STORAGE_PROVIDER=r2` (+ R2 keys), `GOOGLE_CLIENT_ID/SECRET`, `RESEND_API_KEY`, `VAPID_*`, `TURNSTILE_SECRET`.
 
