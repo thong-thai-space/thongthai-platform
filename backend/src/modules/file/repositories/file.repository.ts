@@ -54,6 +54,7 @@ export class FileRepository implements FileRepositoryPort {
     return this.prisma.project.findUnique({
       where: { id: projectId },
       select: {
+        ownerId: true,
         clientId: true,
         tasks: {
           where: { assigneeId: userId },

@@ -21,7 +21,11 @@ export class FileUseCases {
     private readonly accessPolicy: ProjectAccessPolicy,
   ) {}
 
-  findByProject(projectId: string) {
+  async findByProject(projectId: string, userId: string, role: UserRole) {
+    // SECURITY: previously this endpoint returned files for ANY project
+    // when the caller was authenticated. Now the caller must be authorized
+    // for the target project (owner, assigned member, or attached client).
+    await this.accessPolicy.assertCanAccess(projectId, userId, role);
     return this.repo.findByProject(projectId);
   }
 
@@ -33,14 +37,26 @@ export class FileUseCases {
     return file;
   }
 
-  create(data: {
-    name: string;
-    url: string;
-    mimeType: string;
-    size: number;
-    projectId: string;
-    uploadedBy: string;
-  }) {
+  async create(
+    data: {
+      name: string;
+      url: string;
+      mimeType: string;
+      size: number;
+      projectId: string;
+      uploadedBy: string;
+    },
+    role: UserRole,
+  ) {
+    // SECURITY: previously this use-case wrote a file record to ANY project
+    // without checking ownership — combined with the OWNER super-role bug
+    // this allowed attaching arbitrary URLs to other tenants' projects.
+    // Now the caller must be authorized for the target project.
+    await this.accessPolicy.assertCanAccess(
+      data.projectId,
+      data.uploadedBy,
+      role,
+    );
     return this.repo.createFile({
       name: data.name,
       url: data.url,

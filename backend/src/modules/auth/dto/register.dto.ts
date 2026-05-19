@@ -8,7 +8,7 @@ import {
   Equals,
   Matches,
 } from 'class-validator';
-import { UserRole, Language } from '@prisma/client';
+import { Language } from '@prisma/client';
 
 export class RegisterDto {
   @IsEmail()
@@ -30,9 +30,10 @@ export class RegisterDto {
   @IsString()
   phone?: string;
 
-  @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
+  // SECURITY: `role` is intentionally NOT exposed here.
+  // Self-registered users are always created as CLIENT (the Prisma default);
+  // staff (OWNER/ADMIN/MEMBER) must be provisioned through the authenticated
+  // POST /users/members invitation flow.
 
   @IsOptional()
   @IsEnum(Language)

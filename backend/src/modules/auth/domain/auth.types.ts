@@ -1,4 +1,4 @@
-import type { Language, User, UserRole } from '@prisma/client';
+import type { Language, User } from '@prisma/client';
 
 export type AuthUser = Pick<
   User,
@@ -38,7 +38,9 @@ export interface RegisterCommand {
   password: string;
   name: string;
   phone?: string;
-  role?: UserRole;
+  // SECURITY: `role` is intentionally absent — self-registration always
+  // creates a CLIENT account (Prisma default). Staff are provisioned via
+  // the authenticated invitation flow.
   locale?: Language;
   turnstileToken?: string;
   remoteIp?: string;

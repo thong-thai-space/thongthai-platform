@@ -7,23 +7,26 @@ import { FileUseCases } from './use-cases/file.use-cases';
 export class FileService {
   constructor(private readonly useCases: FileUseCases) {}
 
-  findByProject(projectId: string) {
-    return this.useCases.findByProject(projectId);
+  findByProject(projectId: string, userId: string, role: UserRole) {
+    return this.useCases.findByProject(projectId, userId, role);
   }
 
   findOne(id: string, userId: string, role: UserRole) {
     return this.useCases.findOne(id, userId, role);
   }
 
-  create(data: {
-    name: string;
-    url: string;
-    mimeType: string;
-    size: number;
-    projectId: string;
-    uploadedBy: string;
-  }) {
-    return this.useCases.create(data);
+  create(
+    data: {
+      name: string;
+      url: string;
+      mimeType: string;
+      size: number;
+      projectId: string;
+      uploadedBy: string;
+    },
+    role: UserRole,
+  ) {
+    return this.useCases.create(data, role);
   }
 
   uploadProjectFile(params: {

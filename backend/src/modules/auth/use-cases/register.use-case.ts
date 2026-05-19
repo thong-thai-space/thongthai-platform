@@ -45,10 +45,12 @@ export class RegisterUseCase {
         throw new ConflictException('Email already registered');
       }
 
+      // SECURITY: do NOT pass `role` here. Self-registration must never
+      // alter privilege on a re-registered (still-unverified) account.
+      // The existing role is preserved (it defaults to CLIENT).
       await this.repo.update(existing.id, {
         name: cmd.name,
         phone: cmd.phone,
-        role: cmd.role,
         locale: cmd.locale,
         password: hashedPassword,
         termsAcceptedAt: new Date(),
@@ -65,11 +67,13 @@ export class RegisterUseCase {
       };
     }
 
+    // SECURITY: role is not provided — Prisma's `@default(CLIENT)` applies.
+    // Privilege escalation via self-registration is prevented at the DTO,
+    // service, command, and use-case layers.
     await this.repo.create({
       email: cmd.email,
       name: cmd.name,
       phone: cmd.phone,
-      role: cmd.role,
       locale: cmd.locale,
       password: hashedPassword,
       termsAcceptedAt: new Date(),

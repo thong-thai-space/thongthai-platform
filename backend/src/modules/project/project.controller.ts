@@ -89,14 +89,18 @@ export class ProjectController {
   @Patch(':id')
   @UseGuards(RolesGuard)
   @Roles(UserRole.OWNER, UserRole.ADMIN)
-  update(@Param('id') id: string, @Body() dto: UpdateProjectDto) {
-    return this.projectService.update(id, dto);
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateProjectDto,
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.projectService.update(id, dto, userId);
   }
 
   @Delete(':id')
   @UseGuards(RolesGuard)
   @Roles(UserRole.OWNER, UserRole.ADMIN)
-  remove(@Param('id') id: string) {
-    return this.projectService.remove(id);
+  remove(@Param('id') id: string, @CurrentUser('id') userId: string) {
+    return this.projectService.remove(id, userId);
   }
 }

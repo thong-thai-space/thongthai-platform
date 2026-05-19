@@ -23,7 +23,8 @@ export class AuthService {
       password: dto.password,
       name: dto.name,
       phone: dto.phone,
-      role: dto.role,
+      // SECURITY: role is deliberately not forwarded — self-registered users
+      // always become CLIENT (the Prisma default). See RegisterDto.
       locale: dto.locale,
       turnstileToken: dto.turnstileToken,
       remoteIp,

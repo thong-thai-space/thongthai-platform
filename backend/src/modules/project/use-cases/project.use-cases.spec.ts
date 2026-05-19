@@ -48,11 +48,11 @@ describe('ProjectUseCases.findAll', () => {
     });
   });
 
-  it('returns all for OWNER role', async () => {
+  it('scopes OWNER to projects they own (multi-tenant isolation)', async () => {
     const { useCase, repo } = buildSut();
     repo.findAllWithIncludes.mockResolvedValue([] as never);
     await useCase.findAll('o1', UserRole.OWNER);
-    expect(repo.findAllWithIncludes).toHaveBeenCalledWith({});
+    expect(repo.findAllWithIncludes).toHaveBeenCalledWith({ ownerId: 'o1' });
   });
 });
 
@@ -119,21 +119,72 @@ describe('ProjectUseCases.create', () => {
 describe('ProjectUseCases.update', () => {
   it('enforces status transition policy', async () => {
     const { useCase, repo } = buildSut();
-    repo.findById.mockResolvedValue({ status: ProjectStatus.COMPLETED } as never);
+    repo.findById.mockResolvedValue({
+      ownerId: 'owner-1',
+      status: ProjectStatus.COMPLETED,
+    } as never);
 
     await expect(
-      useCase.update('p1', { status: ProjectStatus.IN_PROGRESS } as never),
+      useCase.update(
+        'p1',
+        { status: ProjectStatus.IN_PROGRESS } as never,
+        'owner-1',
+      ),
     ).rejects.toThrow(BadRequestException);
     expect(repo.update).not.toHaveBeenCalled();
   });
 
   it('updates when transition is legal', async () => {
     const { useCase, repo } = buildSut();
-    repo.findById.mockResolvedValue({ status: ProjectStatus.DRAFT } as never);
+    repo.findById.mockResolvedValue({
+      ownerId: 'owner-1',
+      status: ProjectStatus.DRAFT,
+    } as never);
     repo.update.mockResolvedValue({ id: 'p1' } as never);
 
-    await useCase.update('p1', { status: ProjectStatus.PROPOSAL_SENT } as never);
+    await useCase.update(
+      'p1',
+      { status: ProjectStatus.PROPOSAL_SENT } as never,
+      'owner-1',
+    );
     expect(repo.update).toHaveBeenCalled();
+  });
+
+  it('rejects when caller does not own the project (cross-tenant guard)', async () => {
+    const { useCase, repo } = buildSut();
+    repo.findById.mockResolvedValue({
+      ownerId: 'owner-1',
+      status: ProjectStatus.DRAFT,
+    } as never);
+
+    await expect(
+      useCase.update(
+        'p1',
+        { status: ProjectStatus.PROPOSAL_SENT } as never,
+        'attacker',
+      ),
+    ).rejects.toThrow(/Forbidden/);
+    expect(repo.update).not.toHaveBeenCalled();
+  });
+});
+
+describe('ProjectUseCases.remove', () => {
+  it('rejects when caller does not own the project (cross-tenant guard)', async () => {
+    const { useCase, repo } = buildSut();
+    repo.findById.mockResolvedValue({ ownerId: 'owner-1' } as never);
+
+    await expect(useCase.remove('p1', 'attacker')).rejects.toThrow(/Forbidden/);
+    expect(repo.delete).not.toHaveBeenCalled();
+  });
+
+  it('deletes when caller owns the project', async () => {
+    const { useCase, repo } = buildSut();
+    repo.findById.mockResolvedValue({ ownerId: 'owner-1' } as never);
+    repo.delete.mockResolvedValue(true as never);
+
+    const result = await useCase.remove('p1', 'owner-1');
+    expect(repo.delete).toHaveBeenCalledWith('p1');
+    expect(result).toEqual({ success: true });
   });
 });
 

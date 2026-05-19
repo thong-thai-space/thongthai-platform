@@ -13,5 +13,9 @@ export interface FileRepositoryPort {
   findProjectAccess(
     projectId: string,
     userId: string,
-  ): Promise<{ clientId: string | null; tasks: { id: string }[] } | null>;
+  ): Promise<{
+    ownerId: string;
+    clientId: string | null;
+    tasks: { id: string }[];
+  } | null>;
 }

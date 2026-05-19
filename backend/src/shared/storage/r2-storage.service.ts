@@ -7,7 +7,6 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
 import { mkdir, writeFile } from 'fs/promises';
-import { extname } from 'path';
 import { join } from 'path';
 import { dirname } from 'path';
 
@@ -102,9 +101,21 @@ export class R2StorageService implements OnModuleInit {
       throw new BadRequestException('Uploaded file is empty');
     }
 
-    const extension =
-      extname(file.originalname || '') ||
-      this.getExtensionFromMime(file.mimetype);
+    // SECURITY: derive the stored extension from the (server-validated) MIME
+    // type ONLY — NEVER from `file.originalname`, which is attacker-controlled.
+    // Previously a client could upload a file with `Content-Type: application/pdf`
+    // (passing the multer fileFilter) but `originalname: "evil.html"`. The file
+    // was saved as `evil-…html` and served by `useStaticAssets` with
+    // `Content-Type: text/html` (Express infers from extension), producing a
+    // stored XSS on the API origin. By dropping originalname here and refusing
+    // any MIME we don't have a safe mapping for, the stored extension matches
+    // the declared content type.
+    const extension = this.getExtensionFromMime(file.mimetype);
+    if (!extension) {
+      throw new BadRequestException(
+        `File type ${file.mimetype} is not supported`,
+      );
+    }
     const prefix = keyPrefix ? `${this.sanitizeSegment(keyPrefix)}-` : '';
     const key = `${folder}/${prefix}${Date.now()}-${randomUUID()}${extension}`;
 
@@ -145,14 +156,30 @@ export class R2StorageService implements OnModuleInit {
     return value.replace(/[^a-zA-Z0-9-_]/g, '').slice(0, 64) || 'file';
   }
 
-  private getExtensionFromMime(mimeType: string) {
-    const extensions: Record<string, string> = {
-      'image/jpeg': '.jpg',
-      'image/png': '.png',
-      'image/gif': '.gif',
-      'image/webp': '.webp',
-    };
+  // SECURITY: this is the single source of truth for what we accept and how
+  // we name it on disk / object storage. Adding a row here is an explicit
+  // decision that the type is safe to serve from our origin.
+  // Anything NOT in this map is rejected upstream — no extension is taken
+  // from `originalname` (attacker-controlled).
+  private static readonly SAFE_EXTENSION_BY_MIME: Record<string, string> = {
+    'image/jpeg': '.jpg',
+    'image/png': '.png',
+    'image/gif': '.gif',
+    'image/webp': '.webp',
+    'application/pdf': '.pdf',
+    'application/msword': '.doc',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+      '.docx',
+    'application/vnd.ms-excel': '.xls',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+      '.xlsx',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+      '.pptx',
+    'text/plain': '.txt',
+    'text/csv': '.csv',
+  };
 
-    return extensions[mimeType] || '';
+  private getExtensionFromMime(mimeType: string): string | null {
+    return R2StorageService.SAFE_EXTENSION_BY_MIME[mimeType] ?? null;
   }
 }

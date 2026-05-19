@@ -17,6 +17,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { memoryStorage } from 'multer';
 import { UserRole } from '@prisma/client';
 import { FileService } from './file.service';
+import { CreateFileMetadataDto } from './dto/create-file-metadata.dto';
 import { CurrentUser } from '../../shared/decorators/current-user.decorator';
 import { Roles } from '../../shared/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -29,8 +30,13 @@ export class FileController {
   constructor(private fileService: FileService) {}
 
   @Get()
-  findByProject(@Query('projectId') projectId: string) {
-    return this.fileService.findByProject(projectId);
+  findByProject(
+    @Query('projectId') projectId: string,
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') role: UserRole,
+  ) {
+    if (!projectId) throw new BadRequestException('projectId is required');
+    return this.fileService.findByProject(projectId, userId, role);
   }
 
   @Get(':id')
@@ -91,17 +97,11 @@ export class FileController {
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   createMetadata(
-    @Body()
-    body: {
-      name: string;
-      url: string;
-      mimeType: string;
-      size: number;
-      projectId: string;
-    },
+    @Body() body: CreateFileMetadataDto,
     @CurrentUser('id') userId: string,
+    @CurrentUser('role') role: UserRole,
   ) {
-    return this.fileService.create({ ...body, uploadedBy: userId });
+    return this.fileService.create({ ...body, uploadedBy: userId }, role);
   }
 
   @Delete(':id')
