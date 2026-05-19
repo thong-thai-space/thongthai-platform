@@ -46,3 +46,7 @@ backend/uploads/
 .tmp_docx/
 .tmp/
 tmp/
+
+# Claude Code worktrees — agent's working dirs, never share
+.claude/worktrees/
+.claude/local/
