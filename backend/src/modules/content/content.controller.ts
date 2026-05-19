@@ -47,7 +47,7 @@ export class ContentController {
     @Param('section') section: string,
     @Body() body: UpdateContentDto,
   ) {
-    return this.contentService.upsert(section, body.data, body.isActive);
+    return this.contentService.upsert(section, body.data as unknown, body.isActive);
   }
 
   @Delete(':section')
