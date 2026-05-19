@@ -1,153 +1,84 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma, User } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { User, Prisma } from '@prisma/client';
+import type { AuthUser } from '../domain/auth.types';
+import type { AuthRepositoryPort } from '../domain/auth.repository.port';
 
-type AuthUserRecord = Pick<
-  User,
-  | 'id'
-  | 'email'
-  | 'name'
-  | 'phone'
-  | 'avatar'
-  | 'role'
-  | 'motionPreference'
-  | 'password'
-  | 'isActive'
-  | 'emailVerified'
-  | 'googleId'
-  | 'emailVerifyToken'
-  | 'emailVerifyTokenExpiry'
-  | 'lastLoginAt'
-  | 'createdAt'
-  | 'updatedAt'
->;
+const AUTH_USER_SELECT = {
+  id: true,
+  email: true,
+  name: true,
+  phone: true,
+  avatar: true,
+  role: true,
+  motionPreference: true,
+  password: true,
+  isActive: true,
+  emailVerified: true,
+  googleId: true,
+  emailVerifyToken: true,
+  emailVerifyTokenExpiry: true,
+  lastLoginAt: true,
+  createdAt: true,
+  updatedAt: true,
+} satisfies Prisma.UserSelect;
 
-/**
- * Pattern: Repository Pattern
- * Encapsulates all User data access for Auth module
- */
+// Pattern: Repository — concrete persistence implementation of the AuthRepositoryPort
 @Injectable()
-export class AuthRepository {
-  constructor(private prisma: PrismaService) {}
+export class AuthRepository implements AuthRepositoryPort {
+  constructor(private readonly prisma: PrismaService) {}
 
-  /**
-   * Find user by email
-   */
-  async findByEmail(email: string): Promise<AuthUserRecord | null> {
-    try {
-      return await this.prisma.user.findUnique({
-        where: { email },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          phone: true,
-          avatar: true,
-          role: true,
-          motionPreference: true,
-          password: true,
-          isActive: true,
-          emailVerified: true,
-          googleId: true,
-          emailVerifyToken: true,
-          emailVerifyTokenExpiry: true,
-          lastLoginAt: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      });
-    } catch (error) {
-      throw new Error(`Failed to find user by email: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+  findByEmail(email: string): Promise<AuthUser | null> {
+    return this.prisma.user.findUnique({
+      where: { email },
+      select: AUTH_USER_SELECT,
+    });
   }
 
-  /**
-   * Find user by ID with profile
-   */
-  async findByIdWithProfile(id: string): Promise<AuthUserRecord | null> {
-    try {
-      return await this.prisma.user.findUnique({
-        where: { id },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          phone: true,
-          avatar: true,
-          role: true,
-          motionPreference: true,
-          password: true,
-          isActive: true,
-          emailVerified: true,
-          googleId: true,
-          emailVerifyToken: true,
-          emailVerifyTokenExpiry: true,
-          lastLoginAt: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      });
-    } catch (error) {
-      throw new Error(`Failed to find user: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+  findById(id: string): Promise<AuthUser | null> {
+    return this.prisma.user.findUnique({
+      where: { id },
+      select: AUTH_USER_SELECT,
+    });
   }
 
-  /**
-   * Create new user
-   */
+  findByVerificationToken(token: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: { emailVerifyToken: token },
+    });
+  }
+
+  findByGoogleId(googleId: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: { googleId },
+    });
+  }
+
   async create(data: Prisma.UserCreateInput): Promise<User> {
     try {
       return await this.prisma.user.create({ data });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
-          throw new Error('Email already exists');
-        }
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new ConflictException('Email already registered');
       }
-      throw new Error(`Failed to create user: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw error;
     }
   }
 
-  /**
-   * Update user (especially for email verification)
-   */
   async update(id: string, data: Prisma.UserUpdateInput): Promise<User> {
     try {
-      return await this.prisma.user.update({
-        where: { id },
-        data,
-      });
+      return await this.prisma.user.update({ where: { id }, data });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        throw new Error('User not found');
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException('User not found');
       }
-      throw new Error(`Failed to update user: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
-
-  /**
-   * Find user by verification token
-   */
-  async findByVerificationToken(token: string): Promise<User | null> {
-    try {
-      return await this.prisma.user.findUnique({
-        where: { emailVerifyToken: token },
-      });
-    } catch (error) {
-      throw new Error(`Failed to find verification token: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
-
-  /**
-   * Find user by Google ID
-   */
-  async findByGoogleId(googleId: string): Promise<User | null> {
-    try {
-      return await this.prisma.user.findUnique({
-        where: { googleId },
-      });
-    } catch (error) {
-      throw new Error(`Failed to find user by Google ID: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw error;
     }
   }
 }
