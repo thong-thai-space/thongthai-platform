@@ -42,12 +42,15 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       statusCode = exception.getStatus();
       const exceptionResponse = exception.getResponse();
 
-      if (typeof exceptionResponse === 'object') {
-        const errorObj = exceptionResponse as any;
-        message = errorObj.message || exception.message;
+      if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
+        const errorObj = exceptionResponse as { message?: string | string[] };
+        const rawMessage = errorObj.message;
+        message = Array.isArray(rawMessage)
+          ? rawMessage.join('; ')
+          : rawMessage || exception.message;
         errorCode = this.getErrorCodeFromStatus(statusCode);
       } else {
-        message = exceptionResponse as string;
+        message = String(exceptionResponse);
       }
     }
     // Handle Prisma errors

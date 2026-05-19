@@ -3,14 +3,30 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma, Project } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
+
+export type ShowcaseProjectSummary = {
+  id: string;
+  name: string;
+  description: string | null;
+  client: { id: string; name: string } | null;
+  techStack: string[];
+  repoUrl: string | null;
+  liveUrl: string | null;
+  figmaUrl: string | null;
+  showcaseCategory: string | null;
+  showcaseResults: string | null;
+  thumbnailUrl: string | null;
+  screenshots: string[];
+  showcaseOrder: number | null;
+};
 
 @Injectable()
 export class PortfolioRepository {
   constructor(private prisma: PrismaService) {}
 
-  async findShowcaseProjects(): Promise<Project[]> {
+  async findShowcaseProjects(): Promise<ShowcaseProjectSummary[]> {
     try {
       return await this.prisma.project.findMany({
         where: { isShowcase: true },

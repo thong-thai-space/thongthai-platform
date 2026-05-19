@@ -1,9 +1,9 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InvoiceStatus, Prisma, UserRole } from '@prisma/client';
 import { CreateInvoiceDto, UpdateInvoiceDto } from '../dto/invoice.dto';
-import { TaxCalculator } from '../../shared/utils/tax-calculator';
+import { TaxCalculator } from '../../../shared/utils/tax-calculator';
 import { INVOICE_REPOSITORY } from '../invoice.constants';
-import { InvoiceRepositoryPort } from '../domain/invoice.repository.port';
+import type { InvoiceRepositoryPort } from '../domain/invoice.repository.port';
 import { InvoicePolicy } from '../policies/invoice.policy';
 
 // Pattern: Use Case
@@ -88,18 +88,19 @@ export class InvoiceUseCases {
 
     const invoiceNumber = await this.generateInvoiceNumber();
 
+    const { clientId, projectId, ...restInvoiceData } = invoiceData;
     const createData: Prisma.InvoiceCreateInput = {
-      ...invoiceData,
+      ...restInvoiceData,
       dueDate,
       invoiceNumber,
-      creatorId,
+      creator: { connect: { id: creatorId } },
+      client: { connect: { id: clientId } },
+      ...(projectId ? { project: { connect: { id: projectId } } } : {}),
       subtotal,
       tax,
       discount,
       total,
-      items: {
-        create: computedItems,
-      },
+      items: { create: computedItems },
     };
 
     return this.invoiceRepository.create(createData);
