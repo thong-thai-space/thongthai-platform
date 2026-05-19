@@ -141,7 +141,7 @@ See [CLAUDE.md](CLAUDE.md) for full engineering standards (SOLID, DI, error hand
 
 ## Deployment
 
-- `docker-compose.prod.yml` — full production stack (API, web, Postgres, Redis, Nginx)
+- `docker-compose.prod.yml` — production app stack (API, web, Postgres, Redis)
 - `deploy/nginx/` — reverse-proxy templates
 - `deploy/monitoring/` — Prometheus + Grafana
 - `deploy/backup/` — database backup scripts
