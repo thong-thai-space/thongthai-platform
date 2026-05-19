@@ -26,12 +26,12 @@ export class ProjectService {
     return this.useCases.createRequest(dto, clientId);
   }
 
-  update(id: string, dto: UpdateProjectDto) {
-    return this.useCases.update(id, dto);
+  update(id: string, dto: UpdateProjectDto, userId: string) {
+    return this.useCases.update(id, dto, userId);
   }
 
-  remove(id: string) {
-    return this.useCases.remove(id);
+  remove(id: string, userId: string) {
+    return this.useCases.remove(id, userId);
   }
 
   acceptRequest(projectId: string, adminUserId: string) {

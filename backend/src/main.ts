@@ -20,8 +20,21 @@ async function bootstrap() {
   app.use(compression());
   app.use(cookieParser());
 
-  // Serve uploaded files
-  app.useStaticAssets(join(process.cwd(), 'uploads'), { prefix: '/uploads' });
+  // Pattern: Security - serve uploaded files as untrusted attachments.
+  //
+  // SECURITY: user-uploaded files are served from the same origin as the
+  // API. Browsers infer Content-Type from the file extension by default —
+  // any HTML/SVG/JS extension that slipped past upload validation would
+  // execute in the API origin (where session cookies are valid). Defence
+  // in depth: force the browser to download, never render, and pin the
+  // declared type with X-Content-Type-Options: nosniff.
+  app.useStaticAssets(join(process.cwd(), 'uploads'), {
+    prefix: '/uploads',
+    setHeaders: (res) => {
+      res.setHeader('Content-Disposition', 'attachment');
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+    },
+  });
 
   // CORS
   app.enableCors({

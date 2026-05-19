@@ -42,7 +42,9 @@ export class ProjectUseCases {
         tasks: { some: { assigneeId: userId } },
       });
     }
-    return this.repo.findAllWithIncludes({});
+    // SECURITY: OWNER/ADMIN see only projects they own (multi-tenant isolation).
+    // Previously this returned every project in the system.
+    return this.repo.findAllWithIncludes({ ownerId: userId });
   }
 
   async findOne(id: string, userId: string, role: UserRole) {
@@ -55,6 +57,13 @@ export class ProjectUseCases {
     if (role === UserRole.MEMBER) {
       const hasAssignedTask = project.tasks.some((t) => t.assignee?.id === userId);
       if (!hasAssignedTask) throw new ForbiddenException();
+    }
+    // SECURITY: OWNER/ADMIN can only read their own projects.
+    if (
+      (role === UserRole.OWNER || role === UserRole.ADMIN) &&
+      project.ownerId !== userId
+    ) {
+      throw new ForbiddenException();
     }
     return project;
   }
@@ -101,9 +110,19 @@ export class ProjectUseCases {
     return project;
   }
 
-  async update(id: string, dto: UpdateProjectDto): Promise<Project> {
+  async update(
+    id: string,
+    dto: UpdateProjectDto,
+    userId: string,
+  ): Promise<Project> {
     const existing = await this.repo.findById(id);
     if (!existing) throw new NotFoundException('Project not found');
+
+    // SECURITY: cross-tenant write protection — the caller must own the
+    // project (controller already enforces role === OWNER/ADMIN).
+    if (existing.ownerId !== userId) {
+      throw new ForbiddenException();
+    }
 
     if (dto.status) {
       this.statusPolicy.assertTransition(
@@ -123,7 +142,14 @@ export class ProjectUseCases {
     return this.repo.update(id, data);
   }
 
-  async remove(id: string): Promise<{ success: boolean }> {
+  async remove(id: string, userId: string): Promise<{ success: boolean }> {
+    // SECURITY: cross-tenant delete protection — must own the project.
+    const existing = await this.repo.findById(id);
+    if (!existing) throw new NotFoundException('Project not found');
+    if (existing.ownerId !== userId) {
+      throw new ForbiddenException();
+    }
+
     await this.repo.delete(id);
     return { success: true };
   }
