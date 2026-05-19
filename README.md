@@ -1,91 +1,152 @@
-# Thông Thái Space Platform
+# Thông Thái Space
 
-Nền tảng SaaS dành cho freelancer/agency Việt Nam để quản lý dự án, khách hàng và hóa đơn, tích hợp AI hỗ trợ lập kế hoạch, tạo proposal, tách việc và tư vấn chiến lược.
+A Vietnamese SaaS for tech freelancers: project, task, client and invoice management with an AI assistant, real-time collaboration and a public portfolio.
 
-> Monorepo gồm **backend (NestJS)** và **frontend (Next.js)**.
+## Stack
 
-## Tính năng chính
+| Layer | Tech |
+|---|---|
+| Backend | NestJS 11, Prisma 7, PostgreSQL 16, Redis 7, Socket.IO 4 |
+| Frontend | Next.js 16, React 19, TailwindCSS 4, TanStack Query 5, Zustand |
+| Auth | JWT (access 15m / refresh 7d, HttpOnly cookies), Google OAuth |
+| AI | Anthropic Claude (`@anthropic-ai/sdk`) |
+| Storage | Local filesystem or Cloudflare R2 (S3-compatible) |
+| Email | Resend |
+| Infra | Docker Compose, Nginx, Railway-ready |
 
-- Xác thực JWT (access 15m, refresh 7d) + Google OAuth
-- Quản lý dự án, công việc, khách hàng, hóa đơn (đa tiền tệ VND/USD)
-- AI assistant (chat, proposal, estimate, code review)
-- Thông báo realtime + Web Push
-- Upload file (local hoặc Cloudflare R2)
-- Client portal & portfolio công khai
+## Features
 
-## Cấu trúc thư mục
+- Project / task / client / invoice management (multi-currency, VND & USD)
+- AI assistant: chat, proposal drafting, estimation, code review, strategic plans
+- Real-time notifications via Socket.IO + optional Web Push (VAPID)
+- Email & password auth with verification, Google OAuth, optional Cloudflare Turnstile
+- File uploads to local disk or Cloudflare R2
+- Client portal and public portfolio pages
+- Document export: PDF, DOCX, XLSX
+
+## Repository Layout
 
 ```
-backend/    NestJS 11 + Prisma 7 + PostgreSQL + Redis
-frontend/   Next.js 15 + React 19 + TailwindCSS + shadcn/ui
-docs/       Tài liệu
-deploy/     Hạ tầng & cấu hình triển khai
-nginx/      Cấu hình Nginx
+backend/             NestJS API (Clean Architecture per module)
+frontend/            Next.js App Router
+deploy/
+  nginx/             Reverse proxy configs
+  monitoring/        Prometheus / Grafana stack
+  backup/            Backup scripts
+docker-compose.yml         Local dev (Postgres + Redis)
+docker-compose.prod.yml    Production stack
+CLAUDE.md            Engineering standards & AI agent guidance
 ```
 
-## Yêu cầu hệ thống
+## Requirements
 
-- Node.js 20+
-- pnpm
-- Docker (PostgreSQL + Redis)
+- Node.js ≥ 20.18
+- pnpm 10
+- Docker & Docker Compose (for Postgres + Redis)
 
-## Khởi chạy nhanh (Local)
+## Quick Start
 
 ```bash
-# 1) Hạ tầng
-docker compose up -d
+# 1. Infrastructure (Postgres + Redis)
+docker compose up -d postgres redis
 
-# 2) Backend
+# 2. Backend
 cd backend
-cp .env.example .env
+cp .env.example .env            # fill in secrets (see below)
 pnpm install
 npx prisma migrate dev
-pnpm start:dev
+pnpm start:dev                  # http://localhost:4000
 
-# 3) Frontend (terminal khác)
+# 3. Frontend (new terminal)
 cd frontend
 pnpm install
-pnpm dev
+pnpm dev                        # http://localhost:3000
 ```
 
-Truy cập:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:4000/api
-- Swagger (non-prod): http://localhost:4000/api/docs
+| Endpoint | URL |
+|---|---|
+| Frontend | http://localhost:3000 |
+| API (versioned) | http://localhost:4000/api/v1 |
+| Swagger (non-prod) | http://localhost:4000/api/v1/docs |
+| Health probe | http://localhost:4000/api/healthz |
 
-## Cấu hình môi trường
+## Environment
 
-- Backend: xem `backend/.env.example`
-- Frontend: tạo `frontend/.env.local`
-  - `NEXT_PUBLIC_API_URL` (mặc định: `http://localhost:4000/api`)
-  - `NEXT_PUBLIC_SOCKET_URL` (mặc định: `http://localhost:4000`)
+Backend variables are documented in [backend/.env.example](backend/.env.example).
 
-## Prisma 7.x (Lưu ý quan trọng)
+| Variable | Required for boot | Purpose |
+|---|---|---|
+| `DATABASE_URL` | Yes | PostgreSQL connection string |
+| `REDIS_URL` | Yes | Cache, rate-limit store, Socket.IO adapter |
+| `JWT_SECRET`, `JWT_REFRESH_SECRET` | Yes | 32+ char signing keys |
+| `ANTHROPIC_API_KEY` | Yes | Claude AI features |
+| `FRONTEND_URL` | Yes | CORS origin |
+| `NODE_ENV` | No | `development` \| `test` \| `production` (defaults to `development`) |
+| `PORT` | No | API port (defaults to `4000`) |
 
-- **Không** khai báo `url` trong `datasource` (được cấu hình trong `prisma.config.ts`).
-- PrismaClient dùng **driver adapter**: `@prisma/adapter-pg` với `PrismaPg`.
-- **Không** dùng `datasourceUrl` — dùng adapter trong `prisma/prisma.service.ts`.
-- Generated client tại: `backend/generated/prisma/`.
-- Prisma Studio có thể không hoạt động với cấu hình này.
+Feature-gated: `STORAGE_PROVIDER=r2` (+ R2 keys), `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `RESEND_API_KEY`, `VAPID_*`, `TURNSTILE_SECRET_KEY`.
 
-## Scripts thường dùng
+Frontend (`frontend/.env.local`):
 
-### Backend
-- `pnpm lint`
-- `pnpm test`
-- `pnpm build`
-- `pnpm start:dev`
+```env
+NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1
+NEXT_PUBLIC_SOCKET_URL=http://localhost:4000
+```
 
-### Frontend
-- `pnpm lint`
-- `pnpm test`
-- `pnpm build`
-- `pnpm dev`
+## Scripts
 
-## Tài liệu & triển khai
+### Backend (`cd backend`)
 
-- Xem thư mục `docs/` và `deploy/` để biết checklist triển khai và cấu hình hạ tầng.
+| Command | Description |
+|---|---|
+| `pnpm start:dev` | Dev server with hot reload |
+| `pnpm build` | Compile to `dist/` |
+| `pnpm start:prod` | Run compiled build |
+| `pnpm lint` | ESLint (auto-fix) |
+| `pnpm test` / `test:cov` / `test:e2e` | Jest unit / coverage / E2E |
+| `pnpm db:migrate:dev` | Create & apply Prisma migration |
+| `pnpm db:migrate:deploy` | Apply migrations (production) |
+| `pnpm db:studio` | Attempt to open Prisma Studio on :5555 (may not work with this repo's Prisma `@prisma/adapter-pg` driver-adapter setup) |
+
+### Frontend (`cd frontend`)
+
+| Command | Description |
+|---|---|
+| `pnpm dev` | Next.js dev server |
+| `pnpm build` | Production build |
+| `pnpm start` | Serve production build |
+| `pnpm lint` | ESLint |
+| `pnpm test` / `test:watch` / `test:cov` | Vitest |
+
+## Architecture
+
+The backend follows Clean Architecture per module:
+
+```
+modules/<name>/
+  domain/         ports & types          (no dependencies)
+  policies/      business rules
+  use-cases/     application logic
+  adapters/      port implementations
+  repositories/  Prisma-backed data access
+  dto/           class-validator inputs
+  <name>.module.ts       composition root
+  <name>.service.ts      thin facade
+  <name>.controller.ts   HTTP layer
+```
+
+Call flow: `Controller → Service (Facade) → UseCase → Port → Repository → Prisma`.
+
+See [CLAUDE.md](CLAUDE.md) for full engineering standards (SOLID, DI, error handling, testing, security).
+
+## Deployment
+
+- `docker-compose.prod.yml` — production app stack (API, web, Postgres, Redis)
+- `deploy/nginx/` — reverse-proxy templates
+- `deploy/monitoring/` — Prometheus + Grafana
+- `deploy/backup/` — database backup scripts
+- `backend/railway.toml`, `frontend/railway.toml` — Railway deployment configs
 
 ## License
 
-UNLICENSED
+UNLICENSED — proprietary.
