@@ -2,6 +2,10 @@
 node_modules/
 .pnpm-store/
 
+# Lockfiles from other package managers — this monorepo uses pnpm exclusively
+package-lock.json
+yarn.lock
+
 # Environment
 .env
 .env.local
@@ -11,6 +15,7 @@ node_modules/
 dist/
 .next/
 out/
+*.tsbuildinfo
 
 # IDE
 .vscode/
@@ -33,3 +38,11 @@ docker-compose.override.yml
 
 # Coverage
 coverage/
+
+# Runtime data — backend handles uploads locally in dev, to R2 in prod
+backend/uploads/
+
+# Scratch / temp working directories — never commit
+.tmp_docx/
+.tmp/
+tmp/
