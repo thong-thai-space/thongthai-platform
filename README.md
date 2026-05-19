@@ -48,7 +48,7 @@ CLAUDE.md            Engineering standards & AI agent guidance
 
 ```bash
 # 1. Infrastructure (Postgres + Redis)
-docker compose up -d
+docker compose up -d postgres redis
 
 # 2. Backend
 cd backend
