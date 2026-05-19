@@ -1,0 +1,3 @@
+export const MESSAGE_REPOSITORY = Symbol('MESSAGE_REPOSITORY');
+export const MESSAGE_NOTIFIER = Symbol('MESSAGE_NOTIFIER');
+export const MESSAGE_REALTIME = Symbol('MESSAGE_REALTIME');

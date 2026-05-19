@@ -2,8 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { NotificationType } from '@prisma/client';
 import { CreateContactRequestDto } from '../dto/create-contact-request.dto';
 import { CONTACT_NOTIFICATION_PORT, CONTACT_REPOSITORY } from '../contact.constants';
-import { ContactNotificationPort } from '../domain/contact.notification.port';
-import { ContactRepositoryPort } from '../domain/contact.repository.port';
+import type { ContactNotificationPort } from '../domain/contact.notification.port';
+import type { ContactRepositoryPort } from '../domain/contact.repository.port';
 import { ContactPolicy } from '../policies/contact.policy';
 
 // Pattern: Use Case

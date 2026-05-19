@@ -2,8 +2,8 @@ import { Inject, Injectable, BadRequestException, ForbiddenException, NotFoundEx
 import { NotificationType, Prisma, UserRole } from '@prisma/client';
 import { CreateTaskDto, UpdateTaskDto } from '../dto/task.dto';
 import { TASK_NOTIFICATION_PORT, TASK_REPOSITORY } from '../task.constants';
-import { TaskNotificationPort } from '../domain/task.notification.port';
-import { TaskRepositoryPort } from '../domain/task.repository.port';
+import type { TaskNotificationPort } from '../domain/task.notification.port';
+import type { TaskRepositoryPort } from '../domain/task.repository.port';
 
 // Pattern: Use Case
 @Injectable()

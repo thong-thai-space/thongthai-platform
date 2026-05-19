@@ -53,12 +53,11 @@ export type ProjectShowcase = Prisma.ProjectGetPayload<
   typeof projectShowcaseSelect
 >;
 
-/**
- * Pattern: Repository Pattern
- * Encapsulates all Project data access
- */
+import type { ProjectRepositoryPort } from '../domain/project.repository.port';
+
+// Pattern: Repository — concrete implementation of ProjectRepositoryPort
 @Injectable()
-export class ProjectRepository {
+export class ProjectRepository implements ProjectRepositoryPort {
   constructor(private prisma: PrismaService) {}
 
   /**

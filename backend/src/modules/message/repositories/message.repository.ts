@@ -2,12 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { NotificationType, Prisma, UserRole } from '@prisma/client';
 
-/**
- * Pattern: Repository Pattern
- * Encapsulates Message data access
- */
+import type { MessageRepositoryPort } from '../domain/message.repository.port';
+
+// Pattern: Repository — concrete implementation of MessageRepositoryPort
 @Injectable()
-export class MessageRepository {
+export class MessageRepository implements MessageRepositoryPort {
   constructor(private prisma: PrismaService) {}
 
   async createMessage(data: Prisma.MessageUncheckedCreateInput) {
