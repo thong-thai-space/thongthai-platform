@@ -34,7 +34,7 @@ import { ArchitectureAgentDto } from './dto/architecture-agent.dto';
 import { Roles } from '../../shared/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { CurrentUser } from '../../shared/decorators/current-user.decorator';
-import { UserRole } from '@prisma/client';
+import { Language, UserRole } from '@prisma/client';
 
 @ApiTags('AI')
 @ApiBearerAuth()
@@ -154,13 +154,13 @@ export class AiController {
     @Param('projectId') projectId: string,
     @CurrentUser('id') userId: string,
     @CurrentUser('role') role: UserRole,
-    @CurrentUser('locale') locale: string,
+    @CurrentUser('locale') locale: Language,
   ) {
     const report = await this.aiService.generateProgressReport(
       userId,
       role,
       projectId,
-      locale as any,
+      locale,
     );
     return { report };
   }

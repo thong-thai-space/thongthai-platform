@@ -49,11 +49,13 @@ export class AiRepository implements AiRepositoryPort {
 
   async findUsageAuditById(id: string): Promise<{ id: string; userId: string } | null> {
     try {
-      return await this.prisma.aiUsageAudit.findUnique({
+      const audit = await this.prisma.aiUsageAudit.findUnique({
         where: { id },
         select: { id: true, userId: true },
       });
-    } catch (error) {
+      if (!audit || !audit.userId) return null;
+      return { id: audit.id, userId: audit.userId };
+    } catch {
       throw new InternalServerErrorException('Failed to fetch AI audit record');
     }
   }
@@ -214,7 +216,7 @@ export class AiRepository implements AiRepositoryPort {
   async findProjectsForChatContext(userId: string, role?: UserRole) {
     try {
       const projectWhere = role === UserRole.CLIENT ? { clientId: userId } : {};
-      return await this.prisma.project.findMany({
+      const rows = await this.prisma.project.findMany({
         where: projectWhere,
         select: {
           name: true,
@@ -228,7 +230,12 @@ export class AiRepository implements AiRepositoryPort {
         take: 10,
         orderBy: { updatedAt: 'desc' },
       });
-    } catch (error) {
+      // Pattern: Mapper — normalize Prisma Decimal → number at the boundary
+      return rows.map((row) => ({
+        ...row,
+        budget: row.budget ? Number(row.budget) : null,
+      }));
+    } catch {
       throw new InternalServerErrorException('Failed to fetch chat projects');
     }
   }
@@ -360,7 +367,7 @@ export class AiRepository implements AiRepositoryPort {
     try {
       return await this.prisma.aiApplyRequest.findMany({
         where: {
-          ...(status ? { status: status as any } : {}),
+          ...(status ? { status: status as Prisma.AiApplyRequestWhereInput['status'] } : {}),
         },
         orderBy: { createdAt: 'desc' },
         include: aiApplyRequestListIncludes.include,

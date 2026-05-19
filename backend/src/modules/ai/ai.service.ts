@@ -6,12 +6,24 @@ import {
   ApplyStrategicPlanDto,
   StrategicPlanDto,
 } from './dto/ai.dto';
-import { AiUseCases } from './use-cases/ai.use-cases';
+import { AiArchitectureUseCase } from './use-cases/ai-architecture.use-case';
+import { AiAuditUseCase } from './use-cases/ai-audit.use-case';
+import { AiChatUseCase } from './use-cases/ai-chat.use-case';
+import { AiGenerationUseCase } from './use-cases/ai-generation.use-case';
+import { AiPublicChatUseCase } from './use-cases/ai-public-chat.use-case';
+import { AiStrategicPlanUseCase } from './use-cases/ai-strategic-plan.use-case';
 
-// Pattern: Facade
+// Pattern: Facade — delegates to one of six specialized use cases
 @Injectable()
 export class AiService {
-  constructor(private aiUseCases: AiUseCases) {}
+  constructor(
+    private readonly architectureUseCase: AiArchitectureUseCase,
+    private readonly chatUseCase: AiChatUseCase,
+    private readonly generationUseCase: AiGenerationUseCase,
+    private readonly strategicPlanUseCase: AiStrategicPlanUseCase,
+    private readonly auditUseCase: AiAuditUseCase,
+    private readonly publicChatUseCase: AiPublicChatUseCase,
+  ) {}
 
   generateArchitectureDiagram(
     userId: string,
@@ -19,11 +31,11 @@ export class AiService {
     message: string,
     file?: Express.Multer.File,
   ) {
-    return this.aiUseCases.generateArchitectureDiagram(userId, role, message, file);
+    return this.architectureUseCase.execute(userId, role, message, file);
   }
 
   chat(userId: string, message: string, conversationId?: string, role?: UserRole) {
-    return this.aiUseCases.chat(userId, message, conversationId, role);
+    return this.chatUseCase.execute(userId, message, conversationId, role);
   }
 
   generateProposal(
@@ -33,21 +45,15 @@ export class AiService {
     locale: Language = Language.VI,
     budget?: string,
   ) {
-    return this.aiUseCases.generateProposal(userId, role, requirements, locale, budget);
+    return this.generationUseCase.generateProposal(userId, role, requirements, locale, budget);
   }
 
   breakdownTasks(userId: string, role: UserRole, description: string, techStack: string[]) {
-    return this.aiUseCases.breakdownTasks(userId, role, description, techStack);
+    return this.generationUseCase.breakdownTasks(userId, role, description, techStack);
   }
 
-  reviewCode(
-    userId: string,
-    role: UserRole,
-    code: string,
-    language: string,
-    context?: string,
-  ) {
-    return this.aiUseCases.reviewCode(userId, role, code, language, context);
+  reviewCode(userId: string, role: UserRole, code: string, language: string, context?: string) {
+    return this.generationUseCase.reviewCode(userId, role, code, language, context);
   }
 
   estimateProject(
@@ -56,7 +62,7 @@ export class AiService {
     requirements: string,
     locale: Language = Language.VI,
   ) {
-    return this.aiUseCases.estimateProject(userId, role, requirements, locale);
+    return this.generationUseCase.estimateProject(userId, role, requirements, locale);
   }
 
   generateProgressReport(
@@ -65,19 +71,19 @@ export class AiService {
     projectId: string,
     locale: Language = Language.VI,
   ) {
-    return this.aiUseCases.generateProgressReport(userId, role, projectId, locale);
+    return this.generationUseCase.generateProgressReport(userId, role, projectId, locale);
   }
 
   generateStrategicPlan(userId: string, role: UserRole, dto: StrategicPlanDto) {
-    return this.aiUseCases.generateStrategicPlan(userId, role, dto);
+    return this.strategicPlanUseCase.generatePlan(userId, role, dto);
   }
 
   applyStrategicPlan(userId: string, role: UserRole, dto: ApplyStrategicPlanDto) {
-    return this.aiUseCases.applyStrategicPlan(userId, role, dto);
+    return this.strategicPlanUseCase.apply(userId, role, dto);
   }
 
   listApplyRequests(userId: string, role: UserRole, status?: string) {
-    return this.aiUseCases.listApplyRequests(userId, role, status);
+    return this.strategicPlanUseCase.listApplyRequests(userId, role, status);
   }
 
   reviewApplyRequest(
@@ -87,15 +93,15 @@ export class AiService {
     approve: boolean,
     notes?: string,
   ) {
-    return this.aiUseCases.reviewApplyRequest(requestId, userId, role, approve, notes);
+    return this.strategicPlanUseCase.reviewApplyRequest(requestId, userId, role, approve, notes);
   }
 
   getAiAuditLogs(userId: string, role: UserRole, limit?: number, days?: number) {
-    return this.aiUseCases.getAiAuditLogs(userId, role, limit, days);
+    return this.auditUseCase.getLogs(userId, role, limit, days);
   }
 
   getAiAuditSummary(userId: string, role: UserRole, days?: number) {
-    return this.aiUseCases.getAiAuditSummary(userId, role, days);
+    return this.auditUseCase.getSummary(userId, role, days);
   }
 
   updateAiAuditFeedback(
@@ -104,23 +110,23 @@ export class AiService {
     role: UserRole,
     dto: AiAuditFeedbackDto,
   ) {
-    return this.aiUseCases.updateAiAuditFeedback(auditId, userId, role, dto);
+    return this.auditUseCase.updateFeedback(auditId, userId, role, dto);
   }
 
   deleteAiAuditLog(auditId: string, userId: string, role: UserRole) {
-    return this.aiUseCases.deleteAiAuditLog(auditId, userId, role);
+    return this.auditUseCase.deleteLog(auditId, userId, role);
   }
 
   purgeAiAuditLogs(role: UserRole, retentionDays?: number) {
-    return this.aiUseCases.purgeAiAuditLogs(role, retentionDays);
+    return this.auditUseCase.purge(role, retentionDays);
   }
 
   chatPublic(message: string) {
-    return this.aiUseCases.chatPublic(message);
+    return this.publicChatUseCase.execute(message);
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_2AM)
   async handleAuditRetentionCron() {
-    await this.aiUseCases.runAuditRetentionCron();
+    await this.auditUseCase.runRetentionCron();
   }
 }
