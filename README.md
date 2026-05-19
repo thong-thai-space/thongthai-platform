@@ -84,7 +84,7 @@ Backend variables are documented in [backend/.env.example](backend/.env.example)
 | `NODE_ENV` | No | `development` \| `test` \| `production` (defaults to `development`) |
 | `PORT` | No | API port (defaults to `4000`) |
 
-Feature-gated: `STORAGE_PROVIDER=r2` (+ R2 keys), `GOOGLE_CLIENT_ID/SECRET`, `RESEND_API_KEY`, `VAPID_*`, `TURNSTILE_SECRET`.
+Feature-gated: `STORAGE_PROVIDER=r2` (+ R2 keys), `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `RESEND_API_KEY`, `VAPID_*`, `TURNSTILE_SECRET_KEY`.
 
 Frontend (`frontend/.env.local`):
 
