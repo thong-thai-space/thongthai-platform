@@ -4,6 +4,7 @@ import { MemberHeader } from '@/components/member/header';
 import { useAuth } from '@/lib/auth';
 import { AvatarUpload } from '@/components/avatar-upload';
 import api from '@/lib/api';
+import { extractApiErrorMessage } from '@/lib/api-error';
 import { useState } from 'react';
 import { User, Settings } from 'lucide-react';
 import { MotionPreferences } from '@/components/settings/motion-preferences';
@@ -74,8 +75,8 @@ function ProfileForm() {
       await api.patch('/users/me', { name, phone });
       await refreshUser();
       setSuccess('Updated successfully!');
-    } catch {
-      setError('An error occurred. Please try again.');
+    } catch (err) {
+      setError(extractApiErrorMessage(err, 'An error occurred. Please try again.'));
     } finally {
       setSaving(false);
     }
@@ -160,8 +161,8 @@ function PasswordForm() {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-    } catch {
-      setError('Current password is incorrect.');
+    } catch (err) {
+      setError(extractApiErrorMessage(err, 'Current password is incorrect.'));
     } finally {
       setSaving(false);
     }

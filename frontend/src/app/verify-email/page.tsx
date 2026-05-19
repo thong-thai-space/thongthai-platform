@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { CheckCircle, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import api from '@/lib/api';
+import { extractApiErrorMessage } from '@/lib/api-error';
 
 export default function VerifyEmailPage() {
   const router = useRouter();
@@ -29,10 +30,9 @@ export default function VerifyEmailPage() {
         setTimeout(() => {
           router.replace('/dashboard');
         }, 3000);
-      } catch (err: any) {
+      } catch (err) {
         setStatus('error');
-        const errorMsg = err.response?.data?.message || 'Verification failed. Please try again.';
-        setMessage(errorMsg);
+        setMessage(extractApiErrorMessage(err, 'Verification failed. Please try again.'));
       }
     };
 

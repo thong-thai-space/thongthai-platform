@@ -11,6 +11,7 @@ import { useClients } from '@/hooks/use-clients';
 import { useProjects } from '@/hooks/use-projects';
 import { useAuth } from '@/lib/auth';
 import api from '@/lib/api';
+import { extractApiErrorMessage } from '@/lib/api-error';
 import Link from 'next/link';
 import { useState } from 'react';
 import { formatCurrency, formatDate } from '@/lib/utils';
@@ -93,15 +94,7 @@ export default function InvoicesPage() {
           setForm({ clientId: '', projectId: '', dueDate: '', currency: 'VND', taxRate: '10', notes: '', items: [{ description: '', quantity: 1, unitPrice: 0 }] });
         },
         onError: (error: unknown) => {
-          const err = error as {
-            response?: { data?: { message?: string | string[] } };
-            message?: string;
-          };
-          const message =
-            err?.response?.data?.message ||
-            err?.message ||
-            'Failed to create invoice';
-          alert(Array.isArray(message) ? message.join('\n') : String(message));
+          alert(extractApiErrorMessage(error, 'Failed to create invoice'));
         },
       },
     );

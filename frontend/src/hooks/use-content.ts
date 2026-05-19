@@ -1,10 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 
-interface SiteContent {
+// CMS content shape is intentionally permissive — each section has its own schema
+// validated by the backend ContentSectionValidator. We model the data as JSON-like.
+export type ContentPayload = Record<string, unknown>;
+
+export interface SiteContent {
   id: string;
   section: string;
-  data: any;
+  data: ContentPayload;
   isActive: boolean;
   updatedAt: string;
   createdAt: string;
@@ -30,7 +34,15 @@ export function useSectionContent(section: string) {
 export function useUpdateContent() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ section, data, isActive }: { section: string; data: any; isActive?: boolean }) =>
+    mutationFn: ({
+      section,
+      data,
+      isActive,
+    }: {
+      section: string;
+      data: ContentPayload;
+      isActive?: boolean;
+    }) =>
       api.put(`/content/${section}`, { data, isActive }).then((r) => r.data),
     onSuccess: (_, variables) => {
       qc.invalidateQueries({ queryKey: ['content'] });

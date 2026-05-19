@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import api from '@/lib/api';
+import { extractApiErrorMessage } from '@/lib/api-error';
 import { Mail, Send } from 'lucide-react';
 import { TurnstileWidget } from '@/components/security/turnstile-widget';
 
@@ -39,16 +40,8 @@ export default function ForgotPasswordPage() {
         data?.message ||
           'If that email is registered, you will receive password reset instructions shortly.',
       );
-    } catch (err: unknown) {
-      const messageFromApi =
-        typeof err === 'object' &&
-        err !== null &&
-        'response' in err &&
-        typeof (err as { response?: { data?: { message?: string } } }).response?.data?.message ===
-          'string'
-          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
-          : 'Could not process your request right now. Please try again.';
-      setError(messageFromApi || 'Could not process your request right now. Please try again.');
+    } catch (err) {
+      setError(extractApiErrorMessage(err, 'Could not process your request right now. Please try again.'));
     } finally {
       setIsSubmitting(false);
     }

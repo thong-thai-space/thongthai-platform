@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import api from "@/lib/api";
+import { extractApiErrorMessage } from "@/lib/api-error";
 import { Eye, EyeOff } from "lucide-react";
 import { TurnstileWidget } from "@/components/security/turnstile-widget";
 
@@ -61,22 +62,12 @@ export default function LoginPage() {
         localStorage.removeItem(POST_AUTH_REDIRECT_KEY);
       }
       router.push(finalRedirect);
-    } catch (err: unknown) {
-      const message =
-        typeof err === "object" &&
-        err !== null &&
-        "response" in err &&
-        typeof (err as { response?: { data?: { message?: string } } }).response
-          ?.data?.message === "string"
-          ? (err as { response?: { data?: { message?: string } } }).response
-              ?.data?.message
-          : "Sign in failed. Please try again.";
-
-      if (/turnstile|security challenge|captcha/i.test(String(message || ""))) {
+    } catch (err) {
+      const message = extractApiErrorMessage(err, "Sign in failed. Please try again.");
+      if (/turnstile|security challenge|captcha/i.test(message)) {
         setTurnstileToken(null);
       }
-
-      setError(message || "Sign in failed. Please try again.");
+      setError(message);
     }
   };
 

@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
+import { extractApiErrorMessage } from '@/lib/api-error';
 import { Eye, EyeOff, Mail } from 'lucide-react';
 import { TurnstileWidget } from '@/components/security/turnstile-widget';
 
@@ -54,9 +55,8 @@ export default function RegisterPage() {
         turnstileToken || undefined,
       );
       setRegisteredEmail(data.email);
-    } catch (err: any) {
-      const msg = err.response?.data?.message;
-      setError(Array.isArray(msg) ? msg[0] : msg || 'Sign up failed. Please try again.');
+    } catch (err) {
+      setError(extractApiErrorMessage(err, 'Sign up failed. Please try again.'));
     }
   };
 

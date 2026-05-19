@@ -14,8 +14,15 @@ import {
   useUpdatePortfolioProject,
   useUploadPortfolioThumbnail,
 } from '@/hooks/use-projects';
-import { getApiOrigin } from '@/lib/asset-url';
 import { AI_UI_DEFAULTS } from '@/lib/ai-ui-content';
+import {
+  buildDefaultFromTemplate,
+  extractPortfolioCategories,
+  isObjectValue,
+  normalizeByTemplate,
+  resolveAssetUrl,
+  toDisplayLabel,
+} from './_helpers/content-template';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { Save, RefreshCw, Check, Trash2, Plus, Upload, Sparkles } from 'lucide-react';
@@ -207,69 +214,7 @@ type JsonObject = { [key: string]: JsonValue };
 
 type EditorMode = 'visual' | 'json';
 
-function toDisplayLabel(key: string) {
-  return key
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-    .replace(/[_-]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .replace(/^./, (m) => m.toUpperCase());
-}
-
-function isObjectValue(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function buildDefaultFromTemplate(template: unknown): unknown {
-  if (Array.isArray(template)) return [];
-  if (isObjectValue(template)) {
-    const next: Record<string, unknown> = {};
-    Object.entries(template).forEach(([k, v]) => {
-      next[k] = buildDefaultFromTemplate(v);
-    });
-    return next;
-  }
-  if (typeof template === 'number') return 0;
-  if (typeof template === 'boolean') return false;
-  if (template === null) return null;
-  return '';
-}
-
-function normalizeByTemplate(value: unknown, template: unknown): unknown {
-  if (Array.isArray(template)) {
-    if (!Array.isArray(value)) return template;
-    if (template.length === 0) return value;
-
-    const sample = template[0];
-    return value.map((item) => normalizeByTemplate(item, sample));
-  }
-
-  if (isObjectValue(template)) {
-    if (!isObjectValue(value)) return template;
-
-    const normalized: Record<string, unknown> = { ...value };
-    Object.entries(template).forEach(([key, templateValue]) => {
-      normalized[key] = normalizeByTemplate(value[key], templateValue);
-    });
-    return normalized;
-  }
-
-  if (template === null) return value === null ? null : null;
-
-  if (typeof template === 'number') {
-    return typeof value === 'number' ? value : template;
-  }
-
-  if (typeof template === 'boolean') {
-    return typeof value === 'boolean' ? value : template;
-  }
-
-  if (typeof template === 'string') {
-    return typeof value === 'string' ? value : template;
-  }
-
-  return value;
-}
+// Helpers extracted to ./_helpers/content-template — see imports above.
 
 function PrimitiveEditor({
   label,
@@ -1130,17 +1075,7 @@ function toPortfolioSectionData(value: unknown): PortfolioSectionData {
   };
 }
 
-function extractPortfolioCategories(value: unknown) {
-  if (!isObjectValue(value) || !Array.isArray(value.categories)) return [] as string[];
-  return value.categories.map((item) => String(item)).filter(Boolean);
-}
-
-function resolveAssetUrl(path?: string) {
-  if (!path) return '';
-  if (path.startsWith('http')) return path;
-  const apiBase = getApiOrigin();
-  return `${apiBase}${path}`;
-}
+// extractPortfolioCategories + resolveAssetUrl live in ./_helpers/content-template
 
 export default function ContentPage() {
   const { data: allContent = [], isLoading } = useAllContent();
@@ -1176,7 +1111,7 @@ export default function ContentPage() {
     const value = section in draftData ? draftData[section] : contentMap[section];
     if (!value) return;
 
-    await updateContent.mutateAsync({ section, data: value });
+    await updateContent.mutateAsync({ section, data: value as Record<string, unknown> });
     setSaved(section);
     setTimeout(() => setSaved(''), 2000);
   };

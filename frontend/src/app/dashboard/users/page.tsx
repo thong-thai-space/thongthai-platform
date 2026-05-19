@@ -5,6 +5,7 @@ import { UserAvatar } from '@/components/user-avatar';
 import { useTeam, useCreateMember, useUpdateMember, useDeleteMember } from '@/hooks/use-team';
 import { useClients, useCreateClient } from '@/hooks/use-clients';
 import { useAuth } from '@/lib/auth';
+import { extractApiErrorMessage } from '@/lib/api-error';
 import { formatDate } from '@/lib/utils';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
@@ -71,16 +72,8 @@ function AddUserModal({ onClose }: { onClose: () => void }) {
       }
 
       onClose();
-    } catch (err: unknown) {
-      const message =
-        typeof err === 'object' &&
-        err !== null &&
-        'response' in err &&
-        typeof (err as { response?: { data?: { message?: string } } }).response?.data
-          ?.message === 'string'
-          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
-          : 'Failed to create user';
-      setError(message || 'Failed to create user');
+    } catch (err) {
+      setError(extractApiErrorMessage(err, 'Failed to create user'));
     }
   };
 
@@ -186,16 +179,8 @@ function EditUserModal({ user, onClose }: { user: User; onClose: () => void }) {
         isActive: form.isActive,
       });
       onClose();
-    } catch (err: unknown) {
-      const message =
-        typeof err === 'object' &&
-        err !== null &&
-        'response' in err &&
-        typeof (err as { response?: { data?: { message?: string } } }).response?.data
-          ?.message === 'string'
-          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
-          : 'Failed to update user';
-      setError(message || 'Failed to update user');
+    } catch (err) {
+      setError(extractApiErrorMessage(err, 'Failed to update user'));
     }
   };
 
@@ -280,16 +265,8 @@ function DeleteUserModal({ user, onClose }: { user: User; onClose: () => void })
     try {
       await deleteMember.mutateAsync(user.id);
       onClose();
-    } catch (err: unknown) {
-      const message =
-        typeof err === 'object' &&
-        err !== null &&
-        'response' in err &&
-        typeof (err as { response?: { data?: { message?: string } } }).response?.data
-          ?.message === 'string'
-          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
-          : 'Failed to deactivate user';
-      setError(message || 'Failed to deactivate user');
+    } catch (err) {
+      setError(extractApiErrorMessage(err, 'Failed to deactivate user'));
     }
   };
 

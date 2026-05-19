@@ -5,6 +5,7 @@ import { AvatarUpload } from '@/components/avatar-upload';
 import { useAuth } from '@/lib/auth';
 import { useState } from 'react';
 import api from '@/lib/api';
+import { extractApiErrorMessage } from '@/lib/api-error';
 import { User, Lock } from 'lucide-react';
 import { MotionPreferences } from '@/components/settings/motion-preferences';
 
@@ -33,8 +34,8 @@ export default function SettingsPage() {
       await api.patch('/users/me', { name: profile.name, phone: profile.phone });
       await refreshUser();
       setMessage('Profile updated successfully');
-    } catch {
-      setMessage('Error updating profile');
+    } catch (err) {
+      setMessage(extractApiErrorMessage(err, 'Error updating profile'));
     } finally {
       setSaving(false);
     }
@@ -59,8 +60,8 @@ export default function SettingsPage() {
       });
       setMessage('Password changed successfully');
       setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' });
-    } catch {
-      setMessage('Error changing password');
+    } catch (err) {
+      setMessage(extractApiErrorMessage(err, 'Error changing password'));
     } finally {
       setSaving(false);
     }

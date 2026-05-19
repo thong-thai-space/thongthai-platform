@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, KeyRound } from 'lucide-react';
 import api from '@/lib/api';
+import { extractApiErrorMessage } from '@/lib/api-error';
 import { TurnstileWidget } from '@/components/security/turnstile-widget';
 
 export default function ResetPasswordPage() {
@@ -60,16 +61,8 @@ export default function ResetPasswordPage() {
           'Password has been reset successfully. Please sign in with your new password.',
       );
       window.setTimeout(() => router.push('/login'), 1200);
-    } catch (err: unknown) {
-      const messageFromApi =
-        typeof err === 'object' &&
-        err !== null &&
-        'response' in err &&
-        typeof (err as { response?: { data?: { message?: string } } }).response?.data?.message ===
-          'string'
-          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
-          : 'Could not reset password. Please request a new reset link.';
-      setError(messageFromApi || 'Could not reset password. Please request a new reset link.');
+    } catch (err) {
+      setError(extractApiErrorMessage(err, 'Could not reset password. Please request a new reset link.'));
     } finally {
       setIsSubmitting(false);
     }
