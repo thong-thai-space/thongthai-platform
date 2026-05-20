@@ -50,3 +50,4 @@ tmp/
 # Claude Code worktrees — agent's working dirs, never share
 .claude/worktrees/
 .claude/local/
+.claude/settings.local.json
