@@ -1,21 +1,35 @@
 'use client';
 
-import Link from 'next/link';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { useSectionContent } from '@/hooks/use-content';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { MotionReveal, MotionSection } from '@/components/motion/motion-primitives';
 
-const defaults = {
-  title: 'Ready to start your project?',
-  subtitle:
-    'Contact us now for a free consultation and detailed quote for your project. Our expert team will respond within 24 hours.',
-  primaryCta: { text: 'Get a quote', href: '/contact' },
-  secondaryCta: { text: 'Explore services', href: '/services' },
+type CtaShape = {
+  title?: string;
+  subtitle?: string;
+  primaryCta?: { text?: string; href?: string };
+  secondaryCta?: { text?: string; href?: string };
 };
 
 export function CtaSection() {
   const { data } = useSectionContent('cta');
-  const c = (data?.data as typeof defaults) || defaults;
+  const t = useTranslations('cta');
+  const cms = (data?.data as CtaShape) || {};
+
+  const c = {
+    title: cms.title ?? t('title'),
+    subtitle: cms.subtitle ?? t('subtitle'),
+    primaryCta: {
+      text: cms.primaryCta?.text ?? t('primary'),
+      href: cms.primaryCta?.href ?? '/contact',
+    },
+    secondaryCta: {
+      text: cms.secondaryCta?.text ?? t('secondary'),
+      href: cms.secondaryCta?.href ?? '/services',
+    },
+  };
 
   return (
     <MotionSection className="tts-landing-section relative overflow-hidden py-20 sm:py-28">

@@ -14,6 +14,7 @@ export function LanguageSwitcher({ className }: { className?: string }) {
   const [isPending, startTransition] = useTransition();
   const t = useTranslations('language');
 
+  // Pattern: Command (defer locale navigation via React's startTransition)
   const onChange = (next: Locale) => {
     if (next === locale) return;
     startTransition(() => {

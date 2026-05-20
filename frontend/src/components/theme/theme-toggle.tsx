@@ -6,9 +6,11 @@ import { Monitor, Moon, Sun } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
+// Pattern: State Machine (3 finite states: light → dark → system → light)
 const ORDER = ['light', 'dark', 'system'] as const;
 type ThemeKey = (typeof ORDER)[number];
 
+// Pattern: Registry (state → icon component)
 const ICON: Record<ThemeKey, React.ComponentType<{ className?: string }>> = {
   light: Sun,
   dark: Moon,

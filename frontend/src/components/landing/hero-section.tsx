@@ -4,12 +4,13 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { useSectionContent } from "@/hooks/use-content";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Syne } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import { type ReactNode } from "react";
 
-const syne = Syne({
-  weight: ["700"],
-  subsets: ["latin"],
+// Heavy weight for the hero display heading.
+const displayFont = Montserrat({
+  weight: ["800"],
+  subsets: ["latin", "latin-ext", "vietnamese"],
   display: "swap",
 });
 
@@ -103,7 +104,7 @@ export function HeroSection({
               </div>
 
               <h1
-                className={`${syne.className} tts-landing-display text-3xl tracking-tight text-slate-900 sm:text-4xl lg:text-5xl dark:text-white`}
+                className={`${displayFont.className} tts-landing-display text-3xl tracking-tight text-slate-900 sm:text-4xl lg:text-5xl dark:text-white`}
               >
                 {c.title}{" "}
                 <span className="bg-linear-to-r from-primary via-sky-500 to-accent bg-clip-text text-transparent">

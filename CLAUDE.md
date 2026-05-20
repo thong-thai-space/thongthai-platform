@@ -110,6 +110,25 @@ PostgreSQL 16 via Prisma 7 with `@prisma/adapter-pg` (driver adapter — no `url
 Roles: `OWNER > ADMIN > MEMBER > CLIENT`. Enforced via `@Roles()` + `RolesGuard`.
 14 models. Enums: `Language`, `Currency`, `UserRole`, `ProjectStatus`, `TaskStatus`, `InvoiceStatus`, `NotificationType`, `AiFeature`.
 
+## Engineering Judgment
+
+The rules in **Engineering Standards** are _heuristics_, not commandments. Apply them with judgment:
+
+| Guideline | Scale | When to relax |
+|---|---|---|
+| Clean Code | Line / function | Never — always write readable code |
+| OOP / encapsulation | Class | Simple data containers; pure FP pipelines |
+| SOLID | Class relationships | One-off scripts; throwaway admin pages |
+| Clean Architecture layers | System / module | Simple CRUD with no domain logic |
+| 150-line component limit | File | Sequential flows where splitting hurts locality |
+| ≥80% test coverage | Use-case | UI-only presentational components |
+
+**Scale ordering** — Clean Code → OOP → SOLID → Clean Architecture are four _different scales_, not a sequential hierarchy. You can write Clean Code without OOP. SOLID should be applied before Clean Architecture because class-relationship decisions are cheaper to undo than cross-module boundary decisions.
+
+**Rigor scales with blast radius.** A shared use case touched by every consumer deserves ports, tests, and strict layering. A one-off admin widget called from one place — keep it simple.
+
+**YAGNI.** Don't introduce abstractions before the second real use case. The cost to add structure later is lower than the cost to carry premature structure forever.
+
 ## Engineering Standards
 
 ### SOLID + patterns (mandatory)
@@ -131,7 +150,7 @@ Roles: `OWNER > ADMIN > MEMBER > CLIENT`. Enforced via `@Roles()` + `RolesGuard`
 - **Server Components by default** — `"use client"` only when needed.
 - **No raw fetch in components** — use `lib/api.ts`.
 - **No silent catches in `useEffect`/init** — surface errors.
-- **Component > 150 lines** → split.
+- **Component > 150 lines** → consider splitting. Prefer splitting when the component has multiple independent concerns; keep together when lines share tight sequential context (see Engineering Judgment above).
 
 ### Security
 - RBAC via Guards + service-layer ownership checks.

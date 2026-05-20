@@ -96,13 +96,11 @@ export function MotionCard({
 }: MotionCardProps) {
   const prefersReducedMotion = useReducedMotion();
 
+  // The MotionReveal wrapper is purely transform/opacity — it must NOT
+  // receive the consumer's className, otherwise borders, shadows, and
+  // backgrounds render twice (once on the wrapper, once on the inner div).
   return (
-    <MotionReveal
-      className={className}
-      delay={delay}
-      distance={30}
-      duration={0.55}
-    >
+    <MotionReveal delay={delay} distance={30} duration={0.55}>
       <div
         {...props}
         className={`tts-motion-card ${className ?? ''}`.trim()}

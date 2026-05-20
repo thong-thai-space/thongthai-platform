@@ -1,49 +1,45 @@
 'use client';
 
 import { MessageSquare, Lightbulb, Code, Rocket } from 'lucide-react';
+import type { ComponentType } from 'react';
 import { useSectionContent } from '@/hooks/use-content';
+import { useTranslations } from 'next-intl';
 import { MotionReveal, MotionSection } from '@/components/motion/motion-primitives';
 
-const iconMap: Record<string, any> = { MessageSquare, Lightbulb, Code, Rocket };
+const iconMap: Record<string, ComponentType<{ className?: string }>> = {
+  MessageSquare,
+  Lightbulb,
+  Code,
+  Rocket,
+};
 
-const defaults = {
-  title: 'Our Process',
-  subtitle: '4 simple steps from idea to finished product',
-  steps: [
-    {
-      icon: 'MessageSquare',
-      step: '01',
-      title: 'Discuss & Analyze',
-      description:
-        'Listen to requirements, analyze business needs, and recommend the best technology solution.',
-    },
-    {
-      icon: 'Lightbulb',
-      step: '02',
-      title: 'Design & Plan',
-      description:
-        'UI/UX design, system architecture, detailed cost estimation and timeline.',
-    },
-    {
-      icon: 'Code',
-      step: '03',
-      title: 'Develop & Test',
-      description:
-        'Agile development process, thorough testing, and continuous progress updates.',
-    },
-    {
-      icon: 'Rocket',
-      step: '04',
-      title: 'Deploy & Support',
-      description:
-        'Product launch, usage training, long-term maintenance and technical support.',
-    },
-  ],
+type ProcessStep = { icon: string; step: string; title: string; description: string };
+type ProcessShape = { title?: string; subtitle?: string; steps?: ProcessStep[] };
+
+const I18N_STEP_KEYS = ['discuss', 'design', 'develop', 'deploy'] as const;
+const I18N_STEP_ICONS: Record<(typeof I18N_STEP_KEYS)[number], string> = {
+  discuss: 'MessageSquare',
+  design: 'Lightbulb',
+  develop: 'Code',
+  deploy: 'Rocket',
 };
 
 export function ProcessSection() {
   const { data } = useSectionContent('process');
-  const c = (data?.data as typeof defaults) || defaults;
+  const t = useTranslations('process');
+  const cms = (data?.data as ProcessShape) || {};
+
+  const title = cms.title ?? t('title');
+  const subtitle = cms.subtitle ?? t('subtitle');
+  const steps: ProcessStep[] =
+    cms.steps?.length
+      ? cms.steps
+      : I18N_STEP_KEYS.map((key, index) => ({
+          icon: I18N_STEP_ICONS[key],
+          step: String(index + 1).padStart(2, '0'),
+          title: t(`steps.${key}.title`),
+          description: t(`steps.${key}.description`),
+        }));
 
   return (
     <MotionSection className="tts-landing-section relative overflow-hidden bg-linear-to-b from-slate-50 to-white py-20 sm:py-28 dark:from-slate-950 dark:to-slate-900">
@@ -53,20 +49,20 @@ export function ProcessSection() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <MotionReveal className="mx-auto max-w-2xl text-center">
           <h2 className="tts-landing-title text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
-            {c.title}
+            {title}
           </h2>
           <p className="tts-landing-subtitle mt-4 text-lg text-slate-600 dark:text-slate-300">
-            {c.subtitle}
+            {subtitle}
           </p>
         </MotionReveal>
 
         <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {c.steps.map((item, idx) => {
+          {steps.map((item, idx) => {
             const Icon = iconMap[item.icon];
             return (
               <MotionReveal key={item.step} delay={idx * 0.08} className="relative">
                 {/* Connector line */}
-                {idx < c.steps.length - 1 && (
+                {idx < steps.length - 1 && (
                   <div className="absolute left-[55%] top-10 hidden h-0.5 w-full bg-linear-to-r from-primary/35 to-transparent lg:block" />
                 )}
 

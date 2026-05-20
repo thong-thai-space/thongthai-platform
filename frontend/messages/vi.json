@@ -37,6 +37,165 @@
       "satisfaction": "Khách hàng hài lòng"
     }
   },
+  "services": {
+    "title": "Dịch vụ của chúng tôi",
+    "subtitle": "Giải pháp công nghệ toàn diện, từ ý tưởng đến sản phẩm hoàn thiện",
+    "items": {
+      "web": {
+        "title": "Phát triển Web",
+        "description": "Website, ứng dụng web và thương mại điện tử với công nghệ hiện đại: Next.js, React, Node.js. Tối ưu SEO và hiệu năng.",
+        "features": ["Landing page", "Ứng dụng web", "Thương mại điện tử", "Trang quản trị"]
+      },
+      "mobile": {
+        "title": "Ứng dụng di động",
+        "description": "Ứng dụng iOS & Android với React Native và Flutter. Thiết kế UI/UX đẹp, trải nghiệm mượt mà.",
+        "features": ["iOS & Android", "Đa nền tảng", "Thiết kế UI/UX", "Xuất bản App Store"]
+      },
+      "ai": {
+        "title": "Giải pháp AI",
+        "description": "Tích hợp AI vào quy trình doanh nghiệp: chatbot, phân tích dữ liệu, tự động hóa quy trình.",
+        "features": ["Chatbot AI", "Phân tích dữ liệu", "Tự động hóa", "Giải pháp NLP"]
+      },
+      "consulting": {
+        "title": "Tư vấn CNTT",
+        "description": "Chiến lược chuyển đổi số, kiến trúc hệ thống và lựa chọn công nghệ phù hợp cho doanh nghiệp.",
+        "features": ["Chiến lược số", "Kiến trúc hệ thống", "Đánh giá công nghệ", "Đào tạo đội ngũ"]
+      }
+    }
+  },
+  "servicesPage": {
+    "heroTitle": "Dịch vụ công nghệ",
+    "heroTitleHighlight": "công nghệ",
+    "heroSubtitle": "Giải pháp trọn gói từ thiết kế, phát triển đến triển khai và vận hành. Chúng tôi đồng hành cùng bạn ở mọi giai đoạn.",
+    "ctaTitle": "Bạn cần giải pháp nào?",
+    "ctaSubtitle": "Liên hệ ngay để được tư vấn miễn phí và nhận báo giá chi tiết.",
+    "ctaButton": "Liên hệ với chúng tôi",
+    "items": {
+      "web": {
+        "title": "Phát triển Web",
+        "description": "Xây dựng website và ứng dụng web hiện đại bằng công nghệ tiên tiến. Từ landing page đơn giản đến hệ thống phức tạp.",
+        "features": [
+          "Website doanh nghiệp",
+          "Ứng dụng web (SaaS, CRM, ERP)",
+          "Thương mại điện tử & marketplace",
+          "Trang quản trị & CMS",
+          "Progressive Web App (PWA)",
+          "Phát triển & tích hợp API"
+        ]
+      },
+      "mobile": {
+        "title": "Ứng dụng di động",
+        "description": "Phát triển ứng dụng iOS & Android chất lượng cao với thiết kế UI/UX chuyên nghiệp.",
+        "features": [
+          "Ứng dụng native iOS & Android",
+          "Đa nền tảng (React Native, Flutter)",
+          "Thiết kế UI/UX ưu tiên di động",
+          "Push notification & realtime",
+          "Kiến trúc offline-first",
+          "Xuất bản App Store & Play Store"
+        ]
+      },
+      "ai": {
+        "title": "Giải pháp AI",
+        "description": "Tích hợp trí tuệ nhân tạo vào sản phẩm và quy trình để tự động hóa và tối ưu hiệu suất.",
+        "features": [
+          "Chatbot AI & Trợ lý ảo",
+          "Phân tích dữ liệu thông minh",
+          "Tự động hóa quy trình (RPA)",
+          "Computer Vision & OCR",
+          "NLP & phân tích văn bản",
+          "Hệ thống gợi ý"
+        ]
+      },
+      "consulting": {
+        "title": "Tư vấn CNTT",
+        "description": "Tư vấn chiến lược công nghệ, kiến trúc hệ thống và lộ trình chuyển đổi số phù hợp.",
+        "features": [
+          "Chiến lược chuyển đổi số",
+          "Kiến trúc hệ thống & cloud",
+          "Đánh giá công nghệ hiện tại",
+          "Lộ trình chuyển đổi số",
+          "Đào tạo đội ngũ kỹ thuật",
+          "Code review & audit kỹ thuật"
+        ]
+      }
+    }
+  },
+  "process": {
+    "title": "Quy trình làm việc",
+    "subtitle": "4 bước đơn giản từ ý tưởng đến sản phẩm hoàn thiện",
+    "steps": {
+      "discuss": {
+        "title": "Trao đổi & Phân tích",
+        "description": "Lắng nghe yêu cầu, phân tích nhu cầu kinh doanh và đề xuất giải pháp công nghệ tốt nhất."
+      },
+      "design": {
+        "title": "Thiết kế & Lập kế hoạch",
+        "description": "Thiết kế UI/UX, kiến trúc hệ thống, dự toán chi phí và tiến độ chi tiết."
+      },
+      "develop": {
+        "title": "Phát triển & Kiểm thử",
+        "description": "Phát triển theo Agile, kiểm thử kỹ lưỡng và cập nhật tiến độ liên tục."
+      },
+      "deploy": {
+        "title": "Triển khai & Hỗ trợ",
+        "description": "Bàn giao sản phẩm, đào tạo sử dụng, bảo trì dài hạn và hỗ trợ kỹ thuật."
+      }
+    }
+  },
+  "testimonials": {
+    "title": "Khách hàng nói về chúng tôi",
+    "subtitle": "Phản hồi từ những khách hàng đã tin tưởng và đồng hành cùng chúng tôi"
+  },
+  "portfolio": {
+    "title": "Dự án tiêu biểu",
+    "subtitle": "Những dự án chúng tôi đã triển khai thành công cho khách hàng",
+    "viewAll": "Xem tất cả dự án",
+    "empty": "Chưa có dự án tiêu biểu. Vào Bảng điều khiển → Nội dung → Portfolio và bật trạng thái Featured cho dự án.",
+    "visit": "Xem",
+    "fallbackClient": "Khách hàng Thông Thái Space",
+    "fallbackDescription": "Dự án tiêu biểu trong danh mục triển khai của chúng tôi."
+  },
+  "cta": {
+    "title": "Sẵn sàng khởi động dự án?",
+    "subtitle": "Liên hệ với chúng tôi để được tư vấn miễn phí và nhận báo giá chi tiết. Đội ngũ chuyên gia sẽ phản hồi trong 24 giờ.",
+    "primary": "Nhận báo giá",
+    "secondary": "Khám phá dịch vụ"
+  },
+  "footer": {
+    "description": "Giải pháp công nghệ thông minh cho doanh nghiệp. Chuyên phát triển Web, App, AI và tư vấn CNTT.",
+    "columns": {
+      "services": "Dịch vụ",
+      "company": "Công ty",
+      "support": "Hỗ trợ"
+    },
+    "rights": "Đã đăng ký bản quyền."
+  },
+  "about": {
+    "heroTitle": "Giới thiệu Thông Thái Space",
+    "heroSubtitle": "Chúng tôi là đội ngũ chuyên gia công nghệ chuyên phát triển Web, App, AI và tư vấn CNTT cho doanh nghiệp vừa và nhỏ. Sứ mệnh của chúng tôi là giúp doanh nghiệp chuyển đổi số hiệu quả với chi phí hợp lý và chất lượng đạt chuẩn quốc tế.",
+    "valuesTitle": "Giá trị cốt lõi",
+    "values": {
+      "quality": {
+        "title": "Chất lượng",
+        "description": "Cam kết sản phẩm chất lượng cao, mã nguồn sạch, hiệu năng tốt và bảo mật."
+      },
+      "partnership": {
+        "title": "Đồng hành",
+        "description": "Không chỉ là nhà cung cấp, mà là đối tác lâu dài cam kết vì thành công của khách hàng."
+      },
+      "dedication": {
+        "title": "Tận tâm",
+        "description": "Chúng tôi lắng nghe, thấu hiểu và đặt lợi ích khách hàng lên hàng đầu trong mọi dự án."
+      },
+      "innovation": {
+        "title": "Đổi mới",
+        "description": "Liên tục cập nhật công nghệ mới và áp dụng giải pháp sáng tạo cho mọi thử thách."
+      }
+    },
+    "teamTitle": "Đội ngũ",
+    "teamSubtitle": "Những con người đằng sau mỗi dự án thành công"
+  },
   "meta": {
     "home": {
       "title": "Thông Thái Space | Giải pháp công nghệ thông minh",

@@ -1,40 +1,54 @@
 'use client';
 
-import Link from 'next/link';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import { useSectionContent } from '@/hooks/use-content';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 
-const defaults = {
-  brand: {
-    name: 'Thong Thai Space',
-    description:
-      'Smart technology solutions for businesses. Specializing in Web, App, AI development and IT consulting.',
-    email: 'hoangthai229@gmail.com',
-    phone: '0345807906',
-    address: 'Ho Chi Minh City, Vietnam',
-  },
-  links: {
-    Services: [
-      { href: '/services#web', label: 'Web Development' },
-      { href: '/services#app', label: 'Mobile Apps' },
-      { href: '/services#ai', label: 'AI Solutions' },
-      { href: '/services#consulting', label: 'IT Consulting' },
-    ],
-    Company: [
-      { href: '/about', label: 'About' },
-      { href: '/portfolio', label: 'Portfolio' },
-      { href: '/contact', label: 'Contact' },
-    ],
-    Support: [
-      { href: '/login', label: 'Sign in' },
-      { href: '/register', label: 'Sign up' },
-    ],
-  } as Record<string, { href: string; label: string }[]>,
+type FooterLink = { href: string; label: string };
+type FooterShape = {
+  brand?: {
+    name?: string;
+    description?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+  };
+  links?: Record<string, FooterLink[]>;
 };
 
 export function Footer() {
   const { data } = useSectionContent('footer');
-  const c = (data?.data as typeof defaults) || defaults;
+  const t = useTranslations('footer');
+  const tNav = useTranslations('nav');
+  const tServices = useTranslations('services.items');
+  const cms = (data?.data as FooterShape) || {};
+
+  const brand = {
+    name: cms.brand?.name ?? 'Thong Thai Space',
+    description: cms.brand?.description ?? t('description'),
+    email: cms.brand?.email ?? 'hoangthai229@gmail.com',
+    phone: cms.brand?.phone ?? '0345807906',
+    address: cms.brand?.address ?? 'Ho Chi Minh City, Vietnam',
+  };
+
+  const links: Record<string, FooterLink[]> = cms.links ?? {
+    [t('columns.services')]: [
+      { href: '/services#web', label: tServices('web.title') },
+      { href: '/services#app', label: tServices('mobile.title') },
+      { href: '/services#ai', label: tServices('ai.title') },
+      { href: '/services#consulting', label: tServices('consulting.title') },
+    ],
+    [t('columns.company')]: [
+      { href: '/about', label: tNav('about') },
+      { href: '/portfolio', label: tNav('portfolio') },
+      { href: '/contact', label: tNav('contact') },
+    ],
+    [t('columns.support')]: [
+      { href: '/login', label: tNav('signIn') },
+      { href: '/register', label: 'Sign up' },
+    ],
+  };
 
   return (
     <footer className="border-t border-border bg-muted/30">
@@ -44,34 +58,34 @@ export function Footer() {
           <div>
             <Link href="/" className="flex items-center">
               <span className="text-lg font-bold">
-                {c.brand.name.replace(' Space', '')}<span className="text-primary"> Space</span>
+                {brand.name.replace(' Space', '')}<span className="text-primary"> Space</span>
               </span>
             </Link>
             <p className="tts-brand-body mt-3 text-sm">
-              {c.brand.description}
+              {brand.description}
             </p>
             <div className="tts-brand-body mt-4 space-y-2 text-sm">
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
-                <span>{c.brand.email}</span>
+                <span>{brand.email}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4" />
-                <span>{c.brand.phone}</span>
+                <span>{brand.phone}</span>
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                <span>{c.brand.address}</span>
+                <span>{brand.address}</span>
               </div>
             </div>
           </div>
 
           {/* Link columns */}
-          {Object.entries(c.links).map(([title, links]) => (
+          {Object.entries(links).map(([title, columnLinks]) => (
             <div key={title}>
               <h3 className="text-sm font-semibold">{title}</h3>
               <ul className="mt-3 space-y-2">
-                {links.map((link) => (
+                {columnLinks.map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
@@ -86,7 +100,7 @@ export function Footer() {
           ))}
         </div>
         <div className="mt-10 border-t border-border pt-6 text-center text-sm text-muted-foreground">
-          &copy; {new Date().getFullYear()} {c.brand.name}. All rights reserved.
+          &copy; {new Date().getFullYear()} {brand.name}. {t('rights')}
         </div>
       </div>
     </footer>

@@ -3,6 +3,7 @@
 
 import { Award, Heart, Target, Users } from 'lucide-react';
 import { useSectionContent } from '@/hooks/use-content';
+import { useTranslations } from 'next-intl';
 import { resolveBackendAssetUrl } from '@/lib/asset-url';
 import type { ComponentType } from 'react';
 import {
@@ -12,6 +13,7 @@ import {
   BrandSurface,
 } from '@/components/brand/brand-primitives';
 
+// Pattern: Registry (icon name string → component, resolved at render time)
 const iconMap: Record<string, ComponentType<{ className?: string }>> = {
   Target,
   Users,
@@ -19,83 +21,49 @@ const iconMap: Record<string, ComponentType<{ className?: string }>> = {
   Award,
 };
 
-type AboutContent = {
-  hero: {
-    title: string;
-    subtitle: string;
-  };
-  valuesTitle: string;
-  values: Array<{
-    icon: string;
-    title: string;
-    description: string;
-  }>;
-  teamTitle: string;
-  teamSubtitle: string;
-  team: Array<{
-    name: string;
-    role: string;
-    bio: string;
-    avatar?: string;
-  }>;
+type AboutValue = { icon: string; title: string; description: string };
+type AboutTeamMember = { name: string; role: string; bio: string; avatar?: string };
+type AboutShape = {
+  hero?: { title?: string; subtitle?: string };
+  valuesTitle?: string;
+  values?: AboutValue[];
+  teamTitle?: string;
+  teamSubtitle?: string;
+  team?: AboutTeamMember[];
 };
 
-const defaults: AboutContent = {
-  hero: {
-    title: 'About Thong Thai Space',
-    subtitle:
-      'We are a team of technology experts specializing in Web, App, AI development and IT consulting for small and medium businesses. Our mission is to help businesses achieve effective digital transformation with affordable costs and international quality standards.',
-  },
-  valuesTitle: 'Core Values',
-  values: [
-    {
-      icon: 'Target',
-      title: 'Quality',
-      description: 'Committed to high-quality products, clean code, great performance, and security.',
-    },
-    {
-      icon: 'Users',
-      title: 'Partnership',
-      description: "Not just a vendor, but a long-term partner committed to our clients' success.",
-    },
-    {
-      icon: 'Heart',
-      title: 'Dedication',
-      description: "We listen, understand, and put our clients' interests first in every project.",
-    },
-    {
-      icon: 'Award',
-      title: 'Innovation',
-      description: 'Constantly adopting new technologies and applying creative solutions to every challenge.',
-    },
-  ],
-  teamTitle: 'Our Team',
-  teamSubtitle: 'The people behind every successful project',
-  team: [
-    {
-      name: 'Nguyen Hoang Thai',
-      role: 'Founder & CEO',
-      bio: 'Full-stack developer with <1 years of experience, passionate about AI and automation.',
-      avatar: '',
-    },
-    {
-      name: 'Nguyen Hoang Thai',
-      role: 'Development Team',
-      bio: 'Experienced software engineers specializing in Web, Mobile, and AI.',
-      avatar: '',
-    },
-    {
-      name: 'Nguyen Hoang Tuan',
-      role: 'Draphic Designer',
-      bio: 'Creating beautiful interfaces and optimal user experiences.',
-      avatar: '',
-    },
-  ],
+const I18N_VALUE_KEYS = ['quality', 'partnership', 'dedication', 'innovation'] as const;
+const I18N_VALUE_ICONS: Record<(typeof I18N_VALUE_KEYS)[number], string> = {
+  quality: 'Target',
+  partnership: 'Users',
+  dedication: 'Heart',
+  innovation: 'Award',
 };
 
 export function AboutPageContent() {
   const { data } = useSectionContent('about');
-  const c = (data?.data as AboutContent) || defaults;
+  const t = useTranslations('about');
+  const cms = (data?.data as AboutShape) || {};
+
+  // Pattern: Chain of Responsibility (CMS payload → i18n translations → compile-time fallback)
+  const c = {
+    hero: {
+      title: cms.hero?.title ?? t('heroTitle'),
+      subtitle: cms.hero?.subtitle ?? t('heroSubtitle'),
+    },
+    valuesTitle: cms.valuesTitle ?? t('valuesTitle'),
+    values:
+      cms.values?.length
+        ? cms.values
+        : I18N_VALUE_KEYS.map((key) => ({
+            icon: I18N_VALUE_ICONS[key],
+            title: t(`values.${key}.title`),
+            description: t(`values.${key}.description`),
+          })),
+    teamTitle: cms.teamTitle ?? t('teamTitle'),
+    teamSubtitle: cms.teamSubtitle ?? t('teamSubtitle'),
+    team: cms.team ?? [],
+  };
 
   return (
     <div>

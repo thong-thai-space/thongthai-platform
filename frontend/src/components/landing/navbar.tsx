@@ -99,14 +99,19 @@ export function Navbar() {
           )}
         </div>
 
-        {/* Mobile toggle */}
-        <button
-          className="md:hidden"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label={t('menu')}
-        >
-          {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        {/* Mobile right cluster: always-visible toggles + hamburger */}
+        <div className="flex items-center gap-2 md:hidden">
+          <LanguageSwitcher />
+          <ThemeToggle />
+          <button
+            type="button"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label={t('menu')}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200/70 bg-white/80 text-slate-700 transition-colors hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
+          >
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
       </nav>
 
       {/* Mobile menu */}
@@ -127,10 +132,6 @@ export function Navbar() {
               {link.label}
             </Link>
           ))}
-          <div className="flex items-center justify-between gap-2 border-t border-slate-200 pt-3 dark:border-white/10">
-            <LanguageSwitcher />
-            <ThemeToggle />
-          </div>
           <div className="border-t border-slate-200 pt-3 dark:border-white/10">
             {user ? (
               <Link

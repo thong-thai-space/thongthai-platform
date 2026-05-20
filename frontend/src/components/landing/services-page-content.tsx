@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+/* eslint-disable @next/next/no-img-element */
 import {
   ArrowRight,
   Brain,
@@ -10,6 +10,9 @@ import {
   Smartphone,
 } from 'lucide-react';
 import { useSectionContent } from '@/hooks/use-content';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import { resolveBackendAssetUrl } from '@/lib/asset-url';
 import type { ComponentType } from 'react';
 import {
   BrandContainer,
@@ -18,6 +21,7 @@ import {
   BrandSurface,
 } from '@/components/brand/brand-primitives';
 
+// Pattern: Registry (icon name string → component, resolved at render time)
 const iconMap: Record<string, ComponentType<{ className?: string }>> = {
   Globe,
   Smartphone,
@@ -25,113 +29,61 @@ const iconMap: Record<string, ComponentType<{ className?: string }>> = {
   MessageSquare,
 };
 
-const serviceDefaults = [
-  {
-    id: 'web',
-    icon: 'Globe',
-    title: 'Web Development',
-    description:
-      'Build modern websites and web applications using cutting-edge technologies. From simple landing pages to complex systems.',
-    features: [
-      'Business corporate websites',
-      'Web applications (SaaS, CRM, ERP)',
-      'E-commerce & marketplace',
-      'Admin dashboard & CMS',
-      'Progressive Web App (PWA)',
-      'API development & integration',
-    ],
-    techStack: ['Next.js', 'React', 'Node.js', 'NestJS', 'PostgreSQL', 'Redis'],
-  },
-  {
-    id: 'app',
-    icon: 'Smartphone',
-    title: 'Mobile Apps',
-    description:
-      'Develop high-quality iOS & Android applications with professional UI/UX design.',
-    features: [
-      'iOS & Android native apps',
-      'Cross-platform (React Native, Flutter)',
-      'Mobile-first UI/UX design',
-      'Push notification & realtime',
-      'Offline-first architecture',
-      'App Store & Play Store publish',
-    ],
-    techStack: ['React Native', 'Flutter', 'Swift', 'Kotlin', 'Firebase'],
-  },
-  {
-    id: 'ai',
-    icon: 'Brain',
-    title: 'AI Solutions',
-    description:
-      'Integrate artificial intelligence into products and business processes to automate and optimize performance.',
-    features: [
-      'AI Chatbot & Virtual Assistant',
-      'Intelligent data analytics',
-      'Robotic Process Automation (RPA)',
-      'Computer Vision & OCR',
-      'NLP & Text Analytics',
-      'Recommendation System',
-    ],
-    techStack: ['OpenAI', 'Anthropic Claude', 'LangChain', 'Python', 'TensorFlow'],
-  },
-  {
-    id: 'consulting',
-    icon: 'MessageSquare',
-    title: 'IT Consulting',
-    description:
-      'Strategic technology consulting, system architecture, and tailored digital transformation roadmaps.',
-    features: [
-      'Digital transformation strategy',
-      'System architecture & cloud',
-      'Current technology assessment',
-      'Digital transformation roadmap',
-      'Technical team training',
-      'Code review & technical audit',
-    ],
-    techStack: ['AWS', 'Docker', 'Kubernetes', 'CI/CD', 'Monitoring'],
-  },
-];
-
-type ServicesPageContentType = {
-  hero: {
-    title: string;
-    titleHighlight?: string;
-    subtitle: string;
-  };
-  cta: {
-    title: string;
-    subtitle: string;
-    buttonText: string;
-    buttonHref: string;
-  };
+type ServicePageItem = {
+  id: string;
+  icon: string;
+  title: string;
+  description: string;
+  features: string[];
+  techStack: string[];
+  imageUrl?: string;
 };
 
-const contentDefaults: ServicesPageContentType = {
-  hero: {
-    title: 'Technology Services',
-    titleHighlight: 'Services',
-    subtitle:
-      'End-to-end solutions from design, development to deployment and operations. We partner with you through every stage.',
-  },
-  cta: {
-    title: 'Which solution do you need?',
-    subtitle: 'Contact us now for a free consultation and detailed quote.',
-    buttonText: 'Contact us',
-    buttonHref: '/contact',
-  },
+// Stable keys for the i18n fallback. Tech stacks are not translated.
+const I18N_PAGE_KEYS = ['web', 'mobile', 'ai', 'consulting'] as const;
+const I18N_PAGE_META: Record<
+  (typeof I18N_PAGE_KEYS)[number],
+  { id: string; icon: string; techStack: string[] }
+> = {
+  web: { id: 'web', icon: 'Globe', techStack: ['Next.js', 'React', 'Node.js', 'NestJS', 'PostgreSQL', 'Redis'] },
+  mobile: { id: 'app', icon: 'Smartphone', techStack: ['React Native', 'Flutter', 'Swift', 'Kotlin', 'Firebase'] },
+  ai: { id: 'ai', icon: 'Brain', techStack: ['OpenAI', 'Anthropic Claude', 'LangChain', 'Python', 'TensorFlow'] },
+  consulting: { id: 'consulting', icon: 'MessageSquare', techStack: ['AWS', 'Docker', 'Kubernetes', 'CI/CD', 'Monitoring'] },
 };
 
 export function ServicesPageContent() {
   const { data: servicesData } = useSectionContent('services');
   const { data: pageData } = useSectionContent('servicesPage');
+  const t = useTranslations('servicesPage');
+  const tItems = useTranslations('servicesPage.items');
 
-  const services = (servicesData?.data as { items?: typeof serviceDefaults } | undefined)?.items || serviceDefaults;
-  const rawPage = (pageData?.data as Partial<ServicesPageContentType>) || {};
-  const c: ServicesPageContentType = {
-    ...contentDefaults,
-    ...rawPage,
-    hero: { ...contentDefaults.hero, ...rawPage.hero },
-    cta: { ...contentDefaults.cta, ...rawPage.cta },
+  const cmsItems = (servicesData?.data as { items?: ServicePageItem[] } | undefined)?.items;
+  const services: ServicePageItem[] = cmsItems?.length
+    ? cmsItems
+    : I18N_PAGE_KEYS.map((key) => ({
+        ...I18N_PAGE_META[key],
+        title: tItems(`${key}.title`),
+        description: tItems(`${key}.description`),
+        features: tItems.raw(`${key}.features`) as string[],
+      }));
+
+  // Pattern: Chain of Responsibility (CMS payload → i18n translations → compile-time fallback)
+  const rawPage = (pageData?.data as Partial<{
+    hero: { title?: string; titleHighlight?: string; subtitle?: string };
+    cta: { title?: string; subtitle?: string; buttonText?: string; buttonHref?: string };
+  }>) || {};
+  const c = {
+    hero: {
+      title: rawPage.hero?.title ?? t('heroTitle'),
+      titleHighlight: rawPage.hero?.titleHighlight ?? t('heroTitleHighlight'),
+      subtitle: rawPage.hero?.subtitle ?? t('heroSubtitle'),
+    },
+    cta: {
+      title: rawPage.cta?.title ?? t('ctaTitle'),
+      subtitle: rawPage.cta?.subtitle ?? t('ctaSubtitle'),
+      buttonText: rawPage.cta?.buttonText ?? t('ctaButton'),
+      buttonHref: rawPage.cta?.buttonHref ?? '/contact',
+    },
   };
 
   const titleParts =
@@ -163,6 +115,9 @@ export function ServicesPageContent() {
           <div className="space-y-20">
             {services.map((service, idx) => {
               const Icon = iconMap[service.icon] || Globe;
+              const imageSrc = service.imageUrl
+                ? resolveBackendAssetUrl(service.imageUrl) || service.imageUrl
+                : undefined;
               return (
                 <div
                   key={service.id || service.title}
@@ -199,8 +154,20 @@ export function ServicesPageContent() {
                     </div>
                   </BrandSurface>
 
-                  <BrandSurface className="tts-brand-grid flex flex-1 items-center justify-center p-12">
-                    <Icon className="h-24 w-24 text-primary/20" />
+                  <BrandSurface
+                    className={`flex flex-1 items-center justify-center overflow-hidden ${
+                      imageSrc ? 'p-0' : 'tts-brand-grid p-12'
+                    }`}
+                  >
+                    {imageSrc ? (
+                      <img
+                        src={imageSrc}
+                        alt={service.title}
+                        className="h-72 w-full object-cover lg:h-80"
+                      />
+                    ) : (
+                      <Icon className="h-24 w-24 text-primary/20" />
+                    )}
                   </BrandSurface>
                 </div>
               );

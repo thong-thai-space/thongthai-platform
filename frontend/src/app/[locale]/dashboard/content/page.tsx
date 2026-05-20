@@ -23,6 +23,7 @@ import {
   resolveAssetUrl,
   toDisplayLabel,
 } from './_helpers/content-template';
+import { ServicesVisualEditor } from './_editors/services-editor';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { Save, RefreshCw, Check, Trash2, Plus, Upload, Sparkles } from 'lucide-react';
@@ -133,9 +134,11 @@ const SERVICES_DEFAULTS = {
       description:
         'Websites, web apps, and e-commerce with modern technology.',
       features: ['Landing page', 'Web application'],
+      imageUrl: '',
     },
   ],
 };
+
 
 const PROCESS_DEFAULTS = {
   title: 'Our Process',
@@ -687,6 +690,8 @@ function AboutVisualEditor({
   );
 }
 
+// ServicesVisualEditor and its normalizer extracted to ./_editors/services-editor.tsx
+
 function PortfolioFeaturedProjectsEditor({
   value,
   onChange,
@@ -1088,6 +1093,7 @@ export default function ContentPage() {
   const [editorModeBySection, setEditorModeBySection] = useState<Record<string, EditorMode>>({});
   const [saved, setSaved] = useState('');
   const [uploadingAboutKey, setUploadingAboutKey] = useState('');
+  const [uploadingServiceKey, setUploadingServiceKey] = useState('');
 
   const contentMap = useMemo(() => {
     const map: Record<string, unknown> = {};
@@ -1131,15 +1137,23 @@ export default function ContentPage() {
     });
   };
 
-  const handleUploadAboutAvatar = async (file: File, key: string) => {
-    setUploadingAboutKey(key);
-    try {
-      const result = await uploadContentImage.mutateAsync(file);
-      return result.url;
-    } finally {
-      setUploadingAboutKey('');
-    }
-  };
+  // Pattern: Factory — both upload handlers share identical logic; the only
+  // variable is which loading-state setter to bind. Eliminates the duplicated
+  // try/finally boilerplate while keeping each handler's loading state isolated.
+  const makeImageUploader =
+    (setUploading: (k: string) => void) =>
+    async (file: File, key: string): Promise<string | undefined> => {
+      setUploading(key);
+      try {
+        const result = await uploadContentImage.mutateAsync(file);
+        return result.url;
+      } finally {
+        setUploading('');
+      }
+    };
+
+  const handleUploadAboutAvatar = makeImageUploader(setUploadingAboutKey);
+  const handleUploadServiceImage = makeImageUploader(setUploadingServiceKey);
 
   return (
     <>
@@ -1282,6 +1296,18 @@ export default function ContentPage() {
                         uploadingKey={uploadingAboutKey}
                         onUploadAvatar={handleUploadAboutAvatar}
                       />
+                    ) : activeTab === 'services' ? (
+                      <ServicesVisualEditor
+                        value={draftData[activeTab] ?? SECTION_DEFAULTS[activeTab] ?? {}}
+                        onChange={(v) =>
+                          setDraftData((prev) => ({
+                            ...prev,
+                            [activeTab]: v,
+                          }))
+                        }
+                        uploadingKey={uploadingServiceKey}
+                        onUploadImage={handleUploadServiceImage}
+                      />
                     ) : (
                       <VisualEditorNode
                         label={toDisplayLabel(activeTab)}
@@ -1339,6 +1365,18 @@ export default function ContentPage() {
                     }
                     uploadingKey={uploadingAboutKey}
                     onUploadAvatar={handleUploadAboutAvatar}
+                  />
+                ) : activeMode === 'visual' && activeTab === 'services' ? (
+                  <ServicesVisualEditor
+                    value={currentValue}
+                    onChange={(v) =>
+                      setDraftData((prev) => ({
+                        ...prev,
+                        [activeTab]: v,
+                      }))
+                    }
+                    uploadingKey={uploadingServiceKey}
+                    onUploadImage={handleUploadServiceImage}
                   />
                 ) : activeMode === 'visual' ? (
                   <VisualEditorNode

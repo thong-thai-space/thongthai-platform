@@ -37,6 +37,165 @@
       "satisfaction": "Client satisfaction"
     }
   },
+  "services": {
+    "title": "Our Services",
+    "subtitle": "Comprehensive technology solutions, from idea to finished product",
+    "items": {
+      "web": {
+        "title": "Web Development",
+        "description": "Websites, web apps, and e-commerce with modern technology: Next.js, React, Node.js. SEO and performance optimized.",
+        "features": ["Landing page", "Web application", "E-commerce", "Admin dashboard"]
+      },
+      "mobile": {
+        "title": "Mobile Apps",
+        "description": "iOS & Android apps with React Native and Flutter. Beautiful UI/UX design with smooth user experience.",
+        "features": ["iOS & Android", "Cross-platform", "UI/UX Design", "App Store publish"]
+      },
+      "ai": {
+        "title": "AI Solutions",
+        "description": "Integrate AI into business processes: chatbots, data analysis, workflow automation.",
+        "features": ["AI Chatbot", "Data Analytics", "Process Automation", "NLP Solutions"]
+      },
+      "consulting": {
+        "title": "IT Consulting",
+        "description": "Digital transformation strategy, system architecture, and technology selection for your business.",
+        "features": ["Digital Strategy", "System Architecture", "Tech Audit", "Team Training"]
+      }
+    }
+  },
+  "servicesPage": {
+    "heroTitle": "Technology Services",
+    "heroTitleHighlight": "Services",
+    "heroSubtitle": "End-to-end solutions from design, development to deployment and operations. We partner with you through every stage.",
+    "ctaTitle": "Which solution do you need?",
+    "ctaSubtitle": "Contact us now for a free consultation and detailed quote.",
+    "ctaButton": "Contact us",
+    "items": {
+      "web": {
+        "title": "Web Development",
+        "description": "Build modern websites and web applications using cutting-edge technologies. From simple landing pages to complex systems.",
+        "features": [
+          "Business corporate websites",
+          "Web applications (SaaS, CRM, ERP)",
+          "E-commerce & marketplace",
+          "Admin dashboard & CMS",
+          "Progressive Web App (PWA)",
+          "API development & integration"
+        ]
+      },
+      "mobile": {
+        "title": "Mobile Apps",
+        "description": "Develop high-quality iOS & Android applications with professional UI/UX design.",
+        "features": [
+          "iOS & Android native apps",
+          "Cross-platform (React Native, Flutter)",
+          "Mobile-first UI/UX design",
+          "Push notification & realtime",
+          "Offline-first architecture",
+          "App Store & Play Store publish"
+        ]
+      },
+      "ai": {
+        "title": "AI Solutions",
+        "description": "Integrate artificial intelligence into products and business processes to automate and optimize performance.",
+        "features": [
+          "AI Chatbot & Virtual Assistant",
+          "Intelligent data analytics",
+          "Robotic Process Automation (RPA)",
+          "Computer Vision & OCR",
+          "NLP & Text Analytics",
+          "Recommendation System"
+        ]
+      },
+      "consulting": {
+        "title": "IT Consulting",
+        "description": "Strategic technology consulting, system architecture, and tailored digital transformation roadmaps.",
+        "features": [
+          "Digital transformation strategy",
+          "System architecture & cloud",
+          "Current technology assessment",
+          "Digital transformation roadmap",
+          "Technical team training",
+          "Code review & technical audit"
+        ]
+      }
+    }
+  },
+  "process": {
+    "title": "Our Process",
+    "subtitle": "4 simple steps from idea to finished product",
+    "steps": {
+      "discuss": {
+        "title": "Discuss & Analyze",
+        "description": "Listen to requirements, analyze business needs, and recommend the best technology solution."
+      },
+      "design": {
+        "title": "Design & Plan",
+        "description": "UI/UX design, system architecture, detailed cost estimation and timeline."
+      },
+      "develop": {
+        "title": "Develop & Test",
+        "description": "Agile development process, thorough testing, and continuous progress updates."
+      },
+      "deploy": {
+        "title": "Deploy & Support",
+        "description": "Product launch, usage training, long-term maintenance and technical support."
+      }
+    }
+  },
+  "testimonials": {
+    "title": "What our clients say",
+    "subtitle": "Feedback from clients who have trusted and partnered with us"
+  },
+  "portfolio": {
+    "title": "Featured Projects",
+    "subtitle": "A selection of projects we have successfully delivered for our clients",
+    "viewAll": "View all projects",
+    "empty": "No featured projects yet. Go to Dashboard → Content → Portfolio and enable projects as Featured.",
+    "visit": "Visit",
+    "fallbackClient": "Thong Thai Space Client",
+    "fallbackDescription": "Featured project from our delivery portfolio."
+  },
+  "cta": {
+    "title": "Ready to start your project?",
+    "subtitle": "Contact us now for a free consultation and detailed quote for your project. Our expert team will respond within 24 hours.",
+    "primary": "Get a quote",
+    "secondary": "Explore services"
+  },
+  "footer": {
+    "description": "Smart technology solutions for businesses. Specializing in Web, App, AI development and IT consulting.",
+    "columns": {
+      "services": "Services",
+      "company": "Company",
+      "support": "Support"
+    },
+    "rights": "All rights reserved."
+  },
+  "about": {
+    "heroTitle": "About Thong Thai Space",
+    "heroSubtitle": "We are a team of technology experts specializing in Web, App, AI development and IT consulting for small and medium businesses. Our mission is to help businesses achieve effective digital transformation with affordable costs and international quality standards.",
+    "valuesTitle": "Core Values",
+    "values": {
+      "quality": {
+        "title": "Quality",
+        "description": "Committed to high-quality products, clean code, great performance, and security."
+      },
+      "partnership": {
+        "title": "Partnership",
+        "description": "Not just a vendor, but a long-term partner committed to our clients' success."
+      },
+      "dedication": {
+        "title": "Dedication",
+        "description": "We listen, understand, and put our clients' interests first in every project."
+      },
+      "innovation": {
+        "title": "Innovation",
+        "description": "Constantly adopting new technologies and applying creative solutions to every challenge."
+      }
+    },
+    "teamTitle": "Our Team",
+    "teamSubtitle": "The people behind every successful project"
+  },
   "meta": {
     "home": {
       "title": "Thong Thai Space | Smart Technology Solutions",

@@ -1,46 +1,35 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
-import Link from 'next/link';
 import { ArrowRight, ExternalLink } from 'lucide-react';
 import { useSectionContent } from '@/hooks/use-content';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { useShowcaseProjects } from '@/hooks/use-projects';
 import type { Project } from '@/types';
 import { resolveBackendAssetUrl } from '@/lib/asset-url';
 import { MotionCard, MotionReveal, MotionSection } from '@/components/motion/motion-primitives';
 
-const defaults = {
-  title: 'Featured Projects',
-  subtitle: 'A selection of projects we have successfully delivered for our clients',
-  viewAllText: 'View all projects',
-  items: [
-    {
-      title: 'E-Commerce Platform',
-      client: 'Fashion Brand',
-      description: 'Full-featured e-commerce platform with inventory management and integrated payment system.',
-      techStack: ['Next.js', 'Node.js', 'PostgreSQL', 'Stripe'],
-    },
-    {
-      title: 'Healthcare App',
-      client: 'MedTech Startup',
-      description: 'Appointment booking and online health consultation app for medical clinics.',
-      techStack: ['React Native', 'NestJS', 'AI Chatbot'],
-    },
-    {
-      title: 'AI Analytics Dashboard',
-      client: 'Logistics Corp',
-      description: 'Shipping data analytics dashboard with AI-powered trend prediction and route optimization.',
-      techStack: ['React', 'Python', 'TensorFlow', 'D3.js'],
-    },
-  ],
+type PortfolioShape = {
+  title?: string;
+  subtitle?: string;
+  viewAllText?: string;
 };
 
 export function PortfolioSection() {
   const { data } = useSectionContent('portfolio');
   const { data: showcaseProjects = [] } = useShowcaseProjects();
-  const c = (data?.data as typeof defaults) || defaults;
+  const t = useTranslations('portfolio');
+  const cms = (data?.data as PortfolioShape) || {};
 
-  const items = showcaseProjects.slice(0, 3).map((project) => mapProjectToFeaturedCard(project));
+  const title = cms.title ?? t('title');
+  const subtitle = cms.subtitle ?? t('subtitle');
+  const viewAllText = cms.viewAllText ?? t('viewAll');
+  const fallbackClient = t('fallbackClient');
+  const fallbackDescription = t('fallbackDescription');
+  const items = showcaseProjects
+    .slice(0, 3)
+    .map((project) => mapProjectToFeaturedCard(project, fallbackClient, fallbackDescription));
 
   return (
     <MotionSection id="portfolio" className="tts-landing-section relative overflow-hidden py-20 sm:py-28">
@@ -51,18 +40,16 @@ export function PortfolioSection() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <MotionReveal className="mx-auto max-w-2xl text-center">
           <h2 className="tts-landing-title text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
-            {c.title}
+            {title}
           </h2>
           <p className="tts-landing-subtitle mt-4 text-lg text-slate-600 dark:text-slate-300">
-            {c.subtitle}
+            {subtitle}
           </p>
         </MotionReveal>
 
         {items.length === 0 ? (
           <div className="mt-16 rounded-xl border border-dashed border-border p-10 text-center">
-            <p className="text-sm text-muted-foreground">
-              No featured projects yet. Go to Dashboard → Content → Portfolio and enable projects as Featured.
-            </p>
+            <p className="text-sm text-muted-foreground">{t('empty')}</p>
           </div>
         ) : (
           <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -94,7 +81,7 @@ export function PortfolioSection() {
                         rel="noreferrer"
                         className="text-xs font-medium text-slate-500 hover:text-primary dark:text-slate-300"
                       >
-                        Visit
+                        {t('visit')}
                       </a>
                     )}
                   </div>
@@ -121,7 +108,7 @@ export function PortfolioSection() {
             href="/portfolio"
             className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-primary transition-colors hover:bg-slate-50 dark:border-white/10 dark:bg-white/5"
           >
-            {c.viewAllText || 'View all projects'}
+            {viewAllText}
             <ArrowRight className="h-4 w-4" />
           </Link>
         </MotionReveal>
@@ -130,11 +117,15 @@ export function PortfolioSection() {
   );
 }
 
-function mapProjectToFeaturedCard(project: Project) {
+function mapProjectToFeaturedCard(
+  project: Project,
+  fallbackClient: string,
+  fallbackDescription: string,
+) {
   return {
     title: project.name,
-    client: project.client?.name || 'Thong Thai Space Client',
-    description: project.description || 'Featured project from our delivery portfolio.',
+    client: project.client?.name || fallbackClient,
+    description: project.description || fallbackDescription,
     techStack: project.techStack || [],
     thumbnailUrl: resolveAssetUrl(project.thumbnailUrl),
     liveUrl: project.liveUrl,

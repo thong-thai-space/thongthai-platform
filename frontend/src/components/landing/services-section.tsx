@@ -1,49 +1,61 @@
 'use client';
 
+/* eslint-disable @next/next/no-img-element */
 import { Globe, Smartphone, Brain, MessageSquare } from 'lucide-react';
+import type { ComponentType } from 'react';
 import { useSectionContent } from '@/hooks/use-content';
+import { useTranslations } from 'next-intl';
+import { resolveBackendAssetUrl } from '@/lib/asset-url';
 import { MotionCard, MotionReveal, MotionSection } from '@/components/motion/motion-primitives';
 
-const iconMap: Record<string, any> = { Globe, Smartphone, Brain, MessageSquare };
+// Pattern: Registry (icon name string → component, resolved at render time)
+const iconMap: Record<string, ComponentType<{ className?: string }>> = {
+  Globe,
+  Smartphone,
+  Brain,
+  MessageSquare,
+};
 
-const defaults = {
-  title: 'Our Services',
-  subtitle: 'Comprehensive technology solutions, from idea to finished product',
-  items: [
-    {
-      icon: 'Globe',
-      title: 'Web Development',
-      description:
-        'Websites, web apps, and e-commerce with modern technology: Next.js, React, Node.js. SEO and performance optimized.',
-      features: ['Landing page', 'Web application', 'E-commerce', 'Admin dashboard'],
-    },
-    {
-      icon: 'Smartphone',
-      title: 'Mobile Apps',
-      description:
-        'iOS & Android apps with React Native and Flutter. Beautiful UI/UX design with smooth user experience.',
-      features: ['iOS & Android', 'Cross-platform', 'UI/UX Design', 'App Store publish'],
-    },
-    {
-      icon: 'Brain',
-      title: 'AI Solutions',
-      description:
-        'Integrate AI into business processes: chatbots, data analysis, workflow automation.',
-      features: ['AI Chatbot', 'Data Analytics', 'Process Automation', 'NLP Solutions'],
-    },
-    {
-      icon: 'MessageSquare',
-      title: 'IT Consulting',
-      description:
-        'Digital transformation strategy, system architecture, and technology selection for your business.',
-      features: ['Digital Strategy', 'System Architecture', 'Tech Audit', 'Team Training'],
-    },
-  ],
+type ServiceItem = {
+  icon: string;
+  title: string;
+  description: string;
+  features: string[];
+  imageUrl?: string;
+};
+
+type ServicesShape = {
+  title?: string;
+  subtitle?: string;
+  items?: ServiceItem[];
+};
+
+// Stable keys for the i18n fallback items. CMS overrides whichever fields it provides.
+const I18N_ITEM_KEYS = ['web', 'mobile', 'ai', 'consulting'] as const;
+const I18N_ICONS: Record<(typeof I18N_ITEM_KEYS)[number], string> = {
+  web: 'Globe',
+  mobile: 'Smartphone',
+  ai: 'Brain',
+  consulting: 'MessageSquare',
 };
 
 export function ServicesSection() {
   const { data } = useSectionContent('services');
-  const c = (data?.data as typeof defaults) || defaults;
+  const t = useTranslations('services');
+  const cms = (data?.data as ServicesShape) || {};
+
+  // Pattern: Chain of Responsibility (CMS payload → i18n translations → compile-time fallback)
+  const title = cms.title ?? t('title');
+  const subtitle = cms.subtitle ?? t('subtitle');
+  const items: ServiceItem[] =
+    cms.items?.length
+      ? cms.items
+      : I18N_ITEM_KEYS.map((key) => ({
+          icon: I18N_ICONS[key],
+          title: t(`items.${key}.title`),
+          description: t(`items.${key}.description`),
+          features: t.raw(`items.${key}.features`) as string[],
+        }));
 
   return (
     <MotionSection id="services" className="tts-landing-section relative overflow-hidden bg-linear-to-b from-white to-slate-50 py-20 sm:py-28 dark:from-slate-950 dark:to-slate-900">
@@ -53,16 +65,19 @@ export function ServicesSection() {
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <MotionReveal className="mx-auto max-w-2xl text-center">
           <h2 className="tts-landing-title text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
-            {c.title}
+            {title}
           </h2>
           <p className="tts-landing-subtitle mt-4 text-lg text-slate-600 dark:text-slate-300">
-            {c.subtitle}
+            {subtitle}
           </p>
         </MotionReveal>
 
         <div className="mt-16 flex flex-col gap-4">
-          {c.items.map((service, index) => {
-            const Icon = iconMap[service.icon];
+          {items.map((service, index) => {
+            const Icon = iconMap[service.icon] ?? Globe;
+            const imageSrc = service.imageUrl
+              ? resolveBackendAssetUrl(service.imageUrl) || service.imageUrl
+              : undefined;
             return (
               <MotionCard
                 key={service.title}
@@ -70,9 +85,19 @@ export function ServicesSection() {
                 className="group flex items-start gap-5 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm transition-all hover:border-primary/35 hover:shadow-[0_8px_30px_-8px_rgba(37,99,235,0.25)] dark:border-slate-700/60 dark:bg-slate-900"
               >
                 <div className="flex-shrink-0">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                    {Icon && <Icon className="h-6 w-6" />}
-                  </div>
+                  {imageSrc ? (
+                    <div className="h-14 w-14 overflow-hidden rounded-xl border border-slate-200/80 bg-slate-50 dark:border-slate-700/60 dark:bg-slate-800">
+                      <img
+                        src={imageSrc}
+                        alt={service.title}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                      <Icon className="h-6 w-6" />
+                    </div>
+                  )}
                 </div>
                 <div className="min-w-0 flex-1">
                   <h3 className="text-base font-semibold text-slate-900 dark:text-white">{service.title}</h3>
