@@ -114,6 +114,7 @@ const HERO_DEFAULTS = {
   titleEnd: 'products',
   subtitle:
     'Thong Thai Space specializes in Web & App development, AI integration, and IT consulting.',
+  youtubeVideoUrl: '',
   primaryCta: { text: 'Get a free quote', href: '/contact' },
   secondaryCta: { text: 'View our projects', href: '/portfolio' },
   stats: [

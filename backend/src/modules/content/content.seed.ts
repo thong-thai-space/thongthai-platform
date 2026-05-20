@@ -21,6 +21,7 @@ export const DEFAULT_CONTENT: Record<string, object> = {
     titleEnd: 'products',
     subtitle:
       'Thong Thai Space specializes in Web & App development, AI integration, and IT consulting. Our expert team helps businesses digitize processes and achieve sustainable growth.',
+    youtubeVideoUrl: '',
     primaryCta: { text: 'Get a free quote', href: '/contact' },
     secondaryCta: { text: 'View our projects', href: '/portfolio' },
     stats: [

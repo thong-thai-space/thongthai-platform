@@ -5,7 +5,7 @@ import { useSectionContent } from "@/hooks/use-content";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Montserrat } from "next/font/google";
-import { type ReactNode } from "react";
+import { type ReactNode, useMemo, useState } from "react";
 
 // Heavy weight for the hero display heading.
 const displayFont = Montserrat({
@@ -20,10 +20,48 @@ type HeroCmsShape = {
   titleHighlight?: string;
   titleEnd?: string;
   subtitle?: string;
+  youtubeVideoUrl?: string;
   primaryCta?: { text?: string; href?: string };
   secondaryCta?: { text?: string; href?: string };
   stats?: Array<{ value: string; label: string }>;
 };
+
+function toYouTubeEmbedUrl(rawUrl?: string): string | null {
+  if (!rawUrl) return null;
+
+  const trimmed = rawUrl.trim();
+  if (!trimmed) return null;
+
+  try {
+    const parsed = new URL(trimmed);
+    const host = parsed.hostname.replace(/^www\./, "");
+    let videoId = "";
+
+    if (host === "youtu.be") {
+      videoId = parsed.pathname.split("/")[1] ?? "";
+    } else if (host === "youtube.com" || host.endsWith(".youtube.com")) {
+      if (parsed.pathname.startsWith("/watch")) {
+        videoId = parsed.searchParams.get("v") ?? "";
+      } else if (parsed.pathname.startsWith("/embed/")) {
+        videoId = parsed.pathname.split("/")[2] ?? "";
+      } else if (parsed.pathname.startsWith("/shorts/")) {
+        videoId = parsed.pathname.split("/")[2] ?? "";
+      }
+    }
+
+    if (!videoId) return null;
+
+    const params = new URLSearchParams();
+    params.set("autoplay", "1");
+    params.set("rel", "0");
+    params.set("playsinline", "1");
+    params.set("mute", "1");
+
+    return `https://www.youtube.com/embed/${videoId}?${params.toString()}`;
+  } catch {
+    return null;
+  }
+}
 
 interface HeroSectionProps {
   architectureOverlay?: ReactNode;
@@ -35,6 +73,12 @@ export function HeroSection({
   const t = useTranslations("hero");
   const { data } = useSectionContent("hero");
   const raw = (data?.data as HeroCmsShape) || {};
+  const [introDone, setIntroDone] = useState(false);
+  const youtubeEmbedUrl = useMemo(
+    () => toYouTubeEmbedUrl(raw.youtubeVideoUrl),
+    [raw.youtubeVideoUrl],
+  );
+  const shouldShowYoutube = introDone && Boolean(youtubeEmbedUrl);
 
   // CMS values win over i18n defaults; i18n covers anything CMS doesn't provide.
   const defaultStats = [
@@ -65,18 +109,31 @@ export function HeroSection({
       {/* Video block - separate section on top */}
       <section className="relative mx-auto h-[34vh] w-[calc(100%-3rem)] max-w-5xl sm:h-[42vh] sm:w-[calc(100%-6rem)] lg:h-[56vh] lg:w-[calc(100%-10rem)]">
         <div className="relative h-full w-full overflow-hidden rounded-4xl border border-slate-300/45 bg-black shadow-[0_10px_24px_rgba(15,23,42,0.16)] dark:border-white/10 dark:shadow-[0_10px_24px_rgba(2,6,23,0.4)]">
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="h-full w-full scale-[1.3] object-contain"
-          >
-            <source
-              src="/videos/video_abdeaea5-859e-4b99-8330-da037fe439e8.mp4"
-              type="video/mp4"
+          {shouldShowYoutube ? (
+            <iframe
+              className="h-full w-full"
+              src={youtubeEmbedUrl ?? ""}
+              title="Thong Thai Space intro"
+              allow="autoplay; encrypted-media; picture-in-picture"
+              allowFullScreen
             />
-          </video>
+          ) : (
+            <video
+              autoPlay
+              muted
+              loop={!youtubeEmbedUrl}
+              playsInline
+              onEnded={() => {
+                if (youtubeEmbedUrl) setIntroDone(true);
+              }}
+              className="h-full w-full scale-[1.3] object-contain"
+            >
+              <source
+                src="/videos/video_abdeaea5-859e-4b99-8330-da037fe439e8.mp4"
+                type="video/mp4"
+              />
+            </video>
+          )}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-linear-to-t from-white/35 to-transparent dark:from-slate-950/30" />
         </div>
       </section>
