@@ -41,7 +41,7 @@ jobs:
         run: pnpm build
 
       - name: Unit tests
-        run: pnpm test -- --runInBand
+        run: pnpm test --runInBand
         env:
           NODE_ENV: test
           DATABASE_URL: postgresql://test:test@localhost:5432/thongthai_space?schema=public
