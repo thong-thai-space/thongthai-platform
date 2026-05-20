@@ -1,0 +1,50 @@
+{
+  "theme": {
+    "light": "Giao diện sáng",
+    "dark": "Giao diện tối",
+    "system": "Theo hệ thống"
+  },
+  "language": {
+    "label": "Ngôn ngữ",
+    "vi": "Tiếng Việt",
+    "en": "English"
+  },
+  "nav": {
+    "home": "Trang chủ",
+    "about": "Giới thiệu",
+    "services": "Dịch vụ",
+    "portfolio": "Dự án",
+    "contact": "Liên hệ",
+    "signIn": "Đăng nhập",
+    "cta": "Liên hệ ngay",
+    "dashboard": "Bảng điều khiển",
+    "memberPortal": "Cổng nhân viên",
+    "clientPortal": "Cổng khách hàng",
+    "menu": "Mở/đóng menu"
+  },
+  "hero": {
+    "badge": "Giải pháp công nghệ thông minh",
+    "title": "Biến ý tưởng thành",
+    "titleHighlight": "sản phẩm số",
+    "titleEnd": "vượt trội",
+    "subtitle": "Thông Thái Space chuyên phát triển Web & App, tích hợp AI và tư vấn CNTT. Đội ngũ chuyên gia của chúng tôi giúp doanh nghiệp số hóa quy trình và phát triển bền vững.",
+    "primaryCta": "Nhận báo giá miễn phí",
+    "secondaryCta": "Xem dự án của chúng tôi",
+    "stats": {
+      "projects": "Dự án đã hoàn thành",
+      "clients": "Khách hàng tin cậy",
+      "experience": "Năm kinh nghiệm",
+      "satisfaction": "Khách hàng hài lòng"
+    }
+  },
+  "meta": {
+    "home": {
+      "title": "Thông Thái Space | Giải pháp công nghệ thông minh",
+      "description": "Nền tảng quản lý dự án và dịch vụ công nghệ bởi Thông Thái Space - Web, App, AI, Tư vấn"
+    },
+    "about": {
+      "title": "Giới thiệu | Thông Thái Space",
+      "description": "Tìm hiểu về Thông Thái Space — đội ngũ chuyên gia công nghệ với sứ mệnh chuyển đổi số cho doanh nghiệp."
+    }
+  }
+}

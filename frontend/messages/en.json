@@ -1,0 +1,50 @@
+{
+  "theme": {
+    "light": "Light theme",
+    "dark": "Dark theme",
+    "system": "System theme"
+  },
+  "language": {
+    "label": "Language",
+    "vi": "Tiếng Việt",
+    "en": "English"
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "services": "Services",
+    "portfolio": "Portfolio",
+    "contact": "Contact",
+    "signIn": "Sign in",
+    "cta": "Get in touch",
+    "dashboard": "Dashboard",
+    "memberPortal": "My Portal",
+    "clientPortal": "Portal",
+    "menu": "Toggle menu"
+  },
+  "hero": {
+    "badge": "Smart technology solutions",
+    "title": "Turn ideas into",
+    "titleHighlight": "outstanding digital",
+    "titleEnd": "products",
+    "subtitle": "Thong Thai Space specializes in Web & App development, AI integration, and IT consulting. Our expert team helps businesses digitize processes and achieve sustainable growth.",
+    "primaryCta": "Get a free quote",
+    "secondaryCta": "View our projects",
+    "stats": {
+      "projects": "Projects completed",
+      "clients": "Trusted clients",
+      "experience": "Years of experience",
+      "satisfaction": "Client satisfaction"
+    }
+  },
+  "meta": {
+    "home": {
+      "title": "Thong Thai Space | Smart Technology Solutions",
+      "description": "Project management platform and technology services by Thong Thai Space - Web, App, AI, Consulting"
+    },
+    "about": {
+      "title": "About | Thong Thai Space",
+      "description": "Learn about Thong Thai Space - a dedicated team of technology experts on a mission to digitally transform businesses."
+    }
+  }
+}

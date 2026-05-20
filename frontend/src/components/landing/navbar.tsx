@@ -1,36 +1,40 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth } from '@/lib/auth';
 import { Menu, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 import { useSectionContent } from '@/hooks/use-content';
+import { ThemeToggle } from '@/components/theme/theme-toggle';
+import { LanguageSwitcher } from '@/components/language-switcher';
 
 type HeaderContent = {
-  navLinks: Array<{ href: string; label: string }>;
-  ctaText: string;
-  signInText: string;
-};
-
-const defaultHeader: HeaderContent = {
-  navLinks: [
-    { href: '/', label: 'Home' },
-    { href: '/about', label: 'About' },
-    { href: '/services', label: 'Services' },
-    { href: '/portfolio', label: 'Portfolio' },
-    { href: '/contact', label: 'Contact' },
-  ],
-  ctaText: 'Get in touch',
-  signInText: 'Sign in',
+  navLinks?: Array<{ href: string; label: string }>;
+  ctaText?: string;
+  signInText?: string;
 };
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { user, loginWithGoogle } = useAuth();
+  const { user } = useAuth();
   const { data } = useSectionContent('header');
-  const c = (data?.data as HeaderContent) || defaultHeader;
-  const navLinks = c.navLinks?.length ? c.navLinks : defaultHeader.navLinks;
+  const t = useTranslations('nav');
+
+  // CMS content (if present) wins over i18n defaults; i18n covers the rest.
+  const cms = (data?.data as HeaderContent) || {};
+  const navLinks = cms.navLinks?.length
+    ? cms.navLinks
+    : [
+        { href: '/', label: t('home') },
+        { href: '/about', label: t('about') },
+        { href: '/services', label: t('services') },
+        { href: '/portfolio', label: t('portfolio') },
+        { href: '/contact', label: t('contact') },
+      ];
+  const signInText = cms.signInText || t('signIn');
+  const ctaText = cms.ctaText || t('cta');
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/72 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/66">
@@ -58,6 +62,8 @@ export function Navbar() {
 
         {/* CTA */}
         <div className="hidden items-center gap-3 md:flex">
+          <LanguageSwitcher />
+          <ThemeToggle />
           {user ? (
             <Link
               href={
@@ -69,7 +75,11 @@ export function Navbar() {
               }
               className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
             >
-              {user.role === 'CLIENT' ? 'Portal' : user.role === 'MEMBER' ? 'My Portal' : 'Dashboard'}
+              {user.role === 'CLIENT'
+                ? t('clientPortal')
+                : user.role === 'MEMBER'
+                  ? t('memberPortal')
+                  : t('dashboard')}
             </Link>
           ) : (
             <>
@@ -77,13 +87,13 @@ export function Navbar() {
                 href="/login"
                 className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
               >
-                {c.signInText || defaultHeader.signInText}
+                {signInText}
               </Link>
               <Link
                 href="/contact"
                 className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-[0_10px_30px_color-mix(in_srgb,var(--primary)_35%,transparent)] transition-all hover:-translate-y-0.5 hover:bg-primary/90"
               >
-                {c.ctaText || defaultHeader.ctaText}
+                {ctaText}
               </Link>
             </>
           )}
@@ -93,7 +103,7 @@ export function Navbar() {
         <button
           className="md:hidden"
           onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Toggle menu"
+          aria-label={t('menu')}
         >
           {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
@@ -117,6 +127,10 @@ export function Navbar() {
               {link.label}
             </Link>
           ))}
+          <div className="flex items-center justify-between gap-2 border-t border-slate-200 pt-3 dark:border-white/10">
+            <LanguageSwitcher />
+            <ThemeToggle />
+          </div>
           <div className="border-t border-slate-200 pt-3 dark:border-white/10">
             {user ? (
               <Link
@@ -129,22 +143,25 @@ export function Navbar() {
                 }
                 className="block rounded-lg bg-primary px-4 py-2 text-center text-sm font-medium text-primary-foreground"
               >
-                {user.role === 'CLIENT' ? 'Portal' : user.role === 'MEMBER' ? 'My Portal' : 'Dashboard'}
+                {user.role === 'CLIENT'
+                  ? t('clientPortal')
+                  : user.role === 'MEMBER'
+                    ? t('memberPortal')
+                    : t('dashboard')}
               </Link>
             ) : (
               <div className="flex flex-col gap-2">
-                
                 <Link
                   href="/login"
                   className="block rounded-lg border border-border px-4 py-2 text-center text-sm font-medium"
                 >
-                  {c.signInText || defaultHeader.signInText}
+                  {signInText}
                 </Link>
                 <Link
                   href="/contact"
                   className="block rounded-lg bg-primary px-4 py-2 text-center text-sm font-medium text-primary-foreground"
                 >
-                  {c.ctaText || defaultHeader.ctaText}
+                  {ctaText}
                 </Link>
               </div>
             )}

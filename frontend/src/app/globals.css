@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #0f172a;
@@ -44,25 +46,23 @@
   --radius-lg: calc(var(--radius) + 0.125rem);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f172a;
-    --foreground: #f8fafc;
-    --primary: #3b82f6;
-    --primary-foreground: #ffffff;
-    --secondary: #1e293b;
-    --secondary-foreground: #f8fafc;
-    --accent: #fbbf24;
-    --accent-foreground: #0f172a;
-    --muted: #1e293b;
-    --muted-foreground: #94a3b8;
-    --destructive: #dc2626;
-    --destructive-foreground: #ffffff;
-    --border: #334155;
-    --ring: #3b82f6;
-    --sidebar: #020617;
-    --sidebar-foreground: #f8fafc;
-  }
+.dark {
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  --secondary: #1e293b;
+  --secondary-foreground: #f8fafc;
+  --accent: #fbbf24;
+  --accent-foreground: #0f172a;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #334155;
+  --ring: #3b82f6;
+  --sidebar: #020617;
+  --sidebar-foreground: #f8fafc;
 }
 
 body {
@@ -78,13 +78,11 @@ body {
   --tts-space-kicker: color-mix(in srgb, var(--primary) 86%, #0ea5e9 14%);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --tts-space-surface: rgba(15, 23, 42, 0.64);
-    --tts-space-surface-border: rgba(148, 163, 184, 0.2);
-    --tts-space-surface-shadow: 0 20px 50px -34px rgba(2, 6, 23, 0.7);
-    --tts-space-kicker: color-mix(in srgb, var(--primary) 74%, #22d3ee 26%);
-  }
+.dark {
+  --tts-space-surface: rgba(15, 23, 42, 0.64);
+  --tts-space-surface-border: rgba(148, 163, 184, 0.2);
+  --tts-space-surface-shadow: 0 20px 50px -34px rgba(2, 6, 23, 0.7);
+  --tts-space-kicker: color-mix(in srgb, var(--primary) 74%, #22d3ee 26%);
 }
 
 .tts-brand-kicker {
@@ -712,20 +710,18 @@ button:active,
   animation: ai-agent-grid-drift 20s linear infinite;
 }
 
-@media (prefers-color-scheme: light) {
-  .ai-agent-shell::before {
-    background: linear-gradient(
-      90deg,
-      rgba(14, 165, 233, 0) 0%,
-      rgba(14, 165, 233, 0.12) 45%,
-      rgba(14, 165, 233, 0) 100%
-    );
-    opacity: 0.8;
-  }
+html:not(.dark) .ai-agent-shell::before {
+  background: linear-gradient(
+    90deg,
+    rgba(14, 165, 233, 0) 0%,
+    rgba(14, 165, 233, 0.12) 45%,
+    rgba(14, 165, 233, 0) 100%
+  );
+  opacity: 0.8;
+}
 
-  .ai-agent-shell::after {
-    opacity: 0.08;
-  }
+html:not(.dark) .ai-agent-shell::after {
+  opacity: 0.08;
 }
 
 .ai-agent-badge {
@@ -850,26 +846,24 @@ html[data-tts-low-end-motion='1'] .tts-conversion-soft {
   animation: none !important;
 }
 
-@media (prefers-color-scheme: dark) {
-  .tts-page-sweep {
-    opacity: 0.55;
-    background: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--primary) 48%, #0b1220),
-      color-mix(in srgb, var(--accent) 28%, #0b1220)
-    );
-  }
+.dark .tts-page-sweep {
+  opacity: 0.55;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--primary) 48%, #0b1220),
+    color-mix(in srgb, var(--accent) 28%, #0b1220)
+  );
+}
 
-  .tts-motion-card::before {
-    background: radial-gradient(
-      circle at var(--mx) var(--my),
-      color-mix(in srgb, var(--primary) 12%, transparent),
-      transparent 62%
-    );
-  }
+.dark .tts-motion-card::before {
+  background: radial-gradient(
+    circle at var(--mx) var(--my),
+    color-mix(in srgb, var(--primary) 12%, transparent),
+    transparent 62%
+  );
+}
 
-  .tts-conversion-strong,
-  .tts-conversion-soft {
-    animation-duration: 5.4s;
-  }
+.dark .tts-conversion-strong,
+.dark .tts-conversion-soft {
+  animation-duration: 5.4s;
 }

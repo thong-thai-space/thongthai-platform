@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useSectionContent } from "@/hooks/use-content";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { Syne } from "next/font/google";
 import { type ReactNode } from "react";
 
@@ -12,21 +13,15 @@ const syne = Syne({
   display: "swap",
 });
 
-const defaults = {
-  badge: "Smart technology solutions",
-  title: "Turn ideas into",
-  titleHighlight: "outstanding digital",
-  titleEnd: "products",
-  subtitle:
-    "Thong Thai Space specializes in Web & App development, AI integration, and IT consulting. Our expert team helps businesses digitize processes and achieve sustainable growth.",
-  primaryCta: { text: "Get a free quote", href: "/contact" },
-  secondaryCta: { text: "View our projects", href: "/portfolio" },
-  stats: [
-    { value: "50+", label: "Projects completed" },
-    { value: "30+", label: "Trusted clients" },
-    { value: "5+", label: "Years of experience" },
-    { value: "99%", label: "Client satisfaction" },
-  ],
+type HeroCmsShape = {
+  badge?: string;
+  title?: string;
+  titleHighlight?: string;
+  titleEnd?: string;
+  subtitle?: string;
+  primaryCta?: { text?: string; href?: string };
+  secondaryCta?: { text?: string; href?: string };
+  stats?: Array<{ value: string; label: string }>;
 };
 
 interface HeroSectionProps {
@@ -36,14 +31,32 @@ interface HeroSectionProps {
 export function HeroSection({
   architectureOverlay,
 }: HeroSectionProps) {
+  const t = useTranslations("hero");
   const { data } = useSectionContent("hero");
-  const raw = (data?.data as Partial<typeof defaults>) || {};
+  const raw = (data?.data as HeroCmsShape) || {};
+
+  // CMS values win over i18n defaults; i18n covers anything CMS doesn't provide.
+  const defaultStats = [
+    { value: "50+", label: t("stats.projects") },
+    { value: "30+", label: t("stats.clients") },
+    { value: "5+", label: t("stats.experience") },
+    { value: "99%", label: t("stats.satisfaction") },
+  ];
   const c = {
-    ...defaults,
-    ...raw,
-    primaryCta: { ...defaults.primaryCta, ...raw.primaryCta },
-    secondaryCta: { ...defaults.secondaryCta, ...raw.secondaryCta },
-    stats: raw.stats?.length ? raw.stats : defaults.stats,
+    badge: raw.badge ?? t("badge"),
+    title: raw.title ?? t("title"),
+    titleHighlight: raw.titleHighlight ?? t("titleHighlight"),
+    titleEnd: raw.titleEnd ?? t("titleEnd"),
+    subtitle: raw.subtitle ?? t("subtitle"),
+    primaryCta: {
+      text: raw.primaryCta?.text ?? t("primaryCta"),
+      href: raw.primaryCta?.href ?? "/contact",
+    },
+    secondaryCta: {
+      text: raw.secondaryCta?.text ?? t("secondaryCta"),
+      href: raw.secondaryCta?.href ?? "/portfolio",
+    },
+    stats: raw.stats?.length ? raw.stats : defaultStats,
   };
 
   return (
