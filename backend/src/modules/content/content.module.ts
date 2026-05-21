@@ -20,7 +20,10 @@ import { ContentUseCases } from './use-cases/content.use-cases';
     ContentRepository,
     ContentSectionValidator,
     { provide: CONTENT_REPOSITORY, useExisting: ContentRepository },
-    { provide: CONTENT_SECTION_VALIDATOR, useExisting: ContentSectionValidator },
+    {
+      provide: CONTENT_SECTION_VALIDATOR,
+      useExisting: ContentSectionValidator,
+    },
   ],
   exports: [ContentService],
 })

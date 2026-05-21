@@ -12,8 +12,13 @@ import {
   TASK_BREAKDOWN_PROMPT,
 } from '../ai/prompts';
 
-// Pattern: Seed data — kept out of business code; mutable per environment
-export const DEFAULT_CONTENT: Record<string, object> = {
+// Pattern: Seed data — kept out of business code; mutable per environment.
+// The DEFAULT_CONTENT_EN map below holds the English-source payloads in their
+// natural flat shape (easier to edit). DEFAULT_CONTENT (exported at bottom)
+// wraps each entry in the per-locale envelope `{ en: <body>, vi: null }` so
+// the frontend's i18n fallback covers Vietnamese until an admin customises it
+// through the dashboard's locale tabs.
+const DEFAULT_CONTENT_EN: Record<string, object> = {
   hero: {
     badge: 'Smart technology solutions',
     title: 'Turn ideas into',
@@ -33,35 +38,56 @@ export const DEFAULT_CONTENT: Record<string, object> = {
   },
   services: {
     title: 'Our Services',
-    subtitle: 'Comprehensive technology solutions, from idea to finished product',
+    subtitle:
+      'Comprehensive technology solutions, from idea to finished product',
     items: [
       {
         icon: 'Globe',
         title: 'Web Development',
         description:
           'Websites, web apps, and e-commerce with modern technology: Next.js, React, Node.js. SEO and performance optimized.',
-        features: ['Landing page', 'Web application', 'E-commerce', 'Admin dashboard'],
+        features: [
+          'Landing page',
+          'Web application',
+          'E-commerce',
+          'Admin dashboard',
+        ],
       },
       {
         icon: 'Smartphone',
         title: 'Mobile Apps',
         description:
           'iOS & Android apps with React Native and Flutter. Beautiful UI/UX design with smooth user experience.',
-        features: ['iOS & Android', 'Cross-platform', 'UI/UX Design', 'App Store publish'],
+        features: [
+          'iOS & Android',
+          'Cross-platform',
+          'UI/UX Design',
+          'App Store publish',
+        ],
       },
       {
         icon: 'Brain',
         title: 'AI Solutions',
         description:
           'Integrate AI into business processes: chatbots, data analysis, workflow automation.',
-        features: ['AI Chatbot', 'Data Analytics', 'Process Automation', 'NLP Solutions'],
+        features: [
+          'AI Chatbot',
+          'Data Analytics',
+          'Process Automation',
+          'NLP Solutions',
+        ],
       },
       {
         icon: 'MessageSquare',
         title: 'IT Consulting',
         description:
           'Digital transformation strategy, system architecture, and technology selection for your business.',
-        features: ['Digital Strategy', 'System Architecture', 'Tech Audit', 'Team Training'],
+        features: [
+          'Digital Strategy',
+          'System Architecture',
+          'Tech Audit',
+          'Team Training',
+        ],
       },
     ],
   },
@@ -80,7 +106,8 @@ export const DEFAULT_CONTENT: Record<string, object> = {
         icon: 'Lightbulb',
         step: '02',
         title: 'Design & Plan',
-        description: 'UI/UX design, system architecture, detailed cost estimation and timeline.',
+        description:
+          'UI/UX design, system architecture, detailed cost estimation and timeline.',
       },
       {
         icon: 'Code',
@@ -202,7 +229,8 @@ export const DEFAULT_CONTENT: Record<string, object> = {
         description:
           'Restaurant management system: orders, inventory, staffing, and revenue reports.',
         techStack: ['Next.js', 'NestJS', 'PostgreSQL', 'Redis', 'Docker'],
-        results: 'Deployed across 15 branches, reducing order processing time by 50%.',
+        results:
+          'Deployed across 15 branches, reducing order processing time by 50%.',
       },
       {
         title: 'Real Estate Platform',
@@ -364,7 +392,8 @@ export const DEFAULT_CONTENT: Record<string, object> = {
       "I'm the AI assistant of Thong Thai Space. Do you have any questions about our services?",
     publicChatInputPlaceholder: 'Ask about our services...',
     portalChatOnlineTitle: 'AI Assistant is online',
-    portalChatOnlineSubtitle: 'Ask about projects, invoices, or progress updates.',
+    portalChatOnlineSubtitle:
+      'Ask about projects, invoices, or progress updates.',
     portalChatHeaderTitle: 'AI Assistant',
     portalChatWelcomeBody: 'Hello! I can help you ask about your projects.',
     portalChatInputPlaceholder: 'Ask something...',
@@ -381,3 +410,16 @@ export const DEFAULT_CONTENT: Record<string, object> = {
     architectureAgentSynthesizingLabel: 'Synthesizing architecture review...',
   },
 };
+
+// Pattern: Adapter — wraps each flat English payload into the per-locale envelope.
+// Admins can later populate the `vi` slice via the dashboard's locale tabs; until then,
+// the frontend's compile-time i18n messages serve Vietnamese visitors.
+export const DEFAULT_CONTENT: Record<
+  string,
+  { en: object; vi: object | null }
+> = Object.fromEntries(
+  Object.entries(DEFAULT_CONTENT_EN).map(([section, payload]) => [
+    section,
+    { en: payload, vi: null },
+  ]),
+);

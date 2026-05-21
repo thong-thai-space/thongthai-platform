@@ -43,11 +43,12 @@ export class ContentController {
   @Put(':section')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(UserRole.OWNER, UserRole.ADMIN)
-  upsert(
-    @Param('section') section: string,
-    @Body() body: UpdateContentDto,
-  ) {
-    return this.contentService.upsert(section, body.data as unknown, body.isActive);
+  upsert(@Param('section') section: string, @Body() body: UpdateContentDto) {
+    return this.contentService.upsert(
+      section,
+      body.data as unknown,
+      body.isActive,
+    );
   }
 
   @Delete(':section')
@@ -72,7 +73,10 @@ export class ContentController {
       storage: memoryStorage(),
       fileFilter: (_req, file, cb) => {
         if (!file.mimetype.match(/^image\/(jpeg|png|gif|webp)$/)) {
-          return cb(new BadRequestException('Only image files are allowed'), false);
+          return cb(
+            new BadRequestException('Only image files are allowed'),
+            false,
+          );
         }
         cb(null, true);
       },

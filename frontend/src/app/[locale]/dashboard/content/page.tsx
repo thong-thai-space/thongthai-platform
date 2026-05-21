@@ -2,12 +2,14 @@
 'use client';
 
 import { DashboardHeader } from '@/components/dashboard/header';
+import { useLocale } from 'next-intl';
 import {
   useAllContent,
   useUpdateContent,
   useSeedContent,
   useDeleteContent,
   useUploadContentImage,
+  type LocalizedContentPayload,
 } from '@/hooks/use-content';
 import {
   useProjects,
@@ -1083,14 +1085,38 @@ function toPortfolioSectionData(value: unknown): PortfolioSectionData {
 
 // extractPortfolioCategories + resolveAssetUrl live in ./_helpers/content-template
 
+type EditLocale = 'vi' | 'en';
+type SectionDraft = Partial<Record<EditLocale, unknown>>;
+
+function pickInitialEditLocale(uiLocale: string): EditLocale {
+  return uiLocale === 'vi' ? 'vi' : 'en';
+}
+
+function readLocaleSlice(envelope: unknown, locale: EditLocale): unknown {
+  if (!envelope || typeof envelope !== 'object' || Array.isArray(envelope)) return undefined;
+  const obj = envelope as Record<string, unknown>;
+  // Pattern: Adapter — admin sees the locale slice; the envelope shape is hidden.
+  if ('vi' in obj || 'en' in obj) {
+    return obj[locale];
+  }
+  // Legacy unwrapped row (paranoia path): treat the whole thing as English.
+  return locale === 'en' ? obj : undefined;
+}
+
 export default function ContentPage() {
+  const uiLocale = useLocale();
   const { data: allContent = [], isLoading } = useAllContent();
   const updateContent = useUpdateContent();
   const uploadContentImage = useUploadContentImage();
   const seedContent = useSeedContent();
   const deleteContent = useDeleteContent();
   const [activeTab, setActiveTab] = useState('hero');
-  const [draftData, setDraftData] = useState<Record<string, unknown>>({});
+  const [editLocale, setEditLocale] = useState<EditLocale>(() =>
+    pickInitialEditLocale(uiLocale),
+  );
+  // Per-section, per-locale drafts. draftData[section][locale] is the pending edit
+  // for that locale; locales not in the draft are untouched on save (backend merges).
+  const [draftData, setDraftData] = useState<Record<string, SectionDraft>>({});
   const [editorModeBySection, setEditorModeBySection] = useState<Record<string, EditorMode>>({});
   const [saved, setSaved] = useState('');
   const [uploadingAboutKey, setUploadingAboutKey] = useState('');
@@ -1104,8 +1130,12 @@ export default function ContentPage() {
     return map;
   }, [allContent]);
 
-  const currentValue =
-    activeTab in draftData ? draftData[activeTab] : contentMap[activeTab];
+  // Current locale slice for the active section (draft wins, otherwise saved value).
+  const currentValue = useMemo(() => {
+    const draftSlice = draftData[activeTab]?.[editLocale];
+    if (draftSlice !== undefined) return draftSlice;
+    return readLocaleSlice(contentMap[activeTab], editLocale);
+  }, [draftData, contentMap, activeTab, editLocale]);
 
   const activeMode = editorModeBySection[activeTab] ?? 'visual';
   const activeTemplate = SECTION_DEFAULTS[activeTab];
@@ -1114,11 +1144,29 @@ export default function ContentPage() {
       ? normalizeByTemplate(currentValue, activeTemplate)
       : currentValue;
 
-  const handleSave = async (section: string) => {
-    const value = section in draftData ? draftData[section] : contentMap[section];
-    if (!value) return;
+  // Helper: edits update only the current locale's slice in the draft.
+  const setSliceForActiveLocale = (section: string, next: unknown) => {
+    setDraftData((prev) => ({
+      ...prev,
+      [section]: { ...prev[section], [editLocale]: next },
+    }));
+  };
 
-    await updateContent.mutateAsync({ section, data: value as Record<string, unknown> });
+  const handleSave = async (section: string) => {
+    const draft = draftData[section];
+    if (!draft || Object.keys(draft).length === 0) return;
+
+    // Send only the locale(s) the admin actually edited. Backend merges with
+    // the existing record so the OTHER locale stays untouched.
+    await updateContent.mutateAsync({
+      section,
+      data: draft as LocalizedContentPayload,
+    });
+    setDraftData((prev) => {
+      const next = { ...prev };
+      delete next[section];
+      return next;
+    });
     setSaved(section);
     setTimeout(() => setSaved(''), 2000);
   };
@@ -1182,7 +1230,7 @@ export default function ContentPage() {
           </div>
         </div>
 
-        {/* Tabs */}
+        {/* Section tabs */}
         <div className="flex gap-1 overflow-x-auto border-b border-border">
           {SECTIONS.map((s) => (
             <button
@@ -1197,6 +1245,41 @@ export default function ContentPage() {
               {s.label}
             </button>
           ))}
+        </div>
+
+        {/* Locale tabs (per-locale CMS) */}
+        <div className="mt-4 flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/30 p-3">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Editing locale
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Each locale is saved independently. Leave a locale empty to fall back to built-in translations.
+            </p>
+          </div>
+          <div className="inline-flex rounded-md border border-border bg-background p-0.5">
+            {(['vi', 'en'] as const).map((loc) => {
+              const hasDraft = draftData[activeTab]?.[loc] !== undefined;
+              return (
+                <button
+                  key={loc}
+                  type="button"
+                  onClick={() => setEditLocale(loc)}
+                  className={`relative rounded px-3 py-1.5 text-xs font-semibold uppercase transition-colors ${
+                    editLocale === loc
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                  title={hasDraft ? 'Has unsaved changes' : undefined}
+                >
+                  {loc}
+                  {hasDraft && (
+                    <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-amber-400" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {isLoading ? (
@@ -1239,10 +1322,7 @@ export default function ContentPage() {
                 <PortfolioFeaturedProjectsEditor
                   value={currentValue ?? PORTFOLIO_DEFAULTS}
                   onChange={(v) =>
-                    setDraftData((prev) => ({
-                      ...prev,
-                      [activeTab]: v,
-                    }))
+                    setSliceForActiveLocale(activeTab, v)
                   }
                 />
                 <PortfolioDatabaseManager contentValue={currentValue ?? PORTFOLIO_DEFAULTS} />
@@ -1289,10 +1369,7 @@ export default function ContentPage() {
                       <AboutVisualEditor
                         value={draftData[activeTab] ?? SECTION_DEFAULTS[activeTab] ?? {}}
                         onChange={(v) =>
-                          setDraftData((prev) => ({
-                            ...prev,
-                            [activeTab]: v,
-                          }))
+                          setSliceForActiveLocale(activeTab, v)
                         }
                         uploadingKey={uploadingAboutKey}
                         onUploadAvatar={handleUploadAboutAvatar}
@@ -1301,10 +1378,7 @@ export default function ContentPage() {
                       <ServicesVisualEditor
                         value={draftData[activeTab] ?? SECTION_DEFAULTS[activeTab] ?? {}}
                         onChange={(v) =>
-                          setDraftData((prev) => ({
-                            ...prev,
-                            [activeTab]: v,
-                          }))
+                          setSliceForActiveLocale(activeTab, v)
                         }
                         uploadingKey={uploadingServiceKey}
                         onUploadImage={handleUploadServiceImage}
@@ -1314,10 +1388,7 @@ export default function ContentPage() {
                         label={toDisplayLabel(activeTab)}
                         value={draftData[activeTab] ?? SECTION_DEFAULTS[activeTab] ?? {}}
                         onChange={(v) =>
-                          setDraftData((prev) => ({
-                            ...prev,
-                            [activeTab]: v,
-                          }))
+                          setSliceForActiveLocale(activeTab, v)
                         }
                       />
                     )
@@ -1326,10 +1397,7 @@ export default function ContentPage() {
                       key={`${activeTab}-${activeMode}`}
                       value={{}}
                       onChange={(v) =>
-                        setDraftData((prev) => ({
-                          ...prev,
-                          [activeTab]: v,
-                        }))
+                        setSliceForActiveLocale(activeTab, v)
                       }
                     />
                   )}
@@ -1349,20 +1417,14 @@ export default function ContentPage() {
                   <PortfolioFeaturedProjectsEditor
                     value={currentValue}
                     onChange={(v) =>
-                      setDraftData((prev) => ({
-                        ...prev,
-                        [activeTab]: v,
-                      }))
+                      setSliceForActiveLocale(activeTab, v)
                     }
                   />
                 ) : activeMode === 'visual' && activeTab === 'about' ? (
                   <AboutVisualEditor
                     value={currentValue}
                     onChange={(v) =>
-                      setDraftData((prev) => ({
-                        ...prev,
-                        [activeTab]: v,
-                      }))
+                      setSliceForActiveLocale(activeTab, v)
                     }
                     uploadingKey={uploadingAboutKey}
                     onUploadAvatar={handleUploadAboutAvatar}
@@ -1371,10 +1433,7 @@ export default function ContentPage() {
                   <ServicesVisualEditor
                     value={currentValue}
                     onChange={(v) =>
-                      setDraftData((prev) => ({
-                        ...prev,
-                        [activeTab]: v,
-                      }))
+                      setSliceForActiveLocale(activeTab, v)
                     }
                     uploadingKey={uploadingServiceKey}
                     onUploadImage={handleUploadServiceImage}
@@ -1384,10 +1443,7 @@ export default function ContentPage() {
                     label={toDisplayLabel(activeTab)}
                     value={normalizedVisualValue}
                     onChange={(v) =>
-                      setDraftData((prev) => ({
-                        ...prev,
-                        [activeTab]: v,
-                      }))
+                      setSliceForActiveLocale(activeTab, v)
                     }
                   />
                 ) : (
@@ -1395,10 +1451,7 @@ export default function ContentPage() {
                     key={`${activeTab}-${activeMode}`}
                     value={currentValue}
                     onChange={(v) =>
-                      setDraftData((prev) => ({
-                        ...prev,
-                        [activeTab]: v,
-                      }))
+                      setSliceForActiveLocale(activeTab, v)
                     }
                   />
                 )}

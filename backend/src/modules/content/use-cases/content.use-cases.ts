@@ -5,7 +5,13 @@ import {
 } from '../content.constants';
 import type { ContentRepositoryPort } from '../domain/content.repository.port';
 import type { ContentSectionValidatorPort } from '../domain/content.validator.port';
-import type { ContentPayload, ContentRecord } from '../domain/content.types';
+import {
+  SUPPORTED_LOCALES,
+  type ContentPayload,
+  type ContentRecord,
+  type Locale,
+  type LocalizedContentPayload,
+} from '../domain/content.types';
 import { DEFAULT_CONTENT } from '../content.seed';
 
 // Pattern: Use Case — owns CMS read/write logic
@@ -26,13 +32,42 @@ export class ContentUseCases {
     return this.repo.findBySection(section);
   }
 
+  /**
+   * Upsert per-locale content. The incoming payload is partial — `{ vi?, en? }` —
+   * and is merged with the existing record so admins can save one locale at a time
+   * without losing the other.
+   */
   async upsert(
     section: string,
     data: unknown,
     isActive = true,
   ): Promise<ContentRecord> {
     this.validator.validate(section, data);
-    return this.repo.upsert(section, data, isActive);
+
+    const incoming = data as LocalizedContentPayload;
+    const existing = await this.repo.findBySection(section);
+    const existingData =
+      existing && isLocalizedShape(existing.data) ? existing.data : {};
+
+    // Pattern: Partial Merge — only locales present in the incoming payload are touched.
+    const merged: Record<Locale, ContentPayload | null> = {
+      vi: null,
+      en: null,
+    };
+    for (const locale of SUPPORTED_LOCALES) {
+      if (locale in incoming) {
+        merged[locale] = incoming[locale] ?? null;
+      } else {
+        merged[locale] = (existingData[locale] ??
+          null) as ContentPayload | null;
+      }
+    }
+
+    return this.repo.upsert(
+      section,
+      merged as unknown as ContentPayload,
+      isActive,
+    );
   }
 
   async remove(section: string): Promise<ContentRecord> {
@@ -51,4 +86,14 @@ export class ContentUseCases {
     }
     return { message: `Seeded ${sections.length} sections` };
   }
+}
+
+function isLocalizedShape(
+  value: unknown,
+): value is Record<Locale, ContentPayload | null> {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+  // Treat as localized if it has at least one supported locale key
+  return SUPPORTED_LOCALES.some((l) => l in (value as Record<string, unknown>));
 }
