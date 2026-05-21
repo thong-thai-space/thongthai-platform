@@ -46,7 +46,7 @@ export class ContentUseCases {
 
     const incoming = data as LocalizedContentPayload;
     const existing = await this.repo.findBySection(section);
-    const existingData =
+    const existingData: Partial<Record<Locale, ContentPayload | null>> =
       existing && isLocalizedShape(existing.data) ? existing.data : {};
 
     // Pattern: Partial Merge — only locales present in the incoming payload are touched.
@@ -58,8 +58,7 @@ export class ContentUseCases {
       if (locale in incoming) {
         merged[locale] = incoming[locale] ?? null;
       } else {
-        merged[locale] = (existingData[locale] ??
-          null) as ContentPayload | null;
+        merged[locale] = existingData[locale] ?? null;
       }
     }
 
