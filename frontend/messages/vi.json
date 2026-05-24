@@ -197,6 +197,7 @@
     "teamSubtitle": "Những con người đằng sau mỗi dự án thành công"
   },
   "meta": {
+    "siteName": "Thông Thái Space",
     "home": {
       "title": "Thông Thái Space | Giải pháp công nghệ thông minh",
       "description": "Nền tảng quản lý dự án và dịch vụ công nghệ bởi Thông Thái Space - Web, App, AI, Tư vấn"
@@ -204,6 +205,26 @@
     "about": {
       "title": "Giới thiệu | Thông Thái Space",
       "description": "Tìm hiểu về Thông Thái Space — đội ngũ chuyên gia công nghệ với sứ mệnh chuyển đổi số cho doanh nghiệp."
+    },
+    "services": {
+      "title": "Dịch vụ | Thông Thái Space",
+      "description": "Dịch vụ phát triển Web, App, AI và tư vấn công nghệ chuyên nghiệp từ Thông Thái Space."
+    },
+    "portfolio": {
+      "title": "Dự án | Thông Thái Space",
+      "description": "Các dự án tiêu biểu đã hoàn thành bởi Thông Thái Space — Web, App, AI và tích hợp doanh nghiệp."
+    },
+    "contact": {
+      "title": "Liên hệ | Thông Thái Space",
+      "description": "Mô tả yêu cầu của bạn, chúng tôi sẽ tư vấn và báo giá miễn phí trong 24 giờ."
+    },
+    "privacyPolicy": {
+      "title": "Chính sách bảo mật | Thông Thái Space",
+      "description": "Chính sách bảo mật và xử lý dữ liệu cá nhân của nền tảng Thông Thái Space."
+    },
+    "termsAndConditions": {
+      "title": "Điều khoản & Điều kiện | Thông Thái Space",
+      "description": "Điều khoản và điều kiện sử dụng dịch vụ của Thông Thái Space."
     }
   }
 }

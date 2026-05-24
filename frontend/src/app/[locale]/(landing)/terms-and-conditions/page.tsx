@@ -1,6 +1,52 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { routing } from '@/i18n/routing';
 
-export default function TermsAndConditionsPage() {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'meta' });
+  const isDefault = locale === routing.defaultLocale;
+  const canonical = isDefault
+    ? '/terms-and-conditions'
+    : `/${locale}/terms-and-conditions`;
+
+  return {
+    title: t('termsAndConditions.title'),
+    description: t('termsAndConditions.description'),
+    alternates: {
+      canonical,
+      languages: Object.fromEntries(
+        routing.locales.map((alt) => [
+          alt,
+          alt === routing.defaultLocale
+            ? '/terms-and-conditions'
+            : `/${alt}/terms-and-conditions`,
+        ]),
+      ),
+    },
+    openGraph: {
+      url: canonical,
+      siteName: t('siteName'),
+      title: t('termsAndConditions.title'),
+      description: t('termsAndConditions.description'),
+      type: 'article',
+      locale,
+    },
+  };
+}
+
+export default async function TermsAndConditionsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
   return (
     <main className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="tts-brand-surface p-7 sm:p-9">

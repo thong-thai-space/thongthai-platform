@@ -1,6 +1,48 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { routing } from '@/i18n/routing';
 
-export default function PrivacyPolicyPage() {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'meta' });
+  const isDefault = locale === routing.defaultLocale;
+  const canonical = isDefault ? '/privacy-policy' : `/${locale}/privacy-policy`;
+
+  return {
+    title: t('privacyPolicy.title'),
+    description: t('privacyPolicy.description'),
+    alternates: {
+      canonical,
+      languages: Object.fromEntries(
+        routing.locales.map((alt) => [
+          alt,
+          alt === routing.defaultLocale ? '/privacy-policy' : `/${alt}/privacy-policy`,
+        ]),
+      ),
+    },
+    openGraph: {
+      url: canonical,
+      siteName: t('siteName'),
+      title: t('privacyPolicy.title'),
+      description: t('privacyPolicy.description'),
+      type: 'article',
+      locale,
+    },
+  };
+}
+
+export default async function PrivacyPolicyPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
   return (
     <main className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="tts-brand-surface p-7 sm:p-9">

@@ -197,6 +197,7 @@
     "teamSubtitle": "The people behind every successful project"
   },
   "meta": {
+    "siteName": "Thong Thai Space",
     "home": {
       "title": "Thong Thai Space | Smart Technology Solutions",
       "description": "Project management platform and technology services by Thong Thai Space - Web, App, AI, Consulting"
@@ -204,6 +205,26 @@
     "about": {
       "title": "About | Thong Thai Space",
       "description": "Learn about Thong Thai Space - a dedicated team of technology experts on a mission to digitally transform businesses."
+    },
+    "services": {
+      "title": "Services | Thong Thai Space",
+      "description": "Professional Web, App, AI development and IT consulting services from Thong Thai Space."
+    },
+    "portfolio": {
+      "title": "Portfolio | Thong Thai Space",
+      "description": "Featured projects completed by Thong Thai Space — Web, App, AI and enterprise integrations."
+    },
+    "contact": {
+      "title": "Contact | Thong Thai Space",
+      "description": "Describe your project requirements, and we will provide a free consultation and quote within 24 hours."
+    },
+    "privacyPolicy": {
+      "title": "Privacy Policy | Thong Thai Space",
+      "description": "Privacy policy and personal data handling of the Thong Thai Space platform."
+    },
+    "termsAndConditions": {
+      "title": "Terms and Conditions | Thong Thai Space",
+      "description": "Terms and conditions of use for Thong Thai Space services."
     }
   }
 }
