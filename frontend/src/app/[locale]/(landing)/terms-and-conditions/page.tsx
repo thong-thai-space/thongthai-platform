@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { BreadcrumbJsonLd } from '@/components/seo/json-ld';
 import { routing } from '@/i18n/routing';
 
 export async function generateMetadata({
@@ -47,8 +48,21 @@ export default async function TermsAndConditionsPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: 'nav' });
+  const tMeta = await getTranslations({ locale, namespace: 'meta' });
+  const isDefault = locale === routing.defaultLocale;
+  const home = isDefault ? '/' : `/${locale}`;
+  const pageUrl = isDefault
+    ? '/terms-and-conditions'
+    : `/${locale}/terms-and-conditions`;
   return (
     <main className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
+      <BreadcrumbJsonLd
+        items={[
+          { name: t('home'), url: home },
+          { name: tMeta('termsAndConditions.title').split('|')[0].trim(), url: pageUrl },
+        ]}
+      />
       <div className="tts-brand-surface p-7 sm:p-9">
       <h1 className="tts-landing-title text-3xl font-bold tracking-tight text-foreground">Terms and Conditions</h1>
       <p className="tts-brand-body mt-2 text-sm">Last updated: March 19, 2026</p>

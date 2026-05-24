@@ -1,6 +1,10 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ContactPageContent } from '@/components/landing/contact-page-content';
+import {
+  BreadcrumbJsonLd,
+  ContactPageJsonLd,
+} from '@/components/seo/json-ld';
 import { routing } from '@/i18n/routing';
 
 export async function generateMetadata({
@@ -43,5 +47,27 @@ export default async function ContactPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <ContactPageContent />;
+  const tNav = await getTranslations({ locale, namespace: 'nav' });
+  const tMeta = await getTranslations({ locale, namespace: 'meta' });
+  const isDefault = locale === routing.defaultLocale;
+  const home = isDefault ? '/' : `/${locale}`;
+  const contactUrl = isDefault ? '/contact' : `/${locale}/contact`;
+
+  return (
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: tNav('home'), url: home },
+          { name: tNav('contact'), url: contactUrl },
+        ]}
+      />
+      <ContactPageJsonLd
+        name={tMeta('contact.title')}
+        url={contactUrl}
+        email="hoangthai229@gmail.com"
+        telephone="+84345807906"
+      />
+      <ContactPageContent />
+    </>
+  );
 }

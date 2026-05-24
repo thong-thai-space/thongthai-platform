@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ServicesPageContent } from '@/components/landing/services-page-content';
+import { BreadcrumbJsonLd } from '@/components/seo/json-ld';
 import { routing } from '@/i18n/routing';
 
 export async function generateMetadata({
@@ -43,5 +44,20 @@ export default async function ServicesPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <ServicesPageContent />;
+  const t = await getTranslations({ locale, namespace: 'nav' });
+  const isDefault = locale === routing.defaultLocale;
+  const home = isDefault ? '/' : `/${locale}`;
+  const servicesUrl = isDefault ? '/services' : `/${locale}/services`;
+
+  return (
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: t('home'), url: home },
+          { name: t('services'), url: servicesUrl },
+        ]}
+      />
+      <ServicesPageContent />
+    </>
+  );
 }

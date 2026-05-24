@@ -10,6 +10,7 @@ import { SocketProvider } from "@/lib/socket";
 import { AnimationProvider } from "@/components/motion/animation-provider";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { routing } from "@/i18n/routing";
+import { OrganizationJsonLd, WebSiteJsonLd } from "@/components/seo/json-ld";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://thongthaispace.com";
 
@@ -69,6 +70,9 @@ export default async function RootLayout({
   }
   setRequestLocale(locale);
 
+  const t = await getTranslations({ locale, namespace: "meta" });
+  const siteName = t("siteName");
+
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
@@ -76,6 +80,9 @@ export default async function RootLayout({
         <link rel="apple-touch-icon" href="/logo.png" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#2563eb" />
+        {/* Pattern: SEO — Organization + WebSite schemas render once per page. */}
+        <OrganizationJsonLd name={siteName} />
+        <WebSiteJsonLd name={siteName} />
       </head>
       <body
         className={`${montserrat.variable} ${jetbrainsMono.variable} antialiased`}

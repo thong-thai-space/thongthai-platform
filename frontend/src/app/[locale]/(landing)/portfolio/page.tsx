@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { PortfolioPageContent } from '@/components/landing/portfolio-page-content';
+import { BreadcrumbJsonLd } from '@/components/seo/json-ld';
 import { routing } from '@/i18n/routing';
 
 export async function generateMetadata({
@@ -43,5 +44,20 @@ export default async function PortfolioPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <PortfolioPageContent />;
+  const t = await getTranslations({ locale, namespace: 'nav' });
+  const isDefault = locale === routing.defaultLocale;
+  const home = isDefault ? '/' : `/${locale}`;
+  const portfolioUrl = isDefault ? '/portfolio' : `/${locale}/portfolio`;
+
+  return (
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: t('home'), url: home },
+          { name: t('portfolio'), url: portfolioUrl },
+        ]}
+      />
+      <PortfolioPageContent />
+    </>
+  );
 }
