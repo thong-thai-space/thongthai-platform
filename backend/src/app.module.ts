@@ -22,6 +22,7 @@ import { FileModule } from './modules/file/file.module';
 import { MessageModule } from './modules/message/message.module';
 import { ContactModule } from './modules/contact/contact.module';
 import { ContentModule } from './modules/content/content.module';
+import { BlogModule } from './modules/blog/blog.module';
 import { HealthModule } from './modules/health/health.module';
 import { ExportModule } from './modules/export/export.module';
 import { SecurityModule } from './modules/security/security.module';
@@ -78,6 +79,7 @@ import { SecurityModule } from './modules/security/security.module';
     MessageModule,
     ContactModule,
     ContentModule,
+    BlogModule,
     HealthModule,
     ExportModule,
     SecurityModule,

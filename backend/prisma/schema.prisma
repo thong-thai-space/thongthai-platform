@@ -95,6 +95,11 @@ enum AiApplyRequestStatus {
   REJECTED
 }
 
+enum BlogPostStatus {
+  DRAFT
+  PUBLISHED
+}
+
 // ==================== MODELS ====================
 
 model User {
@@ -146,6 +151,9 @@ model User {
   aiUsageAudits    AiUsageAudit[]
   aiApplyRequestsSubmitted AiApplyRequest[] @relation("AiApplyRequester")
   aiApplyRequestsReviewed  AiApplyRequest[] @relation("AiApplyReviewer")
+
+  // Pattern: Authorship — blog posts authored by this user
+  blogPosts        BlogPost[]       @relation("BlogPostAuthor")
 
   @@map("users")
 }
@@ -517,6 +525,34 @@ model SiteContent {
   createdAt DateTime @default(now())
 
   @@map("site_contents")
+}
+
+// Pattern: Aggregate Root — a published blog post is the unit of public CMS content
+// for organic SEO. `(locale, slug)` is unique so the same content can be re-slugged
+// per locale. `contentMdx` is rendered server-side at request time (GĐ1) and later
+// cached as static via ISR once volume grows (GĐ2).
+model BlogPost {
+  id            String         @id @default(cuid())
+  slug          String
+  locale        Language
+  title         String
+  excerpt       String?
+  contentMdx    String
+  coverImageUrl String?
+  tags          String[]       @default([])
+  status        BlogPostStatus @default(DRAFT)
+  publishedAt   DateTime?
+
+  authorId String
+  author   User   @relation("BlogPostAuthor", fields: [authorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([locale, slug])
+  @@index([locale, status, publishedAt])
+  @@index([status, publishedAt])
+  @@map("blog_posts")
 }
 
 model PushSubscription {
