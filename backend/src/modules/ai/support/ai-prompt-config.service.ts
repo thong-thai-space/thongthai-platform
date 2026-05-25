@@ -41,14 +41,24 @@ export class AiPromptConfigService {
     const defaults = this.defaults();
     const section = await this.aiRepository.findPromptSection();
 
-    if (!section?.isActive || !section.data || typeof section.data !== 'object') {
+    if (
+      !section?.isActive ||
+      !section.data ||
+      typeof section.data !== 'object'
+    ) {
       return defaults;
     }
 
     const data = section.data as Record<string, unknown>;
     return {
-      generalAssistant: this.pick(data.generalAssistant, defaults.generalAssistant),
-      clientAssistant: this.pick(data.clientAssistant, defaults.clientAssistant),
+      generalAssistant: this.pick(
+        data.generalAssistant,
+        defaults.generalAssistant,
+      ),
+      clientAssistant: this.pick(
+        data.clientAssistant,
+        defaults.clientAssistant,
+      ),
       publicFaq: this.pick(data.publicFaq, defaults.publicFaq),
       proposal: this.pick(data.proposal, defaults.proposal),
       taskBreakdown: this.pick(data.taskBreakdown, defaults.taskBreakdown),
@@ -56,7 +66,10 @@ export class AiPromptConfigService {
       estimate: this.pick(data.estimate, defaults.estimate),
       progressReport: this.pick(data.progressReport, defaults.progressReport),
       strategicPlan: this.pick(data.strategicPlan, defaults.strategicPlan),
-      architectureDiagram: this.pick(data.architectureDiagram, defaults.architectureDiagram),
+      architectureDiagram: this.pick(
+        data.architectureDiagram,
+        defaults.architectureDiagram,
+      ),
       professionalOutputRules: this.pick(
         data.professionalOutputRules,
         defaults.professionalOutputRules,
@@ -81,6 +94,8 @@ export class AiPromptConfigService {
   }
 
   private pick(input: unknown, fallback: string): string {
-    return typeof input === 'string' && input.trim().length > 0 ? input : fallback;
+    return typeof input === 'string' && input.trim().length > 0
+      ? input
+      : fallback;
   }
 }

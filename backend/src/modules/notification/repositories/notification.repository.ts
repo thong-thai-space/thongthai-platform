@@ -40,7 +40,10 @@ export class NotificationRepository {
         data: { isRead: true },
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
         throw new NotFoundException('Notification not found');
       }
       throw new InternalServerErrorException('Failed to update notification');
@@ -72,7 +75,10 @@ export class NotificationRepository {
     try {
       return await this.prisma.notification.delete({ where: { id } });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
         throw new NotFoundException('Notification not found');
       }
       throw new InternalServerErrorException('Failed to delete notification');

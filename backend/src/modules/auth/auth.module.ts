@@ -49,7 +49,10 @@ import { RolesGuard } from './guards/roles.guard';
     { provide: AUTH_EMAIL_NOTIFIER, useExisting: AuthEmailNotifierAdapter },
     { provide: AUTH_PASSWORD_HASHER, useExisting: BcryptPasswordHasherAdapter },
     { provide: AUTH_TOKEN_SERVICE, useExisting: JwtTokenServiceAdapter },
-    { provide: AUTH_SECURITY_CHALLENGE, useExisting: TurnstileSecurityChallengeAdapter },
+    {
+      provide: AUTH_SECURITY_CHALLENGE,
+      useExisting: TurnstileSecurityChallengeAdapter,
+    },
 
     // Policies
     PasswordPolicy,

@@ -43,7 +43,10 @@ export class ProjectNotificationAdapter implements ProjectNotificationPort {
     }
   }
 
-  async notifyProjectRequested(project: Project, clientId: string): Promise<void> {
+  async notifyProjectRequested(
+    project: Project,
+    clientId: string,
+  ): Promise<void> {
     const [adminIds, clientName] = await Promise.all([
       this.repo.findActiveAdminIds(),
       this.repo.findUserNameById(clientId),

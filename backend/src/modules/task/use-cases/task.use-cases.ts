@@ -1,4 +1,10 @@
-import { Inject, Injectable, BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  BadRequestException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { NotificationType, Prisma, UserRole } from '@prisma/client';
 import { CreateTaskDto, UpdateTaskDto } from '../dto/task.dto';
 import { TASK_NOTIFICATION_PORT, TASK_REPOSITORY } from '../task.constants';
@@ -15,7 +21,11 @@ export class TaskUseCases {
     private notificationPort: TaskNotificationPort,
   ) {}
 
-  async findByProject(projectId: string | undefined, userId: string, role: UserRole) {
+  async findByProject(
+    projectId: string | undefined,
+    userId: string,
+    role: UserRole,
+  ) {
     if (role === UserRole.MEMBER) {
       return this.getMyTasks(userId);
     }
@@ -28,7 +38,9 @@ export class TaskUseCases {
       return this.taskRepository.findAllWithIncludes(where);
     }
 
-    const where: Prisma.TaskWhereInput | undefined = projectId ? { projectId } : undefined;
+    const where: Prisma.TaskWhereInput | undefined = projectId
+      ? { projectId }
+      : undefined;
     return this.taskRepository.findAllWithIncludes(where);
   }
 
@@ -38,11 +50,15 @@ export class TaskUseCases {
 
     // Pattern: Authorization - Per-resource access control
     if (role === UserRole.MEMBER && task.assigneeId !== userId) {
-      throw new ForbiddenException('You do not have permission to access this task');
+      throw new ForbiddenException(
+        'You do not have permission to access this task',
+      );
     }
 
     if (role === UserRole.CLIENT && task.project?.clientId !== userId) {
-      throw new ForbiddenException('You do not have permission to access this task');
+      throw new ForbiddenException(
+        'You do not have permission to access this task',
+      );
     }
 
     return task;
@@ -51,24 +67,35 @@ export class TaskUseCases {
   async create(dto: CreateTaskDto, creatorId: string) {
     // Pattern: Validation - Prevent circular subtasks
     if (dto.parentId) {
-      const isCircular = await this.taskRepository.isCircularSubtask(dto.projectId, dto.parentId);
+      const isCircular = await this.taskRepository.isCircularSubtask(
+        dto.projectId,
+        dto.parentId,
+      );
       if (isCircular) {
-        throw new BadRequestException('Cannot create circular subtask relationship');
+        throw new BadRequestException(
+          'Cannot create circular subtask relationship',
+        );
       }
     }
 
     // Pattern: Validation - Verify assignee is project member
     if (dto.assigneeId) {
-      const assignee = await this.taskRepository.findUserSummary(dto.assigneeId);
+      const assignee = await this.taskRepository.findUserSummary(
+        dto.assigneeId,
+      );
 
       if (!assignee) {
         throw new BadRequestException('Assignee user not found');
       }
 
       if (assignee.role === UserRole.CLIENT) {
-        const clientId = await this.taskRepository.findProjectClientId(dto.projectId);
+        const clientId = await this.taskRepository.findProjectClientId(
+          dto.projectId,
+        );
         if (clientId !== dto.assigneeId) {
-          throw new BadRequestException('Assignee does not have access to this project');
+          throw new BadRequestException(
+            'Assignee does not have access to this project',
+          );
         }
       }
     }
@@ -81,9 +108,13 @@ export class TaskUseCases {
       dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
       estimatedHours: dto.estimatedHours,
       order: dto.order,
-      ...(dto.assigneeId ? { assignee: { connect: { id: dto.assigneeId } } } : {}),
+      ...(dto.assigneeId
+        ? { assignee: { connect: { id: dto.assigneeId } } }
+        : {}),
       ...(dto.parentId ? { parent: { connect: { id: dto.parentId } } } : {}),
-      ...(dto.milestoneId ? { milestone: { connect: { id: dto.milestoneId } } } : {}),
+      ...(dto.milestoneId
+        ? { milestone: { connect: { id: dto.milestoneId } } }
+        : {}),
       project: { connect: { id: dto.projectId } },
       creator: { connect: { id: creatorId } },
     };
@@ -103,31 +134,51 @@ export class TaskUseCases {
     return task;
   }
 
-  async update(id: string, dto: UpdateTaskDto, updaterId?: string, updaterRole?: UserRole) {
+  async update(
+    id: string,
+    dto: UpdateTaskDto,
+    updaterId?: string,
+    updaterRole?: UserRole,
+  ) {
     const task = await this.taskRepository.findById(id);
     if (!task) throw new NotFoundException('Task not found');
 
     if (updaterRole === UserRole.MEMBER) {
       if (task.assigneeId !== updaterId) {
-        throw new ForbiddenException('You can only update tasks assigned to you');
+        throw new ForbiddenException(
+          'You can only update tasks assigned to you',
+        );
       }
     }
 
     const oldStatus = task.status;
     const updateData: Prisma.TaskUpdateInput = {
       ...(dto.title !== undefined ? { title: dto.title } : {}),
-      ...(dto.description !== undefined ? { description: dto.description } : {}),
+      ...(dto.description !== undefined
+        ? { description: dto.description }
+        : {}),
       ...(dto.status !== undefined ? { status: dto.status } : {}),
       ...(dto.priority !== undefined ? { priority: dto.priority } : {}),
-      ...(dto.dueDate !== undefined ? { dueDate: dto.dueDate ? new Date(dto.dueDate) : null } : {}),
-      ...(dto.estimatedHours !== undefined ? { estimatedHours: dto.estimatedHours } : {}),
+      ...(dto.dueDate !== undefined
+        ? { dueDate: dto.dueDate ? new Date(dto.dueDate) : null }
+        : {}),
+      ...(dto.estimatedHours !== undefined
+        ? { estimatedHours: dto.estimatedHours }
+        : {}),
       ...(dto.order !== undefined ? { order: dto.order } : {}),
       ...(dto.assigneeId !== undefined
-        ? { assignee: dto.assigneeId ? { connect: { id: dto.assigneeId } } : { disconnect: true } }
+        ? {
+            assignee: dto.assigneeId
+              ? { connect: { id: dto.assigneeId } }
+              : { disconnect: true },
+          }
         : {}),
     };
 
-    const updated = await this.taskRepository.updateWithIncludes(id, updateData);
+    const updated = await this.taskRepository.updateWithIncludes(
+      id,
+      updateData,
+    );
 
     if (dto.status && dto.status !== oldStatus && updaterId) {
       const updater = await this.taskRepository.findUserSummary(updaterId);
@@ -144,8 +195,14 @@ export class TaskUseCases {
       }
     }
 
-    if (dto.assigneeId && dto.assigneeId !== task.assigneeId && dto.assigneeId !== updaterId) {
-      const projectName = await this.taskRepository.findProjectName(task.projectId);
+    if (
+      dto.assigneeId &&
+      dto.assigneeId !== task.assigneeId &&
+      dto.assigneeId !== updaterId
+    ) {
+      const projectName = await this.taskRepository.findProjectName(
+        task.projectId,
+      );
 
       await this.notificationPort.create({
         type: NotificationType.TASK_ASSIGNED,
@@ -168,7 +225,12 @@ export class TaskUseCases {
     return this.taskRepository.findByAssignee(userId);
   }
 
-  async addComment(taskId: string, content: string, userId: string, role: UserRole) {
+  async addComment(
+    taskId: string,
+    content: string,
+    userId: string,
+    role: UserRole,
+  ) {
     const task = await this.findOne(taskId, userId, role);
 
     const comment = await this.taskRepository.createComment({
@@ -182,7 +244,9 @@ export class TaskUseCases {
     const admins = await this.taskRepository.findAdminIds();
     for (const adminId of admins) recipients.add(adminId);
 
-    const ownerId = await this.taskRepository.findProjectOwnerId(task.projectId);
+    const ownerId = await this.taskRepository.findProjectOwnerId(
+      task.projectId,
+    );
     if (ownerId) recipients.add(ownerId);
     if (task.assigneeId) recipients.add(task.assigneeId);
     if (task.creatorId) recipients.add(task.creatorId);

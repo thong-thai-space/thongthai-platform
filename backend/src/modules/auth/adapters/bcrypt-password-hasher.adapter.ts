@@ -6,7 +6,10 @@ import { AuthPasswordHasherPort } from '../domain/auth.password-hasher.port';
 // Pattern: Adapter — concrete implementation of password hashing
 @Injectable()
 export class BcryptPasswordHasherAdapter implements AuthPasswordHasherPort {
-  hash(plaintext: string, rounds: number = AUTH_HASH_ROUNDS.PASSWORD): Promise<string> {
+  hash(
+    plaintext: string,
+    rounds: number = AUTH_HASH_ROUNDS.PASSWORD,
+  ): Promise<string> {
     return bcrypt.hash(plaintext, rounds);
   }
 

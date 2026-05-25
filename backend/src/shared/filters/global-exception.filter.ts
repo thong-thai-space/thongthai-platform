@@ -97,7 +97,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     response.status(statusCode).json(errorResponse);
   }
 
-  private handlePrismaError(error: Prisma.PrismaClientKnownRequestError): string {
+  private handlePrismaError(
+    error: Prisma.PrismaClientKnownRequestError,
+  ): string {
     const errorMap: Record<string, string> = {
       P2002: 'A unique constraint was violated',
       P2003: 'A foreign key constraint was violated',
@@ -106,11 +108,14 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       P2001: 'The record searched for in the query was not found',
       P2011: 'Null constraint violation',
       P2012: 'Missing a required value',
-      P2014: 'The change you are trying to make would violate the required relation',
+      P2014:
+        'The change you are trying to make would violate the required relation',
       P2015: 'Related record not found',
       P2016: 'Query interpretation error',
-      P2017: 'The records for relation between parent and child models are not connected',
-      P2018: 'The required relation between models for the query could not be found',
+      P2017:
+        'The records for relation between parent and child models are not connected',
+      P2018:
+        'The required relation between models for the query could not be found',
       P2019: 'Input error',
       P2020: 'Value out of range for the type',
       P2021: 'Table does not exist in the current database',

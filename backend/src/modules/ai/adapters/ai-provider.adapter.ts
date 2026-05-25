@@ -27,7 +27,8 @@ export class AiProviderAdapter implements AiProviderPort {
       messages: params.messages,
     });
 
-    const text = response.content[0]?.type === 'text' ? response.content[0].text : '';
+    const text =
+      response.content[0]?.type === 'text' ? response.content[0].text : '';
 
     return {
       text,

@@ -5,10 +5,7 @@ import { UserService } from './user.service';
 import { UserUseCases } from './use-cases/user.use-cases';
 import { UserRepository } from './repositories/user.repository';
 import { BcryptUserPasswordHasher } from './adapters/bcrypt-user-password-hasher.adapter';
-import {
-  USER_PASSWORD_HASHER,
-  USER_REPOSITORY,
-} from './user.constants';
+import { USER_PASSWORD_HASHER, USER_REPOSITORY } from './user.constants';
 
 @Module({
   imports: [StorageModule],

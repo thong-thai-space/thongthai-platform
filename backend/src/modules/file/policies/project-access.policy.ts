@@ -21,7 +21,11 @@ export class ProjectAccessPolicy {
     private readonly repo: FileRepositoryPort,
   ) {}
 
-  async assertCanAccess(projectId: string, userId: string, role: UserRole): Promise<void> {
+  async assertCanAccess(
+    projectId: string,
+    userId: string,
+    role: UserRole,
+  ): Promise<void> {
     const project = await this.repo.findProjectAccess(projectId, userId);
     if (!project) throw new NotFoundException('Project not found');
 

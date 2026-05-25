@@ -84,7 +84,9 @@ describe('AI content helpers', () => {
     });
 
     it('returns true on timeout message', () => {
-      expect(isProviderUnavailableError(new Error('request timeout'))).toBe(true);
+      expect(isProviderUnavailableError(new Error('request timeout'))).toBe(
+        true,
+      );
     });
 
     it('returns false on plain validation error', () => {

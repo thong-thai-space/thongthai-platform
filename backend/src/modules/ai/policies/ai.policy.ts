@@ -1,5 +1,14 @@
-import { BadRequestException, ForbiddenException, Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import { AiApplyRequestWithProject, AiStrategicProject } from '../domain/ai.types';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
+import {
+  AiApplyRequestWithProject,
+  AiStrategicProject,
+} from '../domain/ai.types';
 import { UserRole } from '@prisma/client';
 
 // Pattern: Policy
@@ -11,7 +20,10 @@ export class AiPolicy {
     }
   }
 
-  assertOwnerOnly(role: UserRole, message = 'Only OWNER can perform this action') {
+  assertOwnerOnly(
+    role: UserRole,
+    message = 'Only OWNER can perform this action',
+  ) {
     if (role !== UserRole.OWNER) {
       throw new ForbiddenException(message);
     }
@@ -23,26 +35,43 @@ export class AiPolicy {
     }
   }
 
-  assertAuditAccess(role: UserRole, auditUserId: string, currentUserId: string) {
-    if (role !== UserRole.OWNER && role !== UserRole.ADMIN && auditUserId !== currentUserId) {
+  assertAuditAccess(
+    role: UserRole,
+    auditUserId: string,
+    currentUserId: string,
+  ) {
+    if (
+      role !== UserRole.OWNER &&
+      role !== UserRole.ADMIN &&
+      auditUserId !== currentUserId
+    ) {
       throw new ForbiddenException();
     }
   }
 
-  assertStrategicPlanAccess(project: AiStrategicProject, role: UserRole, userId: string) {
+  assertStrategicPlanAccess(
+    project: AiStrategicProject,
+    role: UserRole,
+    userId: string,
+  ) {
     if (role === UserRole.CLIENT && project.clientId !== userId) {
       throw new ForbiddenException();
     }
 
     if (role === UserRole.MEMBER) {
-      const hasAssignedTask = project.tasks.some((task) => task.assigneeId === userId);
+      const hasAssignedTask = project.tasks.some(
+        (task) => task.assigneeId === userId,
+      );
       if (!hasAssignedTask) throw new ForbiddenException();
     }
   }
 
   assertArchitectureTrialLimit(usedRequests: number, limit: number) {
     if (usedRequests >= limit) {
-      throw new HttpException(`Trial limit reached: maximum ${limit} requests`, HttpStatus.TOO_MANY_REQUESTS);
+      throw new HttpException(
+        `Trial limit reached: maximum ${limit} requests`,
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
     }
   }
 }

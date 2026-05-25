@@ -5,12 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  Prisma,
-  ProjectStatus,
-  UserRole,
-  type Project,
-} from '@prisma/client';
+import { Prisma, ProjectStatus, UserRole, type Project } from '@prisma/client';
 import { CreateProjectDto, UpdateProjectDto } from '../dto/project.dto';
 import { CreateProjectRequestDto } from '../dto/create-project-request.dto';
 import { UpdateProjectClientDto } from '../dto/update-project-client.dto';
@@ -55,7 +50,9 @@ export class ProjectUseCases {
       throw new ForbiddenException();
     }
     if (role === UserRole.MEMBER) {
-      const hasAssignedTask = project.tasks.some((t) => t.assignee?.id === userId);
+      const hasAssignedTask = project.tasks.some(
+        (t) => t.assignee?.id === userId,
+      );
       if (!hasAssignedTask) throw new ForbiddenException();
     }
     // SECURITY: OWNER/ADMIN can only read their own projects.
@@ -92,7 +89,10 @@ export class ProjectUseCases {
     return project;
   }
 
-  async createRequest(dto: CreateProjectRequestDto, clientId: string): Promise<Project> {
+  async createRequest(
+    dto: CreateProjectRequestDto,
+    clientId: string,
+  ): Promise<Project> {
     const data: Prisma.ProjectCreateInput = {
       name: dto.name,
       description: dto.description,
@@ -125,10 +125,7 @@ export class ProjectUseCases {
     }
 
     if (dto.status) {
-      this.statusPolicy.assertTransition(
-        existing.status as ProjectStatus,
-        dto.status as ProjectStatus,
-      );
+      this.statusPolicy.assertTransition(existing.status, dto.status);
     }
 
     const { startDate, endDate, deadline, ...rest } = dto;
@@ -154,7 +151,10 @@ export class ProjectUseCases {
     return { success: true };
   }
 
-  async acceptRequest(projectId: string, adminUserId: string): Promise<Project> {
+  async acceptRequest(
+    projectId: string,
+    adminUserId: string,
+  ): Promise<Project> {
     const project = await this.repo.findById(projectId);
     if (!project) throw new NotFoundException('Project not found');
     if (project.status !== ProjectStatus.DRAFT || !project.clientId) {

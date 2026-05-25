@@ -45,15 +45,20 @@ export const taskAssigneeIncludes = Prisma.validator<Prisma.TaskDefaultArgs>()({
   },
 });
 
-export const taskCommentIncludes = Prisma.validator<Prisma.CommentDefaultArgs>()({
-  include: {
-    author: { select: { id: true, name: true, avatar: true } },
-  },
-});
+export const taskCommentIncludes =
+  Prisma.validator<Prisma.CommentDefaultArgs>()({
+    include: {
+      author: { select: { id: true, name: true, avatar: true } },
+    },
+  });
 
 export type TaskListItem = Prisma.TaskGetPayload<typeof taskListIncludes>;
 export type TaskWithDetails = Prisma.TaskGetPayload<typeof taskDetailIncludes>;
 export type TaskWithProject = Prisma.TaskGetPayload<typeof taskCreateIncludes>;
 export type TaskWithAssignee = Prisma.TaskGetPayload<typeof taskUpdateIncludes>;
-export type TaskWithProjectSummary = Prisma.TaskGetPayload<typeof taskAssigneeIncludes>;
-export type TaskCommentWithAuthor = Prisma.CommentGetPayload<typeof taskCommentIncludes>;
+export type TaskWithProjectSummary = Prisma.TaskGetPayload<
+  typeof taskAssigneeIncludes
+>;
+export type TaskCommentWithAuthor = Prisma.CommentGetPayload<
+  typeof taskCommentIncludes
+>;

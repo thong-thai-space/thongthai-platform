@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { R2StorageService } from '../../../shared/storage/r2-storage.service';
-import type { FileStoragePort, FileUploadFolder } from '../domain/file.storage.port';
+import type {
+  FileStoragePort,
+  FileUploadFolder,
+} from '../domain/file.storage.port';
 
 // Pattern: Adapter — wraps R2StorageService behind FileStoragePort
 @Injectable()

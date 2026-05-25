@@ -62,7 +62,10 @@ describe('AiAuditUseCase.getLogs', () => {
     const { useCase, repo } = buildSut();
     await useCase.getLogs('u1', UserRole.ADMIN, 10, 7);
 
-    const call = repo.findUsageAuditLogs.mock.calls[0][0] as Record<string, unknown>;
+    const call = repo.findUsageAuditLogs.mock.calls[0][0] as Record<
+      string,
+      unknown
+    >;
     expect(call.userId).toBeUndefined();
   });
 
@@ -78,7 +81,10 @@ describe('AiAuditUseCase.getLogs', () => {
   it('clamps limit to [1, 200]', async () => {
     const { useCase, repo } = buildSut();
     await useCase.getLogs('u1', UserRole.ADMIN, 9999);
-    expect(repo.findUsageAuditLogs).toHaveBeenCalledWith(expect.anything(), 200);
+    expect(repo.findUsageAuditLogs).toHaveBeenCalledWith(
+      expect.anything(),
+      200,
+    );
   });
 });
 
@@ -87,7 +93,9 @@ describe('AiAuditUseCase.updateFeedback', () => {
     const { useCase, repo } = buildSut();
     repo.findUsageAuditById.mockResolvedValue(null);
     await expect(
-      useCase.updateFeedback('a1', 'u1', UserRole.MEMBER, { effectivenessScore: 5 } as never),
+      useCase.updateFeedback('a1', 'u1', UserRole.MEMBER, {
+        effectivenessScore: 5,
+      } as never),
     ).rejects.toThrow(NotFoundException);
   });
 
@@ -99,7 +107,11 @@ describe('AiAuditUseCase.updateFeedback', () => {
       effectivenessScore: 5,
     } as never);
 
-    expect(aiPolicy.assertAuditAccess).toHaveBeenCalledWith(UserRole.MEMBER, 'owner', 'u1');
+    expect(aiPolicy.assertAuditAccess).toHaveBeenCalledWith(
+      UserRole.MEMBER,
+      'owner',
+      'u1',
+    );
     expect(repo.updateUsageAudit).toHaveBeenCalled();
   });
 });

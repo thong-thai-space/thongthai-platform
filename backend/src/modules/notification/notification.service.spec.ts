@@ -45,7 +45,9 @@ describe('NotificationService', () => {
 
   it('markAsRead forbids non-owner', async () => {
     mockRepository.findById.mockResolvedValue({ id: 'n1', userId: 'other' });
-    await expect(service.markAsRead('n1', 'me')).rejects.toThrow(ForbiddenException);
+    await expect(service.markAsRead('n1', 'me')).rejects.toThrow(
+      ForbiddenException,
+    );
   });
 
   it('markAsRead succeeds for owner', async () => {
@@ -58,7 +60,9 @@ describe('NotificationService', () => {
 
   it('remove forbids non-owner', async () => {
     mockRepository.findById.mockResolvedValue({ id: 'n1', userId: 'other' });
-    await expect(service.remove('n1', 'me')).rejects.toThrow(ForbiddenException);
+    await expect(service.remove('n1', 'me')).rejects.toThrow(
+      ForbiddenException,
+    );
   });
 
   it('create persists, broadcasts via gateway, and pushes', async () => {
@@ -74,7 +78,11 @@ describe('NotificationService', () => {
     const result = await service.create(data);
 
     expect(result).toEqual(created);
-    expect(mockGateway.sendToUser).toHaveBeenCalledWith('u1', 'notification', created);
+    expect(mockGateway.sendToUser).toHaveBeenCalledWith(
+      'u1',
+      'notification',
+      created,
+    );
     expect(mockPushService.sendPush).toHaveBeenCalledWith('u1', {
       title: data.title,
       body: data.message,

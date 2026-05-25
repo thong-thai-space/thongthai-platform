@@ -9,7 +9,11 @@ export class AuthEmailNotifierAdapter implements AuthEmailNotifierPort {
 
   constructor(private readonly emailService: EmailService) {}
 
-  async sendVerificationEmail(email: string, name: string, token: string): Promise<void> {
+  async sendVerificationEmail(
+    email: string,
+    name: string,
+    token: string,
+  ): Promise<void> {
     try {
       await this.emailService.sendVerificationEmail(email, name, token);
     } catch (error) {
@@ -22,7 +26,11 @@ export class AuthEmailNotifierAdapter implements AuthEmailNotifierPort {
     }
   }
 
-  async sendPasswordResetEmail(email: string, name: string, token: string): Promise<void> {
+  async sendPasswordResetEmail(
+    email: string,
+    name: string,
+    token: string,
+  ): Promise<void> {
     try {
       await this.emailService.sendPasswordResetEmail(email, name, token);
     } catch (error) {

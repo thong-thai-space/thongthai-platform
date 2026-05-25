@@ -53,7 +53,11 @@ export class AuthService {
   }
 
   forgotPassword(email: string, remoteIp?: string, turnstileToken?: string) {
-    return this.passwordResetUseCase.forgotPassword({ email, remoteIp, turnstileToken });
+    return this.passwordResetUseCase.forgotPassword({
+      email,
+      remoteIp,
+      turnstileToken,
+    });
   }
 
   resetPassword(

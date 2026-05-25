@@ -21,25 +21,54 @@ export interface MessageRepositoryPort {
   } | null>;
   findAdminIds(): Promise<{ id: string }[]>;
 
-  findDistinctSentReceivers(userId: string): Promise<{ receiverId: string | null }[]>;
+  findDistinctSentReceivers(
+    userId: string,
+  ): Promise<{ receiverId: string | null }[]>;
   findDistinctReceivedSenders(userId: string): Promise<{ senderId: string }[]>;
 
   findUserSummary(userId: string): Promise<unknown>;
-  findLastMessageBetween(userId: string, otherUserId: string): Promise<{ createdAt: Date } | null>;
+  findLastMessageBetween(
+    userId: string,
+    otherUserId: string,
+  ): Promise<{ createdAt: Date } | null>;
   countUnreadFromUser(senderId: string, receiverId: string): Promise<number>;
 
-  findConversationMessages(userId: string, otherUserId: string): Promise<unknown[]>;
-  findProjectById(projectId: string): Promise<{ ownerId: string | null; clientId: string | null } | null>;
+  findConversationMessages(
+    userId: string,
+    otherUserId: string,
+  ): Promise<unknown[]>;
+  findProjectById(
+    projectId: string,
+  ): Promise<{ ownerId: string | null; clientId: string | null } | null>;
   findUserRole(userId: string): Promise<{ role: string } | null>;
   findProjectConversationMessages(projectId: string): Promise<unknown[]>;
 
-  markMessageRead(messageId: string, userId: string): Promise<{ count: number }>;
-  markNotificationsReadByMessageId(userId: string, messageId: string): Promise<{ count: number }>;
-  markMessagesReadFromUser(otherUserId: string, userId: string): Promise<{ count: number }>;
-  markNotificationsReadBySenderId(userId: string, otherUserId: string): Promise<{ count: number }>;
-  markProjectConversationRead(userId: string, projectId: string): Promise<{ count: number }>;
+  markMessageRead(
+    messageId: string,
+    userId: string,
+  ): Promise<{ count: number }>;
+  markNotificationsReadByMessageId(
+    userId: string,
+    messageId: string,
+  ): Promise<{ count: number }>;
+  markMessagesReadFromUser(
+    otherUserId: string,
+    userId: string,
+  ): Promise<{ count: number }>;
+  markNotificationsReadBySenderId(
+    userId: string,
+    otherUserId: string,
+  ): Promise<{ count: number }>;
+  markProjectConversationRead(
+    userId: string,
+    projectId: string,
+  ): Promise<{ count: number }>;
   countUnreadMessages(userId: string): Promise<number>;
 
-  findUnreadMessageNotifications(userId: string): Promise<{ data: Prisma.JsonValue }[]>;
-  findProjectsByIds(projectIds: string[]): Promise<{ id: string; name: string }[]>;
+  findUnreadMessageNotifications(
+    userId: string,
+  ): Promise<{ data: Prisma.JsonValue }[]>;
+  findProjectsByIds(
+    projectIds: string[],
+  ): Promise<{ id: string; name: string }[]>;
 }

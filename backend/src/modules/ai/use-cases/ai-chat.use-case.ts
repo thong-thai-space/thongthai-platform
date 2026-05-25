@@ -1,11 +1,10 @@
-import {
-  ForbiddenException,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { AiFeature, UserRole } from '@prisma/client';
 import { AI_PROVIDER_PORT, AI_REPOSITORY } from '../ai.constants';
-import type { AiMessageParam, AiProviderPort } from '../domain/ai.provider.port';
+import type {
+  AiMessageParam,
+  AiProviderPort,
+} from '../domain/ai.provider.port';
 import type { AiRepositoryPort } from '../domain/ai.repository.port';
 import { AiAuditService } from '../support/ai-audit.service';
 import { AiPromptConfigService } from '../support/ai-prompt-config.service';
@@ -28,11 +27,20 @@ export class AiChatUseCase {
     private readonly audit: AiAuditService,
   ) {}
 
-  async execute(userId: string, message: string, conversationId?: string, role?: UserRole) {
+  async execute(
+    userId: string,
+    message: string,
+    conversationId?: string,
+    role?: UserRole,
+  ) {
     const promptConfig = await this.prompts.get();
     const sanitizedMessage = maskSensitiveData(message);
 
-    const conversation = await this.resolveConversation(userId, message, conversationId);
+    const conversation = await this.resolveConversation(
+      userId,
+      message,
+      conversationId,
+    );
 
     await this.repo.createMessage({
       conversationId: conversation.id,
@@ -51,7 +59,12 @@ export class AiChatUseCase {
       this.repo.getOperationalSnapshot(userId, role),
     ]);
 
-    const systemPrompt = this.buildSystemPrompt(role, promptConfig, projects, snapshot);
+    const systemPrompt = this.buildSystemPrompt(
+      role,
+      promptConfig,
+      projects,
+      snapshot,
+    );
     const startedAt = Date.now();
 
     try {
@@ -62,7 +75,8 @@ export class AiChatUseCase {
         messages,
       });
 
-      const totalTokens = response.usage.inputTokens + response.usage.outputTokens;
+      const totalTokens =
+        response.usage.inputTokens + response.usage.outputTokens;
       await this.repo.createMessage({
         conversationId: conversation.id,
         role: 'assistant',
@@ -100,7 +114,8 @@ export class AiChatUseCase {
         userId,
         model: AI_MODEL,
         success: false,
-        errorMessage: error instanceof Error ? error.message : 'Unknown AI error',
+        errorMessage:
+          error instanceof Error ? error.message : 'Unknown AI error',
         durationMs: Date.now() - startedAt,
         metadata: { conversationId: conversation.id, role },
       });
@@ -108,10 +123,18 @@ export class AiChatUseCase {
     }
   }
 
-  private async resolveConversation(userId: string, message: string, conversationId?: string) {
+  private async resolveConversation(
+    userId: string,
+    message: string,
+    conversationId?: string,
+  ) {
     if (conversationId) {
-      const found = await this.repo.findConversationWithMessages(conversationId, userId);
-      if (!found) throw new ForbiddenException('Conversation not found or access denied');
+      const found = await this.repo.findConversationWithMessages(
+        conversationId,
+        userId,
+      );
+      if (!found)
+        throw new ForbiddenException('Conversation not found or access denied');
       return found;
     }
     return this.repo.createConversation(userId, message.substring(0, 100));
@@ -119,7 +142,11 @@ export class AiChatUseCase {
 
   private buildSystemPrompt(
     role: UserRole | undefined,
-    promptConfig: { generalAssistant: string; clientAssistant: string; professionalOutputRules: string },
+    promptConfig: {
+      generalAssistant: string;
+      clientAssistant: string;
+      professionalOutputRules: string;
+    },
     projects: Array<{
       name: string;
       status: string;
@@ -151,7 +178,9 @@ export class AiChatUseCase {
       `- If user asks for KPI report, answer with exact numbers from snapshots first, then recommendations.`;
 
     const base =
-      role === UserRole.CLIENT ? promptConfig.clientAssistant : promptConfig.generalAssistant;
+      role === UserRole.CLIENT
+        ? promptConfig.clientAssistant
+        : promptConfig.generalAssistant;
 
     return (
       base +

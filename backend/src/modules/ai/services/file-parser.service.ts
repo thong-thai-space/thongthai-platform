@@ -23,7 +23,9 @@ export class FileParserService {
 
   assertSupported(file: Express.Multer.File) {
     if (!this.allowedMimeTypes.has(file.mimetype)) {
-      throw new BadRequestException(`File type ${file.mimetype} is not supported`);
+      throw new BadRequestException(
+        `File type ${file.mimetype} is not supported`,
+      );
     }
   }
 
@@ -36,7 +38,8 @@ export class FileParserService {
 
     if (file.mimetype === 'image/png' || file.mimetype === 'image/jpeg') {
       return {
-        textContext: 'Attached image was provided for visual architecture context.',
+        textContext:
+          'Attached image was provided for visual architecture context.',
         imagePayload: {
           mediaType: file.mimetype,
           data: file.buffer.toString('base64'),
@@ -70,16 +73,21 @@ export class FileParserService {
         rows.push(`Sheet: ${sheetName}`);
 
         const sheet = workbook.Sheets[sheetName];
-        const values = XLSX.utils.sheet_to_json<(string | number | null)[]>(sheet, {
-          header: 1,
-          raw: false,
-        });
+        const values = XLSX.utils.sheet_to_json<(string | number | null)[]>(
+          sheet,
+          {
+            header: 1,
+            raw: false,
+          },
+        );
 
         values.forEach((row) => {
           if (remainingRows <= 0) return;
 
           const normalized = (row || [])
-            .map((value) => (value === null || value === undefined ? '' : String(value).trim()))
+            .map((value) =>
+              value === null || value === undefined ? '' : String(value).trim(),
+            )
             .filter((value) => value.length > 0)
             .join(' | ');
 

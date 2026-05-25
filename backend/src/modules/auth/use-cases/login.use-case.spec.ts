@@ -150,7 +150,10 @@ describe('LoginUseCase.loginWithGoogle', () => {
       name: null,
       avatar: null,
     } as never);
-    repo.findById.mockResolvedValue({ id: 'u-existing', role: 'OWNER' } as never);
+    repo.findById.mockResolvedValue({
+      id: 'u-existing',
+      role: 'OWNER',
+    } as never);
 
     await useCase.loginWithGoogle(profile);
 

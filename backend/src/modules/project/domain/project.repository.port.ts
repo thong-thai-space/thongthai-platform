@@ -7,7 +7,9 @@ import type {
 
 // Pattern: Repository Port — persistence boundary for the project module
 export interface ProjectRepositoryPort {
-  findAllWithIncludes(where?: Prisma.ProjectWhereInput): Promise<ProjectListWithIncludes[]>;
+  findAllWithIncludes(
+    where?: Prisma.ProjectWhereInput,
+  ): Promise<ProjectListWithIncludes[]>;
   findByIdWithIncludes(id: string): Promise<ProjectWithIncludes | null>;
   findById(id: string): Promise<Project | null>;
   findByClient(clientId: string): Promise<ProjectListWithIncludes[]>;

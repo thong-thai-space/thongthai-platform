@@ -38,7 +38,11 @@ export class ProjectService {
     return this.useCases.acceptRequest(projectId, adminUserId);
   }
 
-  updateByClient(projectId: string, clientId: string, dto: UpdateProjectClientDto) {
+  updateByClient(
+    projectId: string,
+    clientId: string,
+    dto: UpdateProjectClientDto,
+  ) {
     return this.useCases.updateByClient(projectId, clientId, dto);
   }
 

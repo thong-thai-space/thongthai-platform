@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { Prisma, Task, UserRole } from '@prisma/client';
 import { TaskRepositoryPort } from '../domain/task.repository.port';
@@ -42,7 +46,9 @@ export class TaskRepository implements TaskRepositoryPort {
   /**
    * Find all tasks with includes
    */
-  async findAllWithIncludes(where?: Prisma.TaskWhereInput): Promise<TaskListItem[]> {
+  async findAllWithIncludes(
+    where?: Prisma.TaskWhereInput,
+  ): Promise<TaskListItem[]> {
     try {
       return await this.prisma.task.findMany({
         where,
@@ -100,7 +106,10 @@ export class TaskRepository implements TaskRepositoryPort {
         data,
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
         throw new NotFoundException('Task not found');
       }
       throw new InternalServerErrorException('Failed to update task');
@@ -160,24 +169,29 @@ export class TaskRepository implements TaskRepositoryPort {
         visited.add(currentId);
         if (currentId === taskId) return true; // Circular!
 
-        const parent: { parentId: string | null } | null = await this.prisma.task.findUnique({
-          where: { id: currentId },
-          select: { parentId: true },
-        });
+        const parent: { parentId: string | null } | null =
+          await this.prisma.task.findUnique({
+            where: { id: currentId },
+            select: { parentId: true },
+          });
 
         currentId = parent?.parentId || null;
       }
 
       return false;
     } catch (error) {
-      throw new InternalServerErrorException('Failed to check circular subtask');
+      throw new InternalServerErrorException(
+        'Failed to check circular subtask',
+      );
     }
   }
 
   /**
    * Create task with includes (for response)
    */
-  async createWithIncludes(data: Prisma.TaskCreateInput): Promise<TaskWithProject> {
+  async createWithIncludes(
+    data: Prisma.TaskCreateInput,
+  ): Promise<TaskWithProject> {
     try {
       return await this.prisma.task.create({
         data,
@@ -191,7 +205,10 @@ export class TaskRepository implements TaskRepositoryPort {
   /**
    * Update task with includes (for response)
    */
-  async updateWithIncludes(id: string, data: Prisma.TaskUpdateInput): Promise<TaskWithAssignee> {
+  async updateWithIncludes(
+    id: string,
+    data: Prisma.TaskUpdateInput,
+  ): Promise<TaskWithAssignee> {
     try {
       return await this.prisma.task.update({
         where: { id },
@@ -199,7 +216,10 @@ export class TaskRepository implements TaskRepositoryPort {
         include: taskUpdateIncludes.include,
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
         throw new NotFoundException('Task not found');
       }
       throw new InternalServerErrorException('Failed to update task');
@@ -270,7 +290,11 @@ export class TaskRepository implements TaskRepositoryPort {
     }
   }
 
-  async createComment(data: { content: string; authorId: string; taskId: string }): Promise<TaskCommentWithAuthor> {
+  async createComment(data: {
+    content: string;
+    authorId: string;
+    taskId: string;
+  }): Promise<TaskCommentWithAuthor> {
     try {
       return await this.prisma.comment.create({
         data: {
@@ -285,4 +309,3 @@ export class TaskRepository implements TaskRepositoryPort {
     }
   }
 }
-

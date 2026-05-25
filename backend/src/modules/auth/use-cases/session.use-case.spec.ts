@@ -20,7 +20,11 @@ function buildSut() {
     sessionFor: jest.fn(),
   } as unknown as jest.Mocked<SessionIssuer>;
 
-  return { useCase: new SessionUseCase(repo, sessionIssuer), repo, sessionIssuer };
+  return {
+    useCase: new SessionUseCase(repo, sessionIssuer),
+    repo,
+    sessionIssuer,
+  };
 }
 
 describe('SessionUseCase.getProfile', () => {
@@ -42,14 +46,18 @@ describe('SessionUseCase.getProfile', () => {
     const { useCase, repo } = buildSut();
     repo.findById.mockResolvedValue(null);
 
-    await expect(useCase.getProfile('u1')).rejects.toThrow(UnauthorizedException);
+    await expect(useCase.getProfile('u1')).rejects.toThrow(
+      UnauthorizedException,
+    );
   });
 
   it('throws for inactive user', async () => {
     const { useCase, repo } = buildSut();
     repo.findById.mockResolvedValue({ id: 'u1', isActive: false } as never);
 
-    await expect(useCase.getProfile('u1')).rejects.toThrow(UnauthorizedException);
+    await expect(useCase.getProfile('u1')).rejects.toThrow(
+      UnauthorizedException,
+    );
   });
 });
 

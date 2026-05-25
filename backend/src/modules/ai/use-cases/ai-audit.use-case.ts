@@ -52,23 +52,35 @@ export class AiAuditUseCase {
     );
     const avgDurationMs =
       totalRequests > 0
-        ? Math.round(logs.reduce((sum, l) => sum + (l.durationMs || 0), 0) / totalRequests)
+        ? Math.round(
+            logs.reduce((sum, l) => sum + (l.durationMs || 0), 0) /
+              totalRequests,
+          )
         : 0;
 
-    const byFeatureMap = new Map<string, { requests: number; success: number; costUsd: number }>();
+    const byFeatureMap = new Map<
+      string,
+      { requests: number; success: number; costUsd: number }
+    >();
     for (const log of logs) {
-      const entry = byFeatureMap.get(log.feature) || { requests: 0, success: 0, costUsd: 0 };
+      const entry = byFeatureMap.get(log.feature) || {
+        requests: 0,
+        success: 0,
+        costUsd: 0,
+      };
       entry.requests += 1;
       entry.success += log.success ? 1 : 0;
       entry.costUsd += Number(log.estimatedCostUsd || 0);
       byFeatureMap.set(log.feature, entry);
     }
-    const byFeature = Array.from(byFeatureMap.entries()).map(([feature, value]) => ({
-      feature,
-      requests: value.requests,
-      successRate: value.requests ? value.success / value.requests : 0,
-      costUsd: Number(value.costUsd.toFixed(4)),
-    }));
+    const byFeature = Array.from(byFeatureMap.entries()).map(
+      ([feature, value]) => ({
+        feature,
+        requests: value.requests,
+        successRate: value.requests ? value.success / value.requests : 0,
+        costUsd: Number(value.costUsd.toFixed(4)),
+      }),
+    );
 
     return {
       rangeDays: safeDays,
@@ -112,7 +124,9 @@ export class AiAuditUseCase {
   }
 
   async runRetentionCron() {
-    const retentionFromEnv = Number(this.configService.get('AI_AUDIT_RETENTION_DAYS') || 90);
+    const retentionFromEnv = Number(
+      this.configService.get('AI_AUDIT_RETENTION_DAYS') || 90,
+    );
     const result = await this.purgeInternal(retentionFromEnv);
     this.logger.log(
       `AI audit retention cron executed. Deleted ${result.deletedCount} records older than ${result.retentionDays} day(s).`,

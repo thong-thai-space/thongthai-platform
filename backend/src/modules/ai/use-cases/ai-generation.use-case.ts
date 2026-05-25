@@ -134,7 +134,9 @@ export class AiGenerationUseCase {
   ): Promise<unknown> {
     const promptConfig = await this.prompts.get();
     const langNote =
-      locale === Language.EN ? '\n\nRespond in English.' : '\n\nTra loi bang tieng Viet.';
+      locale === Language.EN
+        ? '\n\nRespond in English.'
+        : '\n\nTra loi bang tieng Viet.';
 
     return this.runWithAudit({
       feature: AiFeature.ESTIMATE,
@@ -149,7 +151,9 @@ export class AiGenerationUseCase {
             promptConfig.professionalOutputRules +
             roleDirective(role) +
             langNote,
-          messages: [{ role: 'user', content: maskSensitiveData(requirements) }],
+          messages: [
+            { role: 'user', content: maskSensitiveData(requirements) },
+          ],
         }),
       mapResponse: (r) => tryParseJson(r.text),
     });
@@ -168,7 +172,8 @@ export class AiGenerationUseCase {
     const taskSummary = {
       total: project.tasks.length,
       done: project.tasks.filter((t) => t.status === 'DONE').length,
-      inProgress: project.tasks.filter((t) => t.status === 'IN_PROGRESS').length,
+      inProgress: project.tasks.filter((t) => t.status === 'IN_PROGRESS')
+        .length,
       blocked: project.tasks.filter((t) => t.status === 'BLOCKED').length,
     };
 
@@ -217,7 +222,8 @@ export class AiGenerationUseCase {
     const startedAt = Date.now();
     try {
       const response = await opts.runner();
-      const totalTokens = response.usage.inputTokens + response.usage.outputTokens;
+      const totalTokens =
+        response.usage.inputTokens + response.usage.outputTokens;
 
       await this.audit.log({
         feature: opts.feature,
@@ -244,7 +250,8 @@ export class AiGenerationUseCase {
         projectId: opts.projectId,
         model: AI_MODEL,
         success: false,
-        errorMessage: error instanceof Error ? error.message : 'Unknown AI error',
+        errorMessage:
+          error instanceof Error ? error.message : 'Unknown AI error',
         durationMs: Date.now() - startedAt,
         metadata: opts.metadata,
       });

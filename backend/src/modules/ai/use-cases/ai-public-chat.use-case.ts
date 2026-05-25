@@ -76,7 +76,8 @@ export class AiPublicChatUseCase {
         feature: AiFeature.PUBLIC_CHAT,
         model: AI_MODEL,
         success: false,
-        errorMessage: error instanceof Error ? error.message : 'Unknown AI error',
+        errorMessage:
+          error instanceof Error ? error.message : 'Unknown AI error',
         durationMs: Date.now() - startedAt,
       });
       throw error;
@@ -84,7 +85,8 @@ export class AiPublicChatUseCase {
   }
 
   private async buildBrandContext(): Promise<PublicBrandContext> {
-    const { siteContents, showcaseProjects } = await this.repo.findPublicBrandContextData();
+    const { siteContents, showcaseProjects } =
+      await this.repo.findPublicBrandContextData();
 
     const getSectionData = (section: string) =>
       siteContents.find((x) => x.section === section)?.data as
@@ -93,7 +95,8 @@ export class AiPublicChatUseCase {
 
     const aboutData = getSectionData('about') || {};
     const servicesData = getSectionData('services') || {};
-    const founderData = getSectionData('founder-profile') || getSectionData('founder_cv') || {};
+    const founderData =
+      getSectionData('founder-profile') || getSectionData('founder_cv') || {};
 
     const services = Array.isArray(servicesData['items'])
       ? (servicesData['items'] as Array<Record<string, unknown>>)
@@ -102,7 +105,10 @@ export class AiPublicChatUseCase {
       : [];
 
     const aboutSummary = String(
-      aboutData['summary'] || aboutData['description'] || aboutData['mission'] || '',
+      aboutData['summary'] ||
+        aboutData['description'] ||
+        aboutData['mission'] ||
+        '',
     ).trim();
 
     const founderProfileFromEnv = String(

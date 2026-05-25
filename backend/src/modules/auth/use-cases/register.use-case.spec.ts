@@ -1,7 +1,4 @@
-import {
-  BadRequestException,
-  ConflictException,
-} from '@nestjs/common';
+import { BadRequestException, ConflictException } from '@nestjs/common';
 import type { AuthEmailNotifierPort } from '../domain/auth.email-notifier.port';
 import type { AuthRepositoryPort } from '../domain/auth.repository.port';
 import { PasswordPolicy } from '../policies/password.policy';
@@ -42,7 +39,14 @@ function buildSut() {
     challengePolicy,
     sessionIssuer,
   );
-  return { useCase, repo, notifier, passwordPolicy, challengePolicy, sessionIssuer };
+  return {
+    useCase,
+    repo,
+    notifier,
+    passwordPolicy,
+    challengePolicy,
+    sessionIssuer,
+  };
 }
 
 describe('RegisterUseCase', () => {
@@ -129,7 +133,9 @@ describe('RegisterUseCase', () => {
       const { useCase, repo } = buildSut();
       repo.findByVerificationToken.mockResolvedValue(null);
 
-      await expect(useCase.verifyEmail('token')).rejects.toThrow(BadRequestException);
+      await expect(useCase.verifyEmail('token')).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('throws for already verified user', async () => {
@@ -139,7 +145,9 @@ describe('RegisterUseCase', () => {
         emailVerified: true,
       } as never);
 
-      await expect(useCase.verifyEmail('token')).rejects.toThrow(BadRequestException);
+      await expect(useCase.verifyEmail('token')).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('throws for expired token', async () => {
@@ -150,7 +158,9 @@ describe('RegisterUseCase', () => {
         emailVerifyTokenExpiry: new Date(Date.now() - 1000),
       } as never);
 
-      await expect(useCase.verifyEmail('token')).rejects.toThrow(BadRequestException);
+      await expect(useCase.verifyEmail('token')).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('marks email verified and issues a session', async () => {
@@ -174,7 +184,10 @@ describe('RegisterUseCase', () => {
 
       expect(repo.update).toHaveBeenCalledWith(
         'u1',
-        expect.objectContaining({ emailVerified: true, emailVerifyToken: null }),
+        expect.objectContaining({
+          emailVerified: true,
+          emailVerifyToken: null,
+        }),
       );
       expect(result.accessToken).toBe('a');
     });

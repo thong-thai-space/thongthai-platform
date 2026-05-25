@@ -46,7 +46,7 @@ export class MessageUseCases {
 
     const sender = await this.repo.findUserName(senderId);
     const projectName = dto.projectId
-      ? (await this.repo.findProjectName(dto.projectId))?.name ?? ''
+      ? ((await this.repo.findProjectName(dto.projectId))?.name ?? '')
       : '';
 
     const body = projectName
@@ -98,7 +98,9 @@ export class MessageUseCases {
 
     const otherUserIds = Array.from(
       new Set([
-        ...sent.map((m) => m.receiverId).filter((id): id is string => Boolean(id)),
+        ...sent
+          .map((m) => m.receiverId)
+          .filter((id): id is string => Boolean(id)),
         ...received.map((m) => m.senderId).filter(Boolean),
       ]),
     );
@@ -110,7 +112,12 @@ export class MessageUseCases {
           this.repo.findLastMessageBetween(userId, otherUserId),
           this.repo.countUnreadFromUser(otherUserId, userId),
         ]);
-        return { userId: otherUserId, user: otherUser, lastMessage, unreadCount };
+        return {
+          userId: otherUserId,
+          user: otherUser,
+          lastMessage,
+          unreadCount,
+        };
       }),
     );
 
@@ -148,7 +155,10 @@ export class MessageUseCases {
   }
 
   async markConversationRead(userId: string, otherUserId: string) {
-    const result = await this.repo.markMessagesReadFromUser(otherUserId, userId);
+    const result = await this.repo.markMessagesReadFromUser(
+      otherUserId,
+      userId,
+    );
     await this.repo.markNotificationsReadBySenderId(userId, otherUserId);
     return result;
   }
@@ -162,12 +172,14 @@ export class MessageUseCases {
   }
 
   async getUnreadByProject(userId: string) {
-    const notifications = await this.repo.findUnreadMessageNotifications(userId);
+    const notifications =
+      await this.repo.findUnreadMessageNotifications(userId);
     const counts = new Map<string, number>();
 
     for (const notif of notifications) {
       const data = (notif.data ?? {}) as Record<string, unknown>;
-      const projectId = typeof data.projectId === 'string' ? data.projectId : '';
+      const projectId =
+        typeof data.projectId === 'string' ? data.projectId : '';
       if (!projectId) continue;
       counts.set(projectId, (counts.get(projectId) ?? 0) + 1);
     }

@@ -19,12 +19,16 @@ describe('SecurityChallengePolicy', () => {
 
   it('throws BadRequest when enabled but token missing', async () => {
     const { policy } = buildSut(true);
-    await expect(policy.enforce(undefined)).rejects.toThrow(BadRequestException);
+    await expect(policy.enforce(undefined)).rejects.toThrow(
+      BadRequestException,
+    );
   });
 
   it('throws Unauthorized when verification fails', async () => {
     const { policy } = buildSut(true, false);
-    await expect(policy.enforce('bad-token')).rejects.toThrow(UnauthorizedException);
+    await expect(policy.enforce('bad-token')).rejects.toThrow(
+      UnauthorizedException,
+    );
   });
 
   it('passes when verification succeeds', async () => {

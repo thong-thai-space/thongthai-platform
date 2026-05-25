@@ -22,7 +22,10 @@ import {
     ProjectNotificationAdapter,
     ProjectStatusPolicy,
     { provide: PROJECT_REPOSITORY, useExisting: ProjectRepository },
-    { provide: PROJECT_NOTIFICATION_PORT, useExisting: ProjectNotificationAdapter },
+    {
+      provide: PROJECT_NOTIFICATION_PORT,
+      useExisting: ProjectNotificationAdapter,
+    },
   ],
   exports: [ProjectService],
 })

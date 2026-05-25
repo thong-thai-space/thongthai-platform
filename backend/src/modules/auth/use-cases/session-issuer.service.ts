@@ -17,7 +17,9 @@ export class SessionIssuer {
 
   async issueFor(user: Pick<AuthUser, 'id' | 'role'>): Promise<AuthTokens> {
     const pair = await this.tokens.generateSessionTokens(user.id, user.role);
-    const refreshTokenHash = await this.tokens.hashRefreshToken(pair.refreshToken);
+    const refreshTokenHash = await this.tokens.hashRefreshToken(
+      pair.refreshToken,
+    );
 
     try {
       await this.repo.update(user.id, { refreshTokenHash });

@@ -5,7 +5,10 @@ import { PrismaService } from '../../../prisma/prisma.service';
 export class PushRepository {
   constructor(private prisma: PrismaService) {}
 
-  async upsertSubscription(userId: string, subscription: { endpoint: string; keys: { p256dh: string; auth: string } }) {
+  async upsertSubscription(
+    userId: string,
+    subscription: { endpoint: string; keys: { p256dh: string; auth: string } },
+  ) {
     try {
       return await this.prisma.pushSubscription.upsert({
         where: {
@@ -23,7 +26,9 @@ export class PushRepository {
         },
       });
     } catch (error) {
-      throw new InternalServerErrorException('Failed to store push subscription');
+      throw new InternalServerErrorException(
+        'Failed to store push subscription',
+      );
     }
   }
 
@@ -33,7 +38,9 @@ export class PushRepository {
         where: { userId, endpoint },
       });
     } catch (error) {
-      throw new InternalServerErrorException('Failed to remove push subscription');
+      throw new InternalServerErrorException(
+        'Failed to remove push subscription',
+      );
     }
   }
 
@@ -43,7 +50,9 @@ export class PushRepository {
         where: { userId },
       });
     } catch (error) {
-      throw new InternalServerErrorException('Failed to fetch push subscriptions');
+      throw new InternalServerErrorException(
+        'Failed to fetch push subscriptions',
+      );
     }
   }
 
@@ -53,7 +62,9 @@ export class PushRepository {
         where: { id: { in: ids } },
       });
     } catch (error) {
-      throw new InternalServerErrorException('Failed to remove push subscriptions');
+      throw new InternalServerErrorException(
+        'Failed to remove push subscriptions',
+      );
     }
   }
 }

@@ -36,7 +36,10 @@ export class LoginUseCase {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const matches = await this.passwordPolicy.compare(cmd.password, user.password);
+    const matches = await this.passwordPolicy.compare(
+      cmd.password,
+      user.password,
+    );
     if (!matches) throw new UnauthorizedException('Invalid credentials');
 
     if (!user.emailVerified && !user.googleId) {
@@ -96,7 +99,11 @@ export class LoginUseCase {
 
   private async syncGoogleProfile(
     userId: string,
-    existing: { googleId: string | null; name: string | null; avatar: string | null },
+    existing: {
+      googleId: string | null;
+      name: string | null;
+      avatar: string | null;
+    },
     profile: GoogleProfile,
   ) {
     try {

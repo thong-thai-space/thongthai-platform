@@ -7,7 +7,11 @@ import { TaskUseCases } from './use-cases/task.use-cases';
 export class TaskService {
   constructor(private taskUseCases: TaskUseCases) {}
 
-  async findByProject(projectId: string | undefined, userId: string, role: UserRole) {
+  async findByProject(
+    projectId: string | undefined,
+    userId: string,
+    role: UserRole,
+  ) {
     return this.taskUseCases.findByProject(projectId, userId, role);
   }
 
@@ -19,7 +23,12 @@ export class TaskService {
     return this.taskUseCases.create(dto, creatorId);
   }
 
-  async update(id: string, dto: UpdateTaskDto, updaterId?: string, updaterRole?: UserRole) {
+  async update(
+    id: string,
+    dto: UpdateTaskDto,
+    updaterId?: string,
+    updaterRole?: UserRole,
+  ) {
     return this.taskUseCases.update(id, dto, updaterId, updaterRole);
   }
 
@@ -31,7 +40,12 @@ export class TaskService {
     return this.taskUseCases.getMyTasks(userId);
   }
 
-  async addComment(taskId: string, content: string, userId: string, role: UserRole) {
+  async addComment(
+    taskId: string,
+    content: string,
+    userId: string,
+    role: UserRole,
+  ) {
     return this.taskUseCases.addComment(taskId, content, userId, role);
   }
 }

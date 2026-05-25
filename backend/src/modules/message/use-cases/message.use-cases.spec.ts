@@ -36,7 +36,12 @@ function buildSut() {
     pushNewMessage: jest.fn(),
   };
 
-  const useCase = new MessageUseCases(repo, notifier, realtime, new MessageAccessPolicy());
+  const useCase = new MessageUseCases(
+    repo,
+    notifier,
+    realtime,
+    new MessageAccessPolicy(),
+  );
   return { useCase, repo, notifier, realtime };
 }
 
@@ -57,7 +62,10 @@ describe('MessageUseCases.create', () => {
     await useCase.create('s1', { content: 'hi', receiverId: 'r1' } as never);
 
     expect(repo.createMessage).toHaveBeenCalled();
-    expect(realtime.pushNewMessage).toHaveBeenCalledWith('r1', expect.any(Object));
+    expect(realtime.pushNewMessage).toHaveBeenCalledWith(
+      'r1',
+      expect.any(Object),
+    );
     expect(notifier.notifyNewMessage).toHaveBeenCalledWith(
       expect.objectContaining({ recipientId: 'r1' }),
     );
@@ -89,8 +97,12 @@ describe('MessageUseCases.create', () => {
       projectId: 'p1',
     } as never);
 
-    const recipients = notifier.notifyNewMessage.mock.calls.map((c) => c[0].recipientId);
-    expect(new Set(recipients)).toEqual(new Set(['r1', 'owner', 'client', 'task1', 'admin']));
+    const recipients = notifier.notifyNewMessage.mock.calls.map(
+      (c) => c[0].recipientId,
+    );
+    expect(new Set(recipients)).toEqual(
+      new Set(['r1', 'owner', 'client', 'task1', 'admin']),
+    );
   });
 
   it('does not notify the sender themselves', async () => {
@@ -134,7 +146,9 @@ describe('MessageUseCases.findProjectConversation', () => {
     repo.findProjectById.mockResolvedValue({ ownerId: 'o1', clientId: 'c1' });
     repo.findUserRole.mockResolvedValue({ role: 'CLIENT' });
 
-    await expect(useCase.findProjectConversation('p1', 'random')).rejects.toThrow();
+    await expect(
+      useCase.findProjectConversation('p1', 'random'),
+    ).rejects.toThrow();
   });
 });
 

@@ -12,7 +12,10 @@ export class TaxCalculator {
    * @param taxRateAsDecimal Tax rate as decimal (e.g., 0.1 = 10%)
    * @returns Tax amount in cents
    */
-  static calculateTax(subtotalInCents: number, taxRateAsDecimal: number): number {
+  static calculateTax(
+    subtotalInCents: number,
+    taxRateAsDecimal: number,
+  ): number {
     // Pattern: Precision - Use integer arithmetic to avoid floating-point errors
     // Formula: subtotal * rate, rounded to nearest cent
     const taxInCents = Math.round(subtotalInCents * taxRateAsDecimal);

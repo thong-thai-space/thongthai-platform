@@ -31,7 +31,11 @@ describe('ClientUseCases.findOne', () => {
 });
 
 describe('ClientUseCases.create', () => {
-  const dto = { email: 'c@x.com', password: 'Strong1!aaaa', name: 'Client' } as never;
+  const dto = {
+    email: 'c@x.com',
+    password: 'Strong1!aaaa',
+    name: 'Client',
+  } as never;
 
   it('rejects weak password', async () => {
     const { useCase, repo } = buildSut();

@@ -7,6 +7,38 @@ Guidance for Claude Code working in this repo.
 **Thông Thái Space** — Vietnamese tech freelance project management SaaS with AI features.
 Monorepo: `backend/` (NestJS 11 + Prisma 7 + PostgreSQL + Redis) · `frontend/` (Next.js 15 + React 19 + Tailwind v4).
 
+## Product & Roadmap
+
+Full business plan: **`docs/restructuring-plan.md`** (service catalog, pricing, rationale). Summary of what affects engineering decisions:
+
+**Operating model.** Solo founder. The "phòng/teams" in the plan are functional hats worn by one person + AI tools — not staffed departments. The scarcest resource is *founder time*, not cash (break-even ≈ 1 small audit/month). Optimize accordingly: avoid premature structure, prefer incremental work over rebuilds.
+
+**Three-phase roadmap (2026)** — build in this order; do NOT pull later scope forward:
+
+| Phase | Months | Build focus | Modules in scope |
+|---|---|---|---|
+| GĐ1 | T1–4 | Public site + SEO + lead capture + identity | `content`, `contact`, `portfolio`, `auth`, `user` |
+| GĐ2 | T5–8 | AI Core (RAG MVP) + ops/billing + academy — serve pilot SMEs | `ai`, `project`, `task`, `invoice`, `export` |
+| GĐ3 | T9–12 | Multi-tenant SaaS packaging + community + meeting assistant | subscription, community — *not yet built* |
+
+**Plan modules ↔ codebase modules.** The plan's logical modules already map onto existing code — this is incremental work, not a greenfield rebuild:
+
+- Public & CMS → `content`, `contact`, `portfolio`
+- CRM → `client`, `project`
+- Ops & Billing ("ERP nhẹ") → `project`, `task`, `invoice`, `export`
+- AI Core → `ai`
+- Identity → `auth`, `user`
+- Academy · Community · Subscription → **not yet built** (GĐ2/GĐ3)
+
+**Scope discipline (plan §6.5).**
+- "Mạng xã hội" is deliberately reduced to **blog + simple community feed** — do NOT build a real social network.
+- Meeting/consult assistant (real-time audio → dynamic cards) is **GĐ3 only** — keep it out of earlier scope.
+- Modular monolith, never microservices — one person cannot operate microservices.
+
+**Provider neutrality (plan §6.4).** The product's core promise is vendor-neutral advice. Current code uses the Anthropic SDK only. Direction: the `ai` module should evolve toward a **Provider Router** — one port, swappable adapters (Claude / OpenAI / Gemini). Shape new AI code as adapter-friendly so a 2nd provider stays cheap to add — but YAGNI applies: add the 2nd adapter when a 2nd provider is actually needed. RAG (GĐ2) will use **pgvector** (Postgres extension), not a separate vector DB.
+
+**Human-in-the-loop (plan §3.4, §5.2).** AI assists, the human decides — no fully-autonomous "AI employees." Every AI-generated output (quotes, plans, content, RAG answers) must be reviewable/approvable before it takes effect. Accounting/tax flows are never auto-executed. (See the existing `ai-strategic-plan.use-case.ts` Saga — already built this way.)
+
 ## Commands
 
 Run from `backend/` or `frontend/` as appropriate. Package manager: **pnpm**.

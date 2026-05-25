@@ -40,7 +40,9 @@ export class AiAuditService {
       await this.aiRepository.createUsageAudit({
         feature: entry.feature,
         ...(entry.userId ? { user: { connect: { id: entry.userId } } } : {}),
-        ...(entry.projectId ? { project: { connect: { id: entry.projectId } } } : {}),
+        ...(entry.projectId
+          ? { project: { connect: { id: entry.projectId } } }
+          : {}),
         model: entry.model,
         success: entry.success,
         inputTokens: entry.inputTokens,
@@ -69,7 +71,10 @@ export class AiAuditService {
     if (!user) throw new NotFoundException('User not found');
 
     if (user.aiQuotaUsedTokens + totalTokens > user.aiQuotaLimitTokens) {
-      throw new HttpException('AI quota exceeded', HttpStatus.TOO_MANY_REQUESTS);
+      throw new HttpException(
+        'AI quota exceeded',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
     }
 
     await this.aiRepository.incrementUserQuota(userId, totalTokens);

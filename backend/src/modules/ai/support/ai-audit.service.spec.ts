@@ -77,7 +77,9 @@ describe('AiAuditService.consumeQuota', () => {
   it('throws NotFound when user missing', async () => {
     const { service, repo } = buildSut();
     repo.findUserQuota.mockResolvedValue(null);
-    await expect(service.consumeQuota('u1', 100)).rejects.toThrow(NotFoundException);
+    await expect(service.consumeQuota('u1', 100)).rejects.toThrow(
+      NotFoundException,
+    );
   });
 
   it('throws when quota exceeded', async () => {
@@ -87,7 +89,9 @@ describe('AiAuditService.consumeQuota', () => {
       aiQuotaUsedTokens: 99_999,
       aiQuotaLimitTokens: 100_000,
     });
-    await expect(service.consumeQuota('u1', 1000)).rejects.toThrow(HttpException);
+    await expect(service.consumeQuota('u1', 1000)).rejects.toThrow(
+      HttpException,
+    );
   });
 
   it('increments quota on success', async () => {

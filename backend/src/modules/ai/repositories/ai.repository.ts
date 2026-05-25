@@ -3,12 +3,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  AiApplyRequest,
-  AiUsageAudit,
-  Prisma,
-  UserRole,
-} from '@prisma/client';
+import { AiApplyRequest, AiUsageAudit, Prisma, UserRole } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 import {
   aiApplyRequestCreateIncludes,
@@ -31,7 +26,9 @@ import {
 export class AiRepository implements AiRepositoryPort {
   constructor(private prisma: PrismaService) {}
 
-  async createUsageAudit(data: Prisma.AiUsageAuditCreateInput): Promise<AiUsageAudit> {
+  async createUsageAudit(
+    data: Prisma.AiUsageAuditCreateInput,
+  ): Promise<AiUsageAudit> {
     try {
       return await this.prisma.aiUsageAudit.create({ data });
     } catch (error) {
@@ -47,7 +44,9 @@ export class AiRepository implements AiRepositoryPort {
     }
   }
 
-  async findUsageAuditById(id: string): Promise<{ id: string; userId: string } | null> {
+  async findUsageAuditById(
+    id: string,
+  ): Promise<{ id: string; userId: string } | null> {
     try {
       const audit = await this.prisma.aiUsageAudit.findUnique({
         where: { id },
@@ -60,10 +59,7 @@ export class AiRepository implements AiRepositoryPort {
     }
   }
 
-  async findUsageAuditLogs(
-    where: Prisma.AiUsageAuditWhereInput,
-    take: number,
-  ) {
+  async findUsageAuditLogs(where: Prisma.AiUsageAuditWhereInput, take: number) {
     try {
       return await this.prisma.aiUsageAudit.findMany({
         where,
@@ -93,7 +89,9 @@ export class AiRepository implements AiRepositoryPort {
         },
       });
     } catch (error) {
-      throw new InternalServerErrorException('Failed to fetch AI audit summary');
+      throw new InternalServerErrorException(
+        'Failed to fetch AI audit summary',
+      );
     }
   }
 
@@ -107,7 +105,9 @@ export class AiRepository implements AiRepositoryPort {
         data,
       });
     } catch (error) {
-      throw new InternalServerErrorException('Failed to update AI audit record');
+      throw new InternalServerErrorException(
+        'Failed to update AI audit record',
+      );
     }
   }
 
@@ -115,7 +115,9 @@ export class AiRepository implements AiRepositoryPort {
     try {
       return await this.prisma.aiUsageAudit.delete({ where: { id } });
     } catch (error) {
-      throw new InternalServerErrorException('Failed to delete AI audit record');
+      throw new InternalServerErrorException(
+        'Failed to delete AI audit record',
+      );
     }
   }
 
@@ -130,14 +132,19 @@ export class AiRepository implements AiRepositoryPort {
     }
   }
 
-  async findPromptSection(): Promise<{ isActive: boolean; data: Prisma.InputJsonValue | null } | null> {
+  async findPromptSection(): Promise<{
+    isActive: boolean;
+    data: Prisma.InputJsonValue | null;
+  } | null> {
     try {
       return await this.prisma.siteContent.findUnique({
         where: { section: 'ai-prompts' },
         select: { isActive: true, data: true },
       });
     } catch (error) {
-      throw new InternalServerErrorException('Failed to fetch AI prompt config');
+      throw new InternalServerErrorException(
+        'Failed to fetch AI prompt config',
+      );
     }
   }
 
@@ -240,27 +247,31 @@ export class AiRepository implements AiRepositoryPort {
     }
   }
 
-  async getOperationalSnapshot(userId: string, role?: UserRole): Promise<OperationalSnapshot> {
+  async getOperationalSnapshot(
+    userId: string,
+    role?: UserRole,
+  ): Promise<OperationalSnapshot> {
     if (role === UserRole.CLIENT) {
       try {
-        const [clientProjects, clientTasksInProgress] = await this.prisma.$transaction([
-          this.prisma.project.count({
-            where: {
-              clientId: userId,
-              status: {
-                in: ['PROPOSAL_SENT', 'IN_PROGRESS', 'ON_HOLD', 'REVIEW'],
+        const [clientProjects, clientTasksInProgress] =
+          await this.prisma.$transaction([
+            this.prisma.project.count({
+              where: {
+                clientId: userId,
+                status: {
+                  in: ['PROPOSAL_SENT', 'IN_PROGRESS', 'ON_HOLD', 'REVIEW'],
+                },
               },
-            },
-          }),
-          this.prisma.task.count({
-            where: {
-              project: { clientId: userId },
-              status: {
-                in: ['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'BLOCKED'],
+            }),
+            this.prisma.task.count({
+              where: {
+                project: { clientId: userId },
+                status: {
+                  in: ['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'BLOCKED'],
+                },
               },
-            },
-          }),
-        ]);
+            }),
+          ]);
 
         return {
           scope: 'CLIENT_ONLY',
@@ -271,7 +282,9 @@ export class AiRepository implements AiRepositoryPort {
           tasksInProgress: clientTasksInProgress,
         };
       } catch (error) {
-        throw new InternalServerErrorException('Failed to build operational snapshot');
+        throw new InternalServerErrorException(
+          'Failed to build operational snapshot',
+        );
       }
     }
 
@@ -315,7 +328,9 @@ export class AiRepository implements AiRepositoryPort {
         tasksInProgress,
       };
     } catch (error) {
-      throw new InternalServerErrorException('Failed to build operational snapshot');
+      throw new InternalServerErrorException(
+        'Failed to build operational snapshot',
+      );
     }
   }
 
@@ -367,7 +382,9 @@ export class AiRepository implements AiRepositoryPort {
     try {
       return await this.prisma.aiApplyRequest.findMany({
         where: {
-          ...(status ? { status: status as Prisma.AiApplyRequestWhereInput['status'] } : {}),
+          ...(status
+            ? { status: status as Prisma.AiApplyRequestWhereInput['status'] }
+            : {}),
         },
         orderBy: { createdAt: 'desc' },
         include: aiApplyRequestListIncludes.include,
@@ -479,7 +496,13 @@ export class AiRepository implements AiRepositoryPort {
           where: {
             isActive: true,
             section: {
-              in: ['about', 'services', 'portfolio', 'founder-profile', 'founder_cv'],
+              in: [
+                'about',
+                'services',
+                'portfolio',
+                'founder-profile',
+                'founder_cv',
+              ],
             },
           },
           select: { section: true, data: true },
@@ -499,7 +522,9 @@ export class AiRepository implements AiRepositoryPort {
 
       return { siteContents, showcaseProjects };
     } catch (error) {
-      throw new InternalServerErrorException('Failed to build public brand context');
+      throw new InternalServerErrorException(
+        'Failed to build public brand context',
+      );
     }
   }
 }

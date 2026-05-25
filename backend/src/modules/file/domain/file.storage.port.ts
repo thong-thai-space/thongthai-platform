@@ -1,4 +1,8 @@
-export type FileUploadFolder = 'avatars' | 'content' | 'portfolio' | 'project-files';
+export type FileUploadFolder =
+  | 'avatars'
+  | 'content'
+  | 'portfolio'
+  | 'project-files';
 
 // Pattern: Strategy Port — abstract over R2 / local / S3-compatible storage
 export interface FileStoragePort {

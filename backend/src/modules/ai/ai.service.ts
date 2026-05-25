@@ -34,7 +34,12 @@ export class AiService {
     return this.architectureUseCase.execute(userId, role, message, file);
   }
 
-  chat(userId: string, message: string, conversationId?: string, role?: UserRole) {
+  chat(
+    userId: string,
+    message: string,
+    conversationId?: string,
+    role?: UserRole,
+  ) {
     return this.chatUseCase.execute(userId, message, conversationId, role);
   }
 
@@ -45,15 +50,43 @@ export class AiService {
     locale: Language = Language.VI,
     budget?: string,
   ) {
-    return this.generationUseCase.generateProposal(userId, role, requirements, locale, budget);
+    return this.generationUseCase.generateProposal(
+      userId,
+      role,
+      requirements,
+      locale,
+      budget,
+    );
   }
 
-  breakdownTasks(userId: string, role: UserRole, description: string, techStack: string[]) {
-    return this.generationUseCase.breakdownTasks(userId, role, description, techStack);
+  breakdownTasks(
+    userId: string,
+    role: UserRole,
+    description: string,
+    techStack: string[],
+  ) {
+    return this.generationUseCase.breakdownTasks(
+      userId,
+      role,
+      description,
+      techStack,
+    );
   }
 
-  reviewCode(userId: string, role: UserRole, code: string, language: string, context?: string) {
-    return this.generationUseCase.reviewCode(userId, role, code, language, context);
+  reviewCode(
+    userId: string,
+    role: UserRole,
+    code: string,
+    language: string,
+    context?: string,
+  ) {
+    return this.generationUseCase.reviewCode(
+      userId,
+      role,
+      code,
+      language,
+      context,
+    );
   }
 
   estimateProject(
@@ -62,7 +95,12 @@ export class AiService {
     requirements: string,
     locale: Language = Language.VI,
   ) {
-    return this.generationUseCase.estimateProject(userId, role, requirements, locale);
+    return this.generationUseCase.estimateProject(
+      userId,
+      role,
+      requirements,
+      locale,
+    );
   }
 
   generateProgressReport(
@@ -71,14 +109,23 @@ export class AiService {
     projectId: string,
     locale: Language = Language.VI,
   ) {
-    return this.generationUseCase.generateProgressReport(userId, role, projectId, locale);
+    return this.generationUseCase.generateProgressReport(
+      userId,
+      role,
+      projectId,
+      locale,
+    );
   }
 
   generateStrategicPlan(userId: string, role: UserRole, dto: StrategicPlanDto) {
     return this.strategicPlanUseCase.generatePlan(userId, role, dto);
   }
 
-  applyStrategicPlan(userId: string, role: UserRole, dto: ApplyStrategicPlanDto) {
+  applyStrategicPlan(
+    userId: string,
+    role: UserRole,
+    dto: ApplyStrategicPlanDto,
+  ) {
     return this.strategicPlanUseCase.apply(userId, role, dto);
   }
 
@@ -93,10 +140,21 @@ export class AiService {
     approve: boolean,
     notes?: string,
   ) {
-    return this.strategicPlanUseCase.reviewApplyRequest(requestId, userId, role, approve, notes);
+    return this.strategicPlanUseCase.reviewApplyRequest(
+      requestId,
+      userId,
+      role,
+      approve,
+      notes,
+    );
   }
 
-  getAiAuditLogs(userId: string, role: UserRole, limit?: number, days?: number) {
+  getAiAuditLogs(
+    userId: string,
+    role: UserRole,
+    limit?: number,
+    days?: number,
+  ) {
     return this.auditUseCase.getLogs(userId, role, limit, days);
   }
 

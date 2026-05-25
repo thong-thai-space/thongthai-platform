@@ -3,7 +3,9 @@ import { ROLE_PROMPT_MAP } from '../prompts';
 
 // Pattern: Stateless helpers — pure functions shared across AI use cases
 
-export function tryParseJson<T = unknown>(content: string): T | { raw: string } {
+export function tryParseJson<T = unknown>(
+  content: string,
+): T | { raw: string } {
   try {
     const jsonMatch = content.match(/```json\n?([\s\S]*?)\n?```/);
     if (jsonMatch) return JSON.parse(jsonMatch[1]) as T;
@@ -53,12 +55,22 @@ export function isProviderUnavailableError(error: unknown): boolean {
   }
 
   const code = String(anyError.code || '').toUpperCase();
-  if (['ECONNRESET', 'ETIMEDOUT', 'ENOTFOUND', 'EAI_AGAIN', 'ECONNREFUSED'].includes(code)) {
+  if (
+    [
+      'ECONNRESET',
+      'ETIMEDOUT',
+      'ENOTFOUND',
+      'EAI_AGAIN',
+      'ECONNREFUSED',
+    ].includes(code)
+  ) {
     return true;
   }
 
   const message = String(anyError.message || '').toLowerCase();
-  return /timeout|network|socket|temporarily unavailable|overloaded|rate limit/.test(message);
+  return /timeout|network|socket|temporarily unavailable|overloaded|rate limit/.test(
+    message,
+  );
 }
 
 export const AI_MODEL = 'claude-sonnet-4-20250514';

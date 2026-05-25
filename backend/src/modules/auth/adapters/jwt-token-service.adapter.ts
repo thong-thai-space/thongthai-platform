@@ -21,7 +21,10 @@ export class JwtTokenServiceAdapter implements AuthTokenServicePort {
     private readonly hasher: AuthPasswordHasherPort,
   ) {}
 
-  async generateSessionTokens(userId: string, role: string): Promise<AuthTokens> {
+  async generateSessionTokens(
+    userId: string,
+    role: string,
+  ): Promise<AuthTokens> {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
         { sub: userId, role },
@@ -42,7 +45,10 @@ export class JwtTokenServiceAdapter implements AuthTokenServicePort {
     return { accessToken, refreshToken };
   }
 
-  generateResetPasswordToken(userId: string, passwordHash: string): Promise<string> {
+  generateResetPasswordToken(
+    userId: string,
+    passwordHash: string,
+  ): Promise<string> {
     const secret =
       this.configService.get<string>('JWT_RESET_PASSWORD_SECRET') ||
       this.configService.getOrThrow<string>('JWT_SECRET');

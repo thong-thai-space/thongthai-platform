@@ -12,10 +12,7 @@ import {
 } from '../auth.constants';
 import type { AuthEmailNotifierPort } from '../domain/auth.email-notifier.port';
 import type { AuthRepositoryPort } from '../domain/auth.repository.port';
-import type {
-  AuthSession,
-  RegisterCommand,
-} from '../domain/auth.types';
+import type { AuthSession, RegisterCommand } from '../domain/auth.types';
 import { PasswordPolicy } from '../policies/password.policy';
 import { SecurityChallengePolicy } from '../policies/security-challenge.policy';
 import { SessionIssuer } from './session-issuer.service';
@@ -25,7 +22,8 @@ import { SessionIssuer } from './session-issuer.service';
 export class RegisterUseCase {
   constructor(
     @Inject(AUTH_REPOSITORY) private readonly repo: AuthRepositoryPort,
-    @Inject(AUTH_EMAIL_NOTIFIER) private readonly notifier: AuthEmailNotifierPort,
+    @Inject(AUTH_EMAIL_NOTIFIER)
+    private readonly notifier: AuthEmailNotifierPort,
     private readonly passwordPolicy: PasswordPolicy,
     private readonly challengePolicy: SecurityChallengePolicy,
     private readonly sessionIssuer: SessionIssuer,
@@ -93,9 +91,13 @@ export class RegisterUseCase {
   async verifyEmail(token: string): Promise<AuthSession> {
     const user = await this.repo.findByVerificationToken(token);
     if (!user) throw new BadRequestException('Invalid verification link');
-    if (user.emailVerified) throw new BadRequestException('Email already verified');
+    if (user.emailVerified)
+      throw new BadRequestException('Email already verified');
 
-    if (!user.emailVerifyTokenExpiry || user.emailVerifyTokenExpiry < new Date()) {
+    if (
+      !user.emailVerifyTokenExpiry ||
+      user.emailVerifyTokenExpiry < new Date()
+    ) {
       throw new BadRequestException(
         'Verification link has expired. Please request a new one.',
       );

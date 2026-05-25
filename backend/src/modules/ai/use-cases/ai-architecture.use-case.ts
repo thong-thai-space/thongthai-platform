@@ -89,7 +89,9 @@ export class AiArchitectureUseCase {
         generatedAt: new Date(),
       });
 
-      const cost = fallbackUsed ? 0 : estimateCostUsd(usage.inputTokens, usage.outputTokens);
+      const cost = fallbackUsed
+        ? 0
+        : estimateCostUsd(usage.inputTokens, usage.outputTokens);
 
       await this.audit.log({
         feature: AiFeature.ARCHITECTURE_DIAGRAM,
@@ -128,14 +130,16 @@ export class AiArchitectureUseCase {
         userId,
         model: AI_MODEL,
         success: false,
-        errorMessage: error instanceof Error ? error.message : 'Unknown AI error',
+        errorMessage:
+          error instanceof Error ? error.message : 'Unknown AI error',
         durationMs: Date.now() - startedAt,
         metadata: { hasFile: Boolean(file), mimeType: file?.mimetype },
       });
 
       if (
         error instanceof BadRequestException ||
-        (error instanceof HttpException && error.getStatus() === HttpStatus.TOO_MANY_REQUESTS)
+        (error instanceof HttpException &&
+          error.getStatus() === HttpStatus.TOO_MANY_REQUESTS)
       ) {
         throw error;
       }
@@ -144,7 +148,9 @@ export class AiArchitectureUseCase {
         'Architecture diagram generation failed',
         error instanceof Error ? error.stack : undefined,
       );
-      throw new InternalServerErrorException('Failed to generate architecture diagram');
+      throw new InternalServerErrorException(
+        'Failed to generate architecture diagram',
+      );
     }
   }
 
@@ -154,12 +160,18 @@ export class AiArchitectureUseCase {
       feature: AiFeature.ARCHITECTURE_DIAGRAM,
       success: true,
     });
-    this.aiPolicy.assertArchitectureTrialLimit(used, ARCHITECTURE_TRIAL_REQUEST_LIMIT);
+    this.aiPolicy.assertArchitectureTrialLimit(
+      used,
+      ARCHITECTURE_TRIAL_REQUEST_LIMIT,
+    );
   }
 
   private async generateOrFallback(
     userPrompt: string,
-    promptConfig: { architectureDiagram: string; professionalOutputRules: string },
+    promptConfig: {
+      architectureDiagram: string;
+      professionalOutputRules: string;
+    },
     role: UserRole,
     sanitizedMessage: string,
   ): Promise<{
@@ -172,8 +184,10 @@ export class AiArchitectureUseCase {
       promptConfig.professionalOutputRules +
       roleDirective(role);
 
-    let response: { text: string; usage: { inputTokens: number; outputTokens: number } } | null =
-      null;
+    let response: {
+      text: string;
+      usage: { inputTokens: number; outputTokens: number };
+    } | null = null;
 
     try {
       response = await this.provider.createMessage({
@@ -215,7 +229,8 @@ export class AiArchitectureUseCase {
           usage: {
             inputTokens: response.usage.inputTokens,
             outputTokens: response.usage.outputTokens,
-            totalTokens: response.usage.inputTokens + response.usage.outputTokens,
+            totalTokens:
+              response.usage.inputTokens + response.usage.outputTokens,
           },
           fallbackUsed: false,
         };
@@ -248,15 +263,18 @@ export class AiArchitectureUseCase {
       throw new BadRequestException('AI returned non-JSON architecture output');
     }
 
-    const description = typeof parsed.description === 'string' ? parsed.description.trim() : '';
+    const description =
+      typeof parsed.description === 'string' ? parsed.description.trim() : '';
     const layers = Array.isArray(parsed.layers)
       ? parsed.layers.filter((l) => typeof l === 'string').map((l) => l.trim())
       : [];
     const svgRaw = typeof parsed.svg === 'string' ? parsed.svg.trim() : '';
     const svg = this.sanitizeSvg(svgRaw);
 
-    if (!description) throw new BadRequestException('Architecture description is missing');
-    if (layers.length === 0) throw new BadRequestException('Architecture layers are missing');
+    if (!description)
+      throw new BadRequestException('Architecture description is missing');
+    if (layers.length === 0)
+      throw new BadRequestException('Architecture layers are missing');
     if (!svg.startsWith('<svg') || !svg.includes('viewBox="0 0 900 600"')) {
       throw new BadRequestException('Architecture SVG is invalid');
     }
@@ -275,13 +293,19 @@ export class AiArchitectureUseCase {
     return s;
   }
 
-  private assertQuality(description: string, layers: string[], svg: string): void {
+  private assertQuality(
+    description: string,
+    layers: string[],
+    svg: string,
+  ): void {
     const paragraphCount = description
       .split(/\n\s*\n/g)
       .map((x) => x.trim())
       .filter(Boolean).length;
     if (paragraphCount < 1 || description.length < 120) {
-      throw new BadRequestException('Architecture description quality is too low');
+      throw new BadRequestException(
+        'Architecture description quality is too low',
+      );
     }
     if (layers.length < 3) {
       throw new BadRequestException('Architecture layers are insufficient');
@@ -299,13 +323,17 @@ export class AiArchitectureUseCase {
       svg.length < 500 ||
       svg.length > 120_000
     ) {
-      throw new BadRequestException('Architecture SVG contains unsafe or invalid markup');
+      throw new BadRequestException(
+        'Architecture SVG contains unsafe or invalid markup',
+      );
     }
 
     try {
       new Resvg(svg, { fitTo: { mode: 'width', value: 900 } }).render();
     } catch {
-      throw new BadRequestException('Architecture SVG is malformed and cannot be rendered');
+      throw new BadRequestException(
+        'Architecture SVG is malformed and cannot be rendered',
+      );
     }
   }
 

@@ -12,7 +12,11 @@ import {
   UserRole,
 } from '@prisma/client';
 import { ApplyStrategicPlanDto, StrategicPlanDto } from '../dto/ai.dto';
-import { AI_NOTIFICATION_PORT, AI_PROVIDER_PORT, AI_REPOSITORY } from '../ai.constants';
+import {
+  AI_NOTIFICATION_PORT,
+  AI_PROVIDER_PORT,
+  AI_REPOSITORY,
+} from '../ai.constants';
 import type { AiNotificationPort } from '../domain/ai.notification.port';
 import type { AiProviderPort } from '../domain/ai.provider.port';
 import type { AiRepositoryPort } from '../domain/ai.repository.port';
@@ -51,7 +55,8 @@ export class AiStrategicPlanUseCase {
       ? await this.repo.findProjectForStrategicPlan(dto.projectId)
       : null;
 
-    if (dto.projectId && !project) throw new NotFoundException('Project not found');
+    if (dto.projectId && !project)
+      throw new NotFoundException('Project not found');
     if (project) this.aiPolicy.assertStrategicPlanAccess(project, role, userId);
 
     const projectContext = this.serializeProjectContext(project);
@@ -85,7 +90,10 @@ export class AiStrategicPlanUseCase {
       });
 
       const parsed = tryParseJson(response.text);
-      if (!dto.includeRiskMatrix && 'riskMatrix' in (parsed as Record<string, unknown>)) {
+      if (
+        !dto.includeRiskMatrix &&
+        'riskMatrix' in (parsed as Record<string, unknown>)
+      ) {
         delete (parsed as Record<string, unknown>).riskMatrix;
       }
 
@@ -103,7 +111,10 @@ export class AiStrategicPlanUseCase {
           response.usage.outputTokens,
         ),
         durationMs: Date.now() - startedAt,
-        metadata: { locale, includeRiskMatrix: dto.includeRiskMatrix !== false },
+        metadata: {
+          locale,
+          includeRiskMatrix: dto.includeRiskMatrix !== false,
+        },
       });
 
       return {
@@ -121,22 +132,36 @@ export class AiStrategicPlanUseCase {
         projectId: project?.id,
         model: AI_MODEL,
         success: false,
-        errorMessage: error instanceof Error ? error.message : 'Unknown AI error',
+        errorMessage:
+          error instanceof Error ? error.message : 'Unknown AI error',
         durationMs: Date.now() - startedAt,
-        metadata: { locale, includeRiskMatrix: dto.includeRiskMatrix !== false },
+        metadata: {
+          locale,
+          includeRiskMatrix: dto.includeRiskMatrix !== false,
+        },
       });
       throw error;
     }
   }
 
-  async createApplyRequest(userId: string, role: UserRole, dto: ApplyStrategicPlanDto) {
+  async createApplyRequest(
+    userId: string,
+    role: UserRole,
+    dto: ApplyStrategicPlanDto,
+  ) {
     this.aiPolicy.assertOwnerOrAdmin(role);
 
     const project = await this.repo.findProjectSummary(dto.projectId);
     if (!project) throw new NotFoundException('Project not found');
 
-    const { priorityActions, next7Days, next30Days } = this.extractPlanItems(dto.plan);
-    if (priorityActions.length === 0 && next7Days.length === 0 && next30Days.length === 0) {
+    const { priorityActions, next7Days, next30Days } = this.extractPlanItems(
+      dto.plan,
+    );
+    if (
+      priorityActions.length === 0 &&
+      next7Days.length === 0 &&
+      next30Days.length === 0
+    ) {
       throw new BadRequestException('Plan does not contain actionable items');
     }
 
@@ -199,7 +224,10 @@ export class AiStrategicPlanUseCase {
     approve: boolean,
     notes?: string,
   ) {
-    this.aiPolicy.assertOwnerOnly(role, 'Only OWNER can approve/reject apply requests');
+    this.aiPolicy.assertOwnerOnly(
+      role,
+      'Only OWNER can approve/reject apply requests',
+    );
 
     const request = await this.repo.findApplyRequestById(requestId);
     if (!request) throw new NotFoundException('Apply request not found');
@@ -265,13 +293,16 @@ export class AiStrategicPlanUseCase {
   // ── Private helpers ──────────────────────────────────────────────────
 
   private serializeProjectContext(
-    project: Awaited<ReturnType<AiRepositoryPort['findProjectForStrategicPlan']>>,
+    project: Awaited<
+      ReturnType<AiRepositoryPort['findProjectForStrategicPlan']>
+    >,
   ) {
     if (!project) return null;
     const taskSummary = {
       total: project.tasks.length,
       todo: project.tasks.filter((t) => t.status === 'TODO').length,
-      inProgress: project.tasks.filter((t) => t.status === 'IN_PROGRESS').length,
+      inProgress: project.tasks.filter((t) => t.status === 'IN_PROGRESS')
+        .length,
       inReview: project.tasks.filter((t) => t.status === 'IN_REVIEW').length,
       done: project.tasks.filter((t) => t.status === 'DONE').length,
       blocked: project.tasks.filter((t) => t.status === 'BLOCKED').length,
@@ -283,7 +314,9 @@ export class AiStrategicPlanUseCase {
           invoice.status === 'OVERDUE' ||
           (invoice.status !== 'PAID' && invoice.dueDate < new Date()),
       ).length,
-      paidInvoices: project.invoices.filter((invoice) => invoice.status === 'PAID').length,
+      paidInvoices: project.invoices.filter(
+        (invoice) => invoice.status === 'PAID',
+      ).length,
     };
     return {
       id: project.id,
@@ -305,7 +338,7 @@ export class AiStrategicPlanUseCase {
   }
 
   private extractPlanItems(rawPlan: Record<string, unknown> | undefined) {
-    const plan = (rawPlan || {}) as Record<string, unknown>;
+    const plan = rawPlan || {};
     const priorityActions = Array.isArray(plan.priorityActions)
       ? (plan.priorityActions as Record<string, unknown>[])
       : [];
@@ -333,13 +366,19 @@ export class AiStrategicPlanUseCase {
     const project = await this.repo.findProjectSummary(dto.projectId);
     if (!project) throw new NotFoundException('Project not found');
 
-    const { priorityActions, next7Days, next30Days } = this.extractPlanItems(dto.plan);
+    const { priorityActions, next7Days, next30Days } = this.extractPlanItems(
+      dto.plan,
+    );
 
     const existingMilestones = new Set(
-      (await this.repo.findMilestoneTitles(dto.projectId)).map((t) => t.trim().toLowerCase()),
+      (await this.repo.findMilestoneTitles(dto.projectId)).map((t) =>
+        t.trim().toLowerCase(),
+      ),
     );
     const existingAiTasks = new Set(
-      (await this.repo.findAiTaskTitles(dto.projectId)).map((t) => t.trim().toLowerCase()),
+      (await this.repo.findAiTaskTitles(dto.projectId)).map((t) =>
+        t.trim().toLowerCase(),
+      ),
     );
 
     const members = await this.repo.findActiveMembers();
@@ -396,7 +435,11 @@ export class AiStrategicPlanUseCase {
         skippedTasks.push(trimmed);
         return;
       }
-      const assigneeId = this.resolveAssignee(task.owner, project, memberByRole);
+      const assigneeId = this.resolveAssignee(
+        task.owner,
+        project,
+        memberByRole,
+      );
       await this.repo.createTask({
         project: { connect: { id: dto.projectId } },
         creator: { connect: { id: creatorId } },
@@ -455,7 +498,12 @@ export class AiStrategicPlanUseCase {
 
     return {
       projectId: dto.projectId,
-      summary: { createdMilestones, skippedMilestones, createdTasks, skippedTasks },
+      summary: {
+        createdMilestones,
+        skippedMilestones,
+        createdTasks,
+        skippedTasks,
+      },
     };
   }
 

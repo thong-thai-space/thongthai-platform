@@ -23,7 +23,11 @@ function buildSut() {
     uploadPublicFile: jest.fn().mockResolvedValue('https://cdn/example.png'),
   };
   const accessPolicy = new ProjectAccessPolicy(repo);
-  return { useCase: new FileUseCases(repo, storage, accessPolicy), repo, storage };
+  return {
+    useCase: new FileUseCases(repo, storage, accessPolicy),
+    repo,
+    storage,
+  };
 }
 
 describe('FileUseCases.findOne', () => {
@@ -37,7 +41,10 @@ describe('FileUseCases.findOne', () => {
 
   it('allows OWNER when they own the project (multi-tenant scoped)', async () => {
     const { useCase, repo } = buildSut();
-    repo.findFileWithProject.mockResolvedValue({ id: 'f1', projectId: 'p1' } as never);
+    repo.findFileWithProject.mockResolvedValue({
+      id: 'f1',
+      projectId: 'p1',
+    } as never);
     repo.findProjectAccess.mockResolvedValue({
       ownerId: 'u1',
       clientId: null,
@@ -49,7 +56,10 @@ describe('FileUseCases.findOne', () => {
 
   it('rejects OWNER from another tenant (no global super-role)', async () => {
     const { useCase, repo } = buildSut();
-    repo.findFileWithProject.mockResolvedValue({ id: 'f1', projectId: 'p1' } as never);
+    repo.findFileWithProject.mockResolvedValue({
+      id: 'f1',
+      projectId: 'p1',
+    } as never);
     repo.findProjectAccess.mockResolvedValue({
       ownerId: 'someone-else',
       clientId: null,
@@ -62,7 +72,10 @@ describe('FileUseCases.findOne', () => {
 
   it('rejects CLIENT who does not own the project', async () => {
     const { useCase, repo } = buildSut();
-    repo.findFileWithProject.mockResolvedValue({ id: 'f1', projectId: 'p1' } as never);
+    repo.findFileWithProject.mockResolvedValue({
+      id: 'f1',
+      projectId: 'p1',
+    } as never);
     repo.findProjectAccess.mockResolvedValue({
       ownerId: 'o1',
       clientId: 'other',
@@ -76,14 +89,19 @@ describe('FileUseCases.findOne', () => {
 
   it('allows MEMBER with assigned task', async () => {
     const { useCase, repo } = buildSut();
-    repo.findFileWithProject.mockResolvedValue({ id: 'f1', projectId: 'p1' } as never);
+    repo.findFileWithProject.mockResolvedValue({
+      id: 'f1',
+      projectId: 'p1',
+    } as never);
     repo.findProjectAccess.mockResolvedValue({
       ownerId: 'o1',
       clientId: null,
       tasks: [{ id: 't1' }],
     });
 
-    await expect(useCase.findOne('f1', 'm1', UserRole.MEMBER)).resolves.toBeDefined();
+    await expect(
+      useCase.findOne('f1', 'm1', UserRole.MEMBER),
+    ).resolves.toBeDefined();
   });
 });
 

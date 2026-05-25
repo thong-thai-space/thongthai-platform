@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InvoiceStatus, Prisma, UserRole } from '@prisma/client';
 import { CreateInvoiceDto, UpdateInvoiceDto } from '../dto/invoice.dto';
 import { TaxCalculator } from '../../../shared/utils/tax-calculator';
@@ -39,7 +44,9 @@ export class InvoiceUseCases {
     } = dto;
 
     if (!items?.length) {
-      throw new BadRequestException('Invoice must contain at least one line item');
+      throw new BadRequestException(
+        'Invoice must contain at least one line item',
+      );
     }
 
     const client = await this.invoiceRepository.findClientSummary(dto.clientId);
@@ -48,12 +55,16 @@ export class InvoiceUseCases {
     }
 
     if (dto.projectId) {
-      const project = await this.invoiceRepository.findProjectSummary(dto.projectId);
+      const project = await this.invoiceRepository.findProjectSummary(
+        dto.projectId,
+      );
       if (!project) {
         throw new BadRequestException('Selected project does not exist');
       }
       if (project.clientId && project.clientId !== dto.clientId) {
-        throw new BadRequestException('Selected project does not belong to this client');
+        throw new BadRequestException(
+          'Selected project does not belong to this client',
+        );
       }
     }
 
@@ -62,27 +73,32 @@ export class InvoiceUseCases {
       throw new BadRequestException('Invalid due date');
     }
 
-    const computedItems: Prisma.InvoiceItemCreateWithoutInvoiceInput[] = items.map((item) => {
-      const quantity = item.quantity ?? 1;
-      if (quantity <= 0) {
-        throw new BadRequestException('Item quantity must be greater than 0');
-      }
-      if (item.unitPrice < 0) {
-        throw new BadRequestException('Item unit price cannot be negative');
-      }
+    const computedItems: Prisma.InvoiceItemCreateWithoutInvoiceInput[] =
+      items.map((item) => {
+        const quantity = item.quantity ?? 1;
+        if (quantity <= 0) {
+          throw new BadRequestException('Item quantity must be greater than 0');
+        }
+        if (item.unitPrice < 0) {
+          throw new BadRequestException('Item unit price cannot be negative');
+        }
 
-      const amount = quantity * item.unitPrice;
-      return {
-        description: item.description,
-        quantity,
-        unitPrice: item.unitPrice,
-        amount,
-      };
-    });
+        const amount = quantity * item.unitPrice;
+        return {
+          description: item.description,
+          quantity,
+          unitPrice: item.unitPrice,
+          amount,
+        };
+      });
 
-    const subtotal = computedItems.reduce((sum, it) => sum + Number(it.amount), 0);
+    const subtotal = computedItems.reduce(
+      (sum, it) => sum + Number(it.amount),
+      0,
+    );
     const rate = taxRate ?? 0;
-    const tax = TaxCalculator.calculateTax(TaxCalculator.toCents(subtotal), rate) / 100;
+    const tax =
+      TaxCalculator.calculateTax(TaxCalculator.toCents(subtotal), rate) / 100;
     const discount = dto.discount ?? 0;
     const total = subtotal + tax - discount;
 
@@ -115,8 +131,8 @@ export class InvoiceUseCases {
 
     if (dto.status && dto.status !== existingInvoice.status) {
       this.invoicePolicy.assertValidStatusTransition(
-        existingInvoice.status as InvoiceStatus,
-        dto.status as InvoiceStatus,
+        existingInvoice.status,
+        dto.status,
       );
     }
 

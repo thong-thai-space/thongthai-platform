@@ -27,7 +27,11 @@ function buildSut() {
     notifyProjectRequested: jest.fn().mockResolvedValue(undefined),
     notifyRequestAccepted: jest.fn().mockResolvedValue(undefined),
   };
-  const useCase = new ProjectUseCases(repo, notifier, new ProjectStatusPolicy());
+  const useCase = new ProjectUseCases(
+    repo,
+    notifier,
+    new ProjectStatusPolicy(),
+  );
   return { useCase, repo, notifier };
 }
 
@@ -67,15 +71,17 @@ describe('ProjectUseCases.findOne', () => {
   it('throws NotFound for missing project', async () => {
     const { useCase, repo } = buildSut();
     repo.findByIdWithIncludes.mockResolvedValue(null);
-    await expect(useCase.findOne('x', 'u', UserRole.OWNER)).rejects.toThrow(NotFoundException);
+    await expect(useCase.findOne('x', 'u', UserRole.OWNER)).rejects.toThrow(
+      NotFoundException,
+    );
   });
 
   it('forbids wrong client', async () => {
     const { useCase, repo } = buildSut();
     repo.findByIdWithIncludes.mockResolvedValue(project as never);
-    await expect(useCase.findOne('p1', 'other', UserRole.CLIENT)).rejects.toThrow(
-      ForbiddenException,
-    );
+    await expect(
+      useCase.findOne('p1', 'other', UserRole.CLIENT),
+    ).rejects.toThrow(ForbiddenException);
   });
 
   it('forbids member without assigned tasks', async () => {
@@ -196,7 +202,9 @@ describe('ProjectUseCases.acceptRequest', () => {
       clientId: 'c1',
     } as never);
 
-    await expect(useCase.acceptRequest('p1', 'admin')).rejects.toThrow(BadRequestException);
+    await expect(useCase.acceptRequest('p1', 'admin')).rejects.toThrow(
+      BadRequestException,
+    );
   });
 
   it('accepts DRAFT projects and notifies', async () => {
@@ -225,13 +233,19 @@ describe('ProjectStatusPolicy', () => {
 
   it('forbids COMPLETED → anything', () => {
     expect(() =>
-      policy.assertTransition(ProjectStatus.COMPLETED, ProjectStatus.IN_PROGRESS),
+      policy.assertTransition(
+        ProjectStatus.COMPLETED,
+        ProjectStatus.IN_PROGRESS,
+      ),
     ).toThrow(BadRequestException);
   });
 
   it('treats same status as no-op', () => {
     expect(() =>
-      policy.assertTransition(ProjectStatus.IN_PROGRESS, ProjectStatus.IN_PROGRESS),
+      policy.assertTransition(
+        ProjectStatus.IN_PROGRESS,
+        ProjectStatus.IN_PROGRESS,
+      ),
     ).not.toThrow();
   });
 });

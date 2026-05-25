@@ -1,4 +1,8 @@
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { Invoice, InvoiceStatus, UserRole } from '@prisma/client';
 
 // Pattern: Policy
@@ -6,7 +10,9 @@ import { Invoice, InvoiceStatus, UserRole } from '@prisma/client';
 export class InvoicePolicy {
   assertCanView(role: UserRole, invoice: Invoice, userId: string) {
     if (role === UserRole.CLIENT && invoice.clientId !== userId) {
-      throw new ForbiddenException('You do not have permission to access this invoice');
+      throw new ForbiddenException(
+        'You do not have permission to access this invoice',
+      );
     }
   }
 
@@ -16,7 +22,10 @@ export class InvoicePolicy {
     }
   }
 
-  assertValidStatusTransition(currentStatus: InvoiceStatus, newStatus: InvoiceStatus): void {
+  assertValidStatusTransition(
+    currentStatus: InvoiceStatus,
+    newStatus: InvoiceStatus,
+  ): void {
     const validTransitions: Record<InvoiceStatus, InvoiceStatus[]> = {
       DRAFT: ['SENT', 'CANCELLED'],
       SENT: ['PAID', 'OVERDUE', 'CANCELLED'],

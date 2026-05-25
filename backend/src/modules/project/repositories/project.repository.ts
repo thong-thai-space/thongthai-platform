@@ -77,7 +77,9 @@ export class ProjectRepository implements ProjectRepositoryPort {
   /**
    * Find all projects with includes
    */
-  async findAllWithIncludes(where?: Prisma.ProjectWhereInput): Promise<ProjectListWithIncludes[]> {
+  async findAllWithIncludes(
+    where?: Prisma.ProjectWhereInput,
+  ): Promise<ProjectListWithIncludes[]> {
     try {
       return await this.prisma.project.findMany({
         where,
@@ -135,7 +137,10 @@ export class ProjectRepository implements ProjectRepositoryPort {
         data,
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
         throw new NotFoundException('Project not found');
       }
       throw new InternalServerErrorException('Failed to update project');
@@ -150,7 +155,10 @@ export class ProjectRepository implements ProjectRepositoryPort {
       await this.prisma.project.delete({ where: { id } });
       return true;
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
         throw new NotFoundException('Project not found');
       }
       throw new InternalServerErrorException('Failed to delete project');
@@ -181,7 +189,9 @@ export class ProjectRepository implements ProjectRepositoryPort {
         where: { status },
       });
     } catch (error) {
-      throw new InternalServerErrorException('Failed to find projects by status');
+      throw new InternalServerErrorException(
+        'Failed to find projects by status',
+      );
     }
   }
 
@@ -196,7 +206,9 @@ export class ProjectRepository implements ProjectRepositoryPort {
         orderBy: { showcaseOrder: 'asc' },
       });
     } catch (error) {
-      throw new InternalServerErrorException('Failed to find showcase projects');
+      throw new InternalServerErrorException(
+        'Failed to find showcase projects',
+      );
     }
   }
 
@@ -229,4 +241,3 @@ export class ProjectRepository implements ProjectRepositoryPort {
     }
   }
 }
-

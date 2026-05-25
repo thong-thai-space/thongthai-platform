@@ -8,9 +8,13 @@ import type { AiStrategicPlanUseCase } from './use-cases/ai-strategic-plan.use-c
 
 describe('AiService (facade)', () => {
   function buildSut() {
-    const architecture = { execute: jest.fn() } as unknown as jest.Mocked<AiArchitectureUseCase>;
+    const architecture = {
+      execute: jest.fn(),
+    } as unknown as jest.Mocked<AiArchitectureUseCase>;
     const chat = {
-      execute: jest.fn().mockResolvedValue({ conversationId: 'c1', message: 'hi', usage: {} }),
+      execute: jest
+        .fn()
+        .mockResolvedValue({ conversationId: 'c1', message: 'hi', usage: {} }),
     } as unknown as jest.Mocked<AiChatUseCase>;
     const generation = {
       generateProposal: jest.fn(),
@@ -37,26 +41,63 @@ describe('AiService (facade)', () => {
       execute: jest.fn().mockResolvedValue({ message: 'hi back' }),
     } as unknown as jest.Mocked<AiPublicChatUseCase>;
 
-    const service = new AiService(architecture, chat, generation, strategicPlan, audit, publicChat);
-    return { service, architecture, chat, generation, strategicPlan, audit, publicChat };
+    const service = new AiService(
+      architecture,
+      chat,
+      generation,
+      strategicPlan,
+      audit,
+      publicChat,
+    );
+    return {
+      service,
+      architecture,
+      chat,
+      generation,
+      strategicPlan,
+      audit,
+      publicChat,
+    };
   }
 
   it('delegates chat to AiChatUseCase', async () => {
     const { service, chat } = buildSut();
     await service.chat('u1', 'hello');
-    expect(chat.execute).toHaveBeenCalledWith('u1', 'hello', undefined, undefined);
+    expect(chat.execute).toHaveBeenCalledWith(
+      'u1',
+      'hello',
+      undefined,
+      undefined,
+    );
   });
 
   it('delegates generateProposal to AiGenerationUseCase', async () => {
     const { service, generation } = buildSut();
-    await service.generateProposal('u1', 'OWNER' as never, 'req', 'EN' as never, '$5k');
-    expect(generation.generateProposal).toHaveBeenCalledWith('u1', 'OWNER', 'req', 'EN', '$5k');
+    await service.generateProposal(
+      'u1',
+      'OWNER' as never,
+      'req',
+      'EN' as never,
+      '$5k',
+    );
+    expect(generation.generateProposal).toHaveBeenCalledWith(
+      'u1',
+      'OWNER',
+      'req',
+      'EN',
+      '$5k',
+    );
   });
 
   it('delegates generateArchitectureDiagram to AiArchitectureUseCase', async () => {
     const { service, architecture } = buildSut();
     await service.generateArchitectureDiagram('u1', 'OWNER' as never, 'msg');
-    expect(architecture.execute).toHaveBeenCalledWith('u1', 'OWNER', 'msg', undefined);
+    expect(architecture.execute).toHaveBeenCalledWith(
+      'u1',
+      'OWNER',
+      'msg',
+      undefined,
+    );
   });
 
   it('delegates chatPublic to AiPublicChatUseCase', async () => {

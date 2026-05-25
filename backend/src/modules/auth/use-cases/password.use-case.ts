@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { createHash } from 'crypto';
 import {
   AUTH_EMAIL_NOTIFIER,
@@ -27,13 +23,16 @@ const GENERIC_MESSAGE =
 export class PasswordResetUseCase {
   constructor(
     @Inject(AUTH_REPOSITORY) private readonly repo: AuthRepositoryPort,
-    @Inject(AUTH_EMAIL_NOTIFIER) private readonly notifier: AuthEmailNotifierPort,
+    @Inject(AUTH_EMAIL_NOTIFIER)
+    private readonly notifier: AuthEmailNotifierPort,
     @Inject(AUTH_TOKEN_SERVICE) private readonly tokens: AuthTokenServicePort,
     private readonly passwordPolicy: PasswordPolicy,
     private readonly challengePolicy: SecurityChallengePolicy,
   ) {}
 
-  async forgotPassword(cmd: ForgotPasswordCommand): Promise<{ message: string }> {
+  async forgotPassword(
+    cmd: ForgotPasswordCommand,
+  ): Promise<{ message: string }> {
     await this.challengePolicy.enforce(cmd.turnstileToken, cmd.remoteIp);
 
     const user = await this.repo.findByEmail(cmd.email);
@@ -45,7 +44,11 @@ export class PasswordResetUseCase {
       user.id,
       user.password,
     );
-    await this.notifier.sendPasswordResetEmail(user.email, user.name, resetToken);
+    await this.notifier.sendPasswordResetEmail(
+      user.email,
+      user.name,
+      resetToken,
+    );
     return { message: GENERIC_MESSAGE };
   }
 

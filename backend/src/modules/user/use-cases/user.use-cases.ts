@@ -59,11 +59,17 @@ export class UserUseCases {
     const user = await this.repo.findById(userId);
     if (!user) throw new NotFoundException('User not found');
     if (!user.password) {
-      throw new UnauthorizedException('Password change is not available for this account');
+      throw new UnauthorizedException(
+        'Password change is not available for this account',
+      );
     }
 
-    const matches = await this.hasher.compare(dto.currentPassword, user.password);
-    if (!matches) throw new UnauthorizedException('Current password is incorrect');
+    const matches = await this.hasher.compare(
+      dto.currentPassword,
+      user.password,
+    );
+    if (!matches)
+      throw new UnauthorizedException('Current password is incorrect');
 
     this.assertStrongPassword(dto.newPassword);
     const hashedPassword = await this.hasher.hash(dto.newPassword);

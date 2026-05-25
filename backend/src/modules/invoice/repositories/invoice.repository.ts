@@ -58,7 +58,10 @@ export class InvoiceRepository implements InvoiceRepositoryPort {
       ) {
         throw new ConflictException('Invoice number already exists');
       }
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2003'
+      ) {
         throw new BadRequestException('Invalid relation data (client/project)');
       }
       throw new InternalServerErrorException('Failed to create invoice');
@@ -75,7 +78,10 @@ export class InvoiceRepository implements InvoiceRepositoryPort {
         data,
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
         throw new NotFoundException('Invoice not found');
       }
       throw new InternalServerErrorException('Failed to update invoice');
@@ -90,7 +96,10 @@ export class InvoiceRepository implements InvoiceRepositoryPort {
       await this.prisma.invoice.delete({ where: { id } });
       return true;
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
         throw new NotFoundException('Invoice not found');
       }
       throw new InternalServerErrorException('Failed to delete invoice');
@@ -121,7 +130,9 @@ export class InvoiceRepository implements InvoiceRepositoryPort {
         orderBy: [{ dueDate: 'asc' }, { createdAt: 'desc' }],
       });
     } catch (error) {
-      throw new InternalServerErrorException('Failed to find invoices by status');
+      throw new InternalServerErrorException(
+        'Failed to find invoices by status',
+      );
     }
   }
 
@@ -171,7 +182,9 @@ export class InvoiceRepository implements InvoiceRepositoryPort {
 
       return `${prefix}${String(nextSeq).padStart(6, '0')}`;
     } catch (error) {
-      throw new InternalServerErrorException('Failed to generate invoice number');
+      throw new InternalServerErrorException(
+        'Failed to generate invoice number',
+      );
     }
   }
 

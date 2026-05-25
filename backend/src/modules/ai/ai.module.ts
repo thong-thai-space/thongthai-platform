@@ -10,7 +10,11 @@ import { AiPolicy } from './policies/ai.policy';
 import { AiRepository } from './repositories/ai.repository';
 import { AiNotificationAdapter } from './adapters/ai-notification.adapter';
 import { AiProviderAdapter } from './adapters/ai-provider.adapter';
-import { AI_NOTIFICATION_PORT, AI_PROVIDER_PORT, AI_REPOSITORY } from './ai.constants';
+import {
+  AI_NOTIFICATION_PORT,
+  AI_PROVIDER_PORT,
+  AI_REPOSITORY,
+} from './ai.constants';
 import { AiAuditService } from './support/ai-audit.service';
 import { AiPromptConfigService } from './support/ai-prompt-config.service';
 import { AiArchitectureUseCase } from './use-cases/ai-architecture.use-case';

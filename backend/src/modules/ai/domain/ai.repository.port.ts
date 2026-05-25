@@ -60,12 +60,16 @@ export interface PublicBrandContextData {
 export interface AiRepositoryPort {
   createUsageAudit(data: Prisma.AiUsageAuditCreateInput): Promise<AiUsageAudit>;
   countUsageAudit(where: Prisma.AiUsageAuditWhereInput): Promise<number>;
-  findUsageAuditById(id: string): Promise<{ id: string; userId: string } | null>;
+  findUsageAuditById(
+    id: string,
+  ): Promise<{ id: string; userId: string } | null>;
   findUsageAuditLogs(
     where: Prisma.AiUsageAuditWhereInput,
     take: number,
   ): Promise<AiAuditLogWithRelations[]>;
-  findUsageAuditSummary(where: Prisma.AiUsageAuditWhereInput): Promise<AiUsageAuditSummaryRow[]>;
+  findUsageAuditSummary(
+    where: Prisma.AiUsageAuditWhereInput,
+  ): Promise<AiUsageAuditSummaryRow[]>;
   updateUsageAudit(
     id: string,
     data: Prisma.AiUsageAuditUpdateInput,
@@ -73,7 +77,10 @@ export interface AiRepositoryPort {
   deleteUsageAudit(id: string): Promise<AiUsageAudit>;
   deleteUsageAuditBefore(cutoff: Date): Promise<number>;
 
-  findPromptSection(): Promise<{ isActive: boolean; data: Prisma.InputJsonValue | null } | null>;
+  findPromptSection(): Promise<{
+    isActive: boolean;
+    data: Prisma.InputJsonValue | null;
+  } | null>;
 
   findUserQuota(userId: string): Promise<{
     id: string;
@@ -86,7 +93,10 @@ export interface AiRepositoryPort {
     conversationId: string,
     userId: string,
   ): Promise<AiConversationWithMessages | null>;
-  createConversation(userId: string, title: string): Promise<AiConversationWithMessages>;
+  createConversation(
+    userId: string,
+    title: string,
+  ): Promise<AiConversationWithMessages>;
   createMessage(data: {
     conversationId: string;
     role: 'user' | 'assistant';
@@ -98,10 +108,17 @@ export interface AiRepositoryPort {
     userId: string,
     role?: UserRole,
   ): Promise<AiProjectContextItem[]>;
-  getOperationalSnapshot(userId: string, role?: UserRole): Promise<OperationalSnapshot>;
+  getOperationalSnapshot(
+    userId: string,
+    role?: UserRole,
+  ): Promise<OperationalSnapshot>;
 
-  findProjectForProgressReport(projectId: string): Promise<AiProgressProject | null>;
-  findProjectForStrategicPlan(projectId: string): Promise<AiStrategicProject | null>;
+  findProjectForProgressReport(
+    projectId: string,
+  ): Promise<AiProgressProject | null>;
+  findProjectForStrategicPlan(
+    projectId: string,
+  ): Promise<AiStrategicProject | null>;
   findProjectSummary(projectId: string): Promise<{
     id: string;
     name: string;
@@ -109,9 +126,13 @@ export interface AiRepositoryPort {
     clientId: string | null;
   } | null>;
 
-  createApplyRequest(data: Prisma.AiApplyRequestCreateInput): Promise<AiApplyRequestWithRequester>;
+  createApplyRequest(
+    data: Prisma.AiApplyRequestCreateInput,
+  ): Promise<AiApplyRequestWithRequester>;
   listApplyRequests(status?: string): Promise<AiApplyRequestWithRelations[]>;
-  findApplyRequestById(requestId: string): Promise<AiApplyRequestWithProject | null>;
+  findApplyRequestById(
+    requestId: string,
+  ): Promise<AiApplyRequestWithProject | null>;
   updateApplyRequest(
     requestId: string,
     data: Prisma.AiApplyRequestUpdateInput,

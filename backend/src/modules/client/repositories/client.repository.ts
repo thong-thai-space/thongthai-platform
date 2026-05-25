@@ -50,7 +50,12 @@ export class ClientRepository implements ClientRepositoryPort {
             select: { id: true, name: true, status: true },
           },
           clientInvoices: {
-            select: { id: true, invoiceNumber: true, status: true, total: true },
+            select: {
+              id: true,
+              invoiceNumber: true,
+              status: true,
+              total: true,
+            },
           },
         },
       });
@@ -80,7 +85,10 @@ export class ClientRepository implements ClientRepositoryPort {
         },
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
         throw new ConflictException('Email already exists');
       }
       throw new InternalServerErrorException('Failed to create client');
@@ -101,7 +109,10 @@ export class ClientRepository implements ClientRepositoryPort {
         },
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
         throw new NotFoundException('Client not found');
       }
       throw new InternalServerErrorException('Failed to update client');
@@ -116,7 +127,10 @@ export class ClientRepository implements ClientRepositoryPort {
         select: { id: true, email: true, isActive: true },
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
         throw new NotFoundException('Client not found');
       }
       throw new InternalServerErrorException('Failed to remove client');

@@ -274,9 +274,7 @@ describe('Auth E2E', () => {
     });
 
     it('should reject without token (401)', () => {
-      return request(app.getHttpServer())
-        .post('/api/auth/refresh')
-        .expect(401);
+      return request(app.getHttpServer()).post('/api/auth/refresh').expect(401);
     });
   });
 });

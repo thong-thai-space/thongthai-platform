@@ -48,7 +48,9 @@ export class PortfolioRepository {
         orderBy: { showcaseOrder: 'asc' },
       });
     } catch (error) {
-      throw new InternalServerErrorException('Failed to fetch showcase projects');
+      throw new InternalServerErrorException(
+        'Failed to fetch showcase projects',
+      );
     }
   }
 
@@ -75,10 +77,15 @@ export class PortfolioRepository {
         },
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
         throw new NotFoundException('Project not found');
       }
-      throw new InternalServerErrorException('Failed to update showcase project');
+      throw new InternalServerErrorException(
+        'Failed to update showcase project',
+      );
     }
   }
 }
