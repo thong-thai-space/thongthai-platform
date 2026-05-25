@@ -16,11 +16,13 @@ import {
   ChevronLeft,
   ChevronRight,
   PanelTop,
+  Inbox,
 } from 'lucide-react';
 import { useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 const navItems = [
   { href: '/dashboard/projects', icon: FolderKanban, label: 'Projects' },
+  { href: '/dashboard/leads', icon: Inbox, label: 'Leads' },
   { href: '/dashboard/ai-assistant', icon: Bot, label: 'AI Assistant' },
   { href: '/dashboard/tasks', icon: CheckSquare, label: 'Tasks' },
   { href: '/dashboard/users', icon: UsersRound, label: 'Users' },
