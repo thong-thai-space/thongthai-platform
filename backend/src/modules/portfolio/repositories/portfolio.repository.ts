@@ -5,26 +5,16 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
+import type {
+  PortfolioRepositoryPort,
+  ShowcaseProjectSummary,
+  UpdateShowcaseInput,
+} from '../domain/portfolio.repository.port';
 
-export type ShowcaseProjectSummary = {
-  id: string;
-  name: string;
-  description: string | null;
-  client: { id: string; name: string } | null;
-  techStack: string[];
-  repoUrl: string | null;
-  liveUrl: string | null;
-  figmaUrl: string | null;
-  showcaseCategory: string | null;
-  showcaseResults: string | null;
-  thumbnailUrl: string | null;
-  screenshots: string[];
-  showcaseOrder: number | null;
-};
-
+// Pattern: Repository — Prisma adapter implementing PortfolioRepositoryPort.
 @Injectable()
-export class PortfolioRepository {
-  constructor(private prisma: PrismaService) {}
+export class PortfolioRepository implements PortfolioRepositoryPort {
+  constructor(private readonly prisma: PrismaService) {}
 
   async findShowcaseProjects(): Promise<ShowcaseProjectSummary[]> {
     try {
@@ -47,7 +37,7 @@ export class PortfolioRepository {
         },
         orderBy: { showcaseOrder: 'asc' },
       });
-    } catch (error) {
+    } catch {
       throw new InternalServerErrorException(
         'Failed to fetch showcase projects',
       );
@@ -55,25 +45,27 @@ export class PortfolioRepository {
   }
 
   async updateShowcaseProject(
-    projectId: string,
-    data: Prisma.ProjectUpdateInput,
-  ) {
+    id: string,
+    data: UpdateShowcaseInput,
+  ): Promise<ShowcaseProjectSummary> {
     try {
       return await this.prisma.project.update({
-        where: { id: projectId },
+        where: { id },
         data,
         select: {
           id: true,
           name: true,
-          isShowcase: true,
-          showcaseOrder: true,
+          description: true,
+          client: { select: { id: true, name: true } },
+          techStack: true,
+          repoUrl: true,
+          liveUrl: true,
+          figmaUrl: true,
           showcaseCategory: true,
           showcaseResults: true,
-          liveUrl: true,
-          repoUrl: true,
-          figmaUrl: true,
           thumbnailUrl: true,
           screenshots: true,
+          showcaseOrder: true,
         },
       });
     } catch (error) {
