@@ -274,3 +274,36 @@ export interface Conversation {
   lastMessage: Message;
   unreadCount: number;
 }
+
+// ==================== BLOG ====================
+
+export type BlogPostStatus = 'DRAFT' | 'PUBLISHED';
+
+export interface BlogPost {
+  id: string;
+  slug: string;
+  locale: Language;
+  title: string;
+  excerpt?: string | null;
+  contentMdx: string;
+  coverImageUrl?: string | null;
+  tags: string[];
+  status: BlogPostStatus;
+  publishedAt?: string | null;
+  authorId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BlogListResult {
+  items: BlogPost[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface BlogSitemapSlug {
+  locale: Language;
+  slug: string;
+  updatedAt: string;
+}

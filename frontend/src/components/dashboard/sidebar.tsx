@@ -17,6 +17,7 @@ import {
   ChevronRight,
   PanelTop,
   Inbox,
+  Newspaper,
 } from 'lucide-react';
 import { useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
@@ -28,6 +29,7 @@ const navItems = [
   { href: '/dashboard/users', icon: UsersRound, label: 'Users' },
   { href: '/dashboard/invoices', icon: FileText, label: 'Invoices' },
   { href: '/dashboard/content', icon: PanelTop, label: 'Content' },
+  { href: '/dashboard/blog', icon: Newspaper, label: 'Blog' },
   { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
 ];
 

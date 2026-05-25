@@ -20,7 +20,8 @@
     "dashboard": "Dashboard",
     "memberPortal": "My Portal",
     "clientPortal": "Portal",
-    "menu": "Toggle menu"
+    "menu": "Toggle menu",
+    "blog": "Blog"
   },
   "hero": {
     "badge": "Smart technology solutions",
@@ -44,22 +45,42 @@
       "web": {
         "title": "Web Development",
         "description": "Websites, web apps, and e-commerce with modern technology: Next.js, React, Node.js. SEO and performance optimized.",
-        "features": ["Landing page", "Web application", "E-commerce", "Admin dashboard"]
+        "features": [
+          "Landing page",
+          "Web application",
+          "E-commerce",
+          "Admin dashboard"
+        ]
       },
       "mobile": {
         "title": "Mobile Apps",
         "description": "iOS & Android apps with React Native and Flutter. Beautiful UI/UX design with smooth user experience.",
-        "features": ["iOS & Android", "Cross-platform", "UI/UX Design", "App Store publish"]
+        "features": [
+          "iOS & Android",
+          "Cross-platform",
+          "UI/UX Design",
+          "App Store publish"
+        ]
       },
       "ai": {
         "title": "AI Solutions",
         "description": "Integrate AI into business processes: chatbots, data analysis, workflow automation.",
-        "features": ["AI Chatbot", "Data Analytics", "Process Automation", "NLP Solutions"]
+        "features": [
+          "AI Chatbot",
+          "Data Analytics",
+          "Process Automation",
+          "NLP Solutions"
+        ]
       },
       "consulting": {
         "title": "IT Consulting",
         "description": "Digital transformation strategy, system architecture, and technology selection for your business.",
-        "features": ["Digital Strategy", "System Architecture", "Tech Audit", "Team Training"]
+        "features": [
+          "Digital Strategy",
+          "System Architecture",
+          "Tech Audit",
+          "Team Training"
+        ]
       }
     }
   },
@@ -225,6 +246,21 @@
     "termsAndConditions": {
       "title": "Terms and Conditions | Thong Thai Space",
       "description": "Terms and conditions of use for Thong Thai Space services."
+    },
+    "blog": {
+      "title": "Blog | Thong Thai Space",
+      "description": "Technology insights, programming tips and AI coverage from the Thong Thai Space team — in-depth articles for developers and businesses."
     }
+  },
+  "blog": {
+    "hero": {
+      "title": "Knowledge &",
+      "titleHighlight": "Technology",
+      "subtitle": "In-depth articles on programming, AI and technology trends from the Thong Thai Space team."
+    },
+    "loadError": "Could not load posts. Please try again later.",
+    "empty": "No posts published yet.",
+    "notFound": "This post does not exist or has not been published yet.",
+    "backToBlog": "Back to Blog"
   }
 }

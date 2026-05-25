@@ -20,7 +20,8 @@
     "dashboard": "Bảng điều khiển",
     "memberPortal": "Cổng nhân viên",
     "clientPortal": "Cổng khách hàng",
-    "menu": "Mở/đóng menu"
+    "menu": "Mở/đóng menu",
+    "blog": "Blog"
   },
   "hero": {
     "badge": "Giải pháp công nghệ thông minh",
@@ -44,22 +45,42 @@
       "web": {
         "title": "Phát triển Web",
         "description": "Website, ứng dụng web và thương mại điện tử với công nghệ hiện đại: Next.js, React, Node.js. Tối ưu SEO và hiệu năng.",
-        "features": ["Landing page", "Ứng dụng web", "Thương mại điện tử", "Trang quản trị"]
+        "features": [
+          "Landing page",
+          "Ứng dụng web",
+          "Thương mại điện tử",
+          "Trang quản trị"
+        ]
       },
       "mobile": {
         "title": "Ứng dụng di động",
         "description": "Ứng dụng iOS & Android với React Native và Flutter. Thiết kế UI/UX đẹp, trải nghiệm mượt mà.",
-        "features": ["iOS & Android", "Đa nền tảng", "Thiết kế UI/UX", "Xuất bản App Store"]
+        "features": [
+          "iOS & Android",
+          "Đa nền tảng",
+          "Thiết kế UI/UX",
+          "Xuất bản App Store"
+        ]
       },
       "ai": {
         "title": "Giải pháp AI",
         "description": "Tích hợp AI vào quy trình doanh nghiệp: chatbot, phân tích dữ liệu, tự động hóa quy trình.",
-        "features": ["Chatbot AI", "Phân tích dữ liệu", "Tự động hóa", "Giải pháp NLP"]
+        "features": [
+          "Chatbot AI",
+          "Phân tích dữ liệu",
+          "Tự động hóa",
+          "Giải pháp NLP"
+        ]
       },
       "consulting": {
         "title": "Tư vấn CNTT",
         "description": "Chiến lược chuyển đổi số, kiến trúc hệ thống và lựa chọn công nghệ phù hợp cho doanh nghiệp.",
-        "features": ["Chiến lược số", "Kiến trúc hệ thống", "Đánh giá công nghệ", "Đào tạo đội ngũ"]
+        "features": [
+          "Chiến lược số",
+          "Kiến trúc hệ thống",
+          "Đánh giá công nghệ",
+          "Đào tạo đội ngũ"
+        ]
       }
     }
   },
@@ -225,6 +246,21 @@
     "termsAndConditions": {
       "title": "Điều khoản & Điều kiện | Thông Thái Space",
       "description": "Điều khoản và điều kiện sử dụng dịch vụ của Thông Thái Space."
+    },
+    "blog": {
+      "title": "Blog | Thông Thái Space",
+      "description": "Kiến thức công nghệ, lập trình và AI từ đội ngũ Thông Thái Space — bài viết chuyên sâu cho lập trình viên và doanh nghiệp."
     }
+  },
+  "blog": {
+    "hero": {
+      "title": "Kiến thức &",
+      "titleHighlight": "Công nghệ",
+      "subtitle": "Bài viết chuyên sâu về lập trình, AI và xu hướng công nghệ từ đội ngũ Thông Thái Space."
+    },
+    "loadError": "Không thể tải bài viết. Vui lòng thử lại sau.",
+    "empty": "Chưa có bài viết nào được xuất bản.",
+    "notFound": "Bài viết không tồn tại hoặc chưa được xuất bản.",
+    "backToBlog": "Quay lại Blog"
   }
 }
