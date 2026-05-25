@@ -1,10 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { NotificationType } from '@prisma/client';
 import { CreateContactRequestDto } from '../dto/create-contact-request.dto';
-import { CONTACT_NOTIFICATION_PORT, CONTACT_REPOSITORY } from '../contact.constants';
+import {
+  CONTACT_NOTIFICATION_PORT,
+  CONTACT_REPOSITORY,
+} from '../contact.constants';
 import type { ContactNotificationPort } from '../domain/contact.notification.port';
 import type { ContactRepositoryPort } from '../domain/contact.repository.port';
 import { ContactPolicy } from '../policies/contact.policy';
+import { ContactSecurityChallengePolicy } from '../policies/contact-security-challenge.policy';
 
 // Pattern: Use Case
 @Injectable()
@@ -15,9 +19,13 @@ export class ContactUseCases {
     @Inject(CONTACT_NOTIFICATION_PORT)
     private notificationPort: ContactNotificationPort,
     private contactPolicy: ContactPolicy,
+    private challengePolicy: ContactSecurityChallengePolicy,
   ) {}
 
-  async create(dto: CreateContactRequestDto) {
+  async create(dto: CreateContactRequestDto, remoteIp?: string) {
+    // Pattern: Guard — bot challenge enforced before any DB write or notification.
+    await this.challengePolicy.enforce(dto.turnstileToken, remoteIp);
+
     const contactRequest = await this.contactRepository.createContactRequest({
       name: dto.name,
       email: dto.email,
@@ -29,7 +37,8 @@ export class ContactUseCases {
     });
 
     const adminIds = await this.contactRepository.findActiveAdminIds();
-    const recipients = this.contactPolicy.resolveNotificationRecipients(adminIds);
+    const recipients =
+      this.contactPolicy.resolveNotificationRecipients(adminIds);
 
     for (const adminId of recipients) {
       await this.notificationPort.create({

@@ -6,7 +6,7 @@ import { ContactUseCases } from './use-cases/contact.use-cases';
 export class ContactService {
   constructor(private contactUseCases: ContactUseCases) {}
 
-  async create(dto: CreateContactRequestDto) {
-    return this.contactUseCases.create(dto);
+  async create(dto: CreateContactRequestDto, remoteIp?: string) {
+    return this.contactUseCases.create(dto, remoteIp);
   }
 }

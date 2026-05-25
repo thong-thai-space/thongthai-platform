@@ -28,4 +28,11 @@ export class CreateContactRequestDto {
   @IsNotEmpty()
   @IsString()
   message: string;
+
+  // Cloudflare Turnstile token. Required only when TURNSTILE_SECRET_KEY is set
+  // on the server — the policy treats an unset env as "challenge disabled" so
+  // the field stays optional at the DTO layer.
+  @IsOptional()
+  @IsString()
+  turnstileToken?: string;
 }

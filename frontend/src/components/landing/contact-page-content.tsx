@@ -11,6 +11,7 @@ import {
   BrandSection,
   BrandSurface,
 } from '@/components/brand/brand-primitives';
+import { TurnstileWidget } from '@/components/security/turnstile-widget';
 
 interface ContactForm {
   name: string;
@@ -87,6 +88,10 @@ const defaults: ContactContent = {
 export function ContactPageContent() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const isTurnstileEnabled = Boolean(
+    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim(),
+  );
   const { data } = useSectionContent('contact');
   const raw = (data?.data as Partial<ContactContent>) || {};
   const c: ContactContent = {
@@ -106,7 +111,14 @@ export function ContactPageContent() {
   const onSubmit = async (data: ContactForm) => {
     try {
       setError('');
-      await api.post('/contact', data);
+      if (isTurnstileEnabled && !turnstileToken) {
+        setError('Please complete the security challenge.');
+        return;
+      }
+      await api.post('/contact', {
+        ...data,
+        turnstileToken: turnstileToken || undefined,
+      });
       setSubmitted(true);
     } catch {
       setError(c.form.errorText || defaults.form.errorText);
@@ -284,9 +296,16 @@ export function ContactPageContent() {
                   </div>
                 )}
 
+                <TurnstileWidget
+                  onTokenChange={setTurnstileToken}
+                  className="flex justify-start"
+                />
+
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={
+                    isSubmitting || (isTurnstileEnabled && !turnstileToken)
+                  }
                   className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
                 >
                   <Send className="h-4 w-4" />
