@@ -360,6 +360,7 @@ const DEFAULT_CONTENT_EN: Record<string, object> = {
       { href: '/about', label: 'About' },
       { href: '/services', label: 'Services' },
       { href: '/portfolio', label: 'Portfolio' },
+      { href: '/blog', label: 'Blog' },
       { href: '/contact', label: 'Contact' },
     ],
     ctaText: 'Get in touch',
@@ -411,15 +412,90 @@ const DEFAULT_CONTENT_EN: Record<string, object> = {
   },
 };
 
+// Vietnamese payloads for sections whose UI strings are NOT covered by
+// compile-time i18n (they are CMS-driven: architecture agent widget, nav,
+// testimonials). Admins can further customise via the dashboard's VI locale tab.
+const DEFAULT_CONTENT_VI: Partial<Record<string, object>> = {
+  header: {
+    navLinks: [
+      { href: '/', label: 'Trang chủ' },
+      { href: '/about', label: 'Giới thiệu' },
+      { href: '/services', label: 'Dịch vụ' },
+      { href: '/portfolio', label: 'Dự án' },
+      { href: '/blog', label: 'Blog' },
+      { href: '/contact', label: 'Liên hệ' },
+    ],
+    ctaText: 'Liên hệ ngay',
+    signInText: 'Đăng nhập',
+  },
+  testimonials: {
+    title: 'Khách hàng nói về chúng tôi',
+    subtitle: 'Phản hồi từ những khách hàng đã tin tưởng và đồng hành cùng chúng tôi',
+    items: [
+      {
+        name: 'Nguyễn Minh Tuấn',
+        role: 'CEO, TechStart Vietnam',
+        content:
+          'Thông Thái Space đã giúp chúng tôi xây dựng nền tảng SaaS từ đầu. Đội ngũ rất chuyên nghiệp, giao tiếp tốt và luôn bàn giao đúng tiến độ.',
+        rating: 5,
+      },
+      {
+        name: 'Trần Thu Hà',
+        role: 'Founder, BeautyBox',
+        content:
+          'Doanh thu website thương mại điện tử của chúng tôi tăng 300% sau khi được Thông Thái thiết kế lại. UI đẹp, hiệu năng nhanh và khách hàng rất thích.',
+        rating: 5,
+      },
+      {
+        name: 'Lê Đức Anh',
+        role: 'CTO, LogiCorp',
+        content:
+          'Giải pháp phân tích AI giúp chúng tôi tối ưu 40% chi phí vận chuyển. Rất ấn tượng với năng lực kỹ thuật và cách tiếp cận giải quyết vấn đề của đội ngũ.',
+        rating: 5,
+      },
+    ],
+  },
+  'ai-ui': {
+    dashboardAiChatEmptyState:
+      'Hỏi trợ lý AI một câu hỏi. Tôi có thể giúp bạn về lập trình, tư vấn dự án, review code...',
+    dashboardAiChatInputPlaceholder:
+      'Nhập tin nhắn... (Enter để gửi, Shift+Enter để xuống dòng)',
+    publicChatOnlineTitle: 'Trợ lý AI đang trực tuyến',
+    publicChatOnlineSubtitle: 'Cần hỗ trợ? Hỏi tôi bất cứ điều gì về dịch vụ của chúng tôi.',
+    publicChatHeaderTitle: 'Thông Thái Space',
+    publicChatHeaderSubtitle: 'Trợ lý AI',
+    publicChatWelcomeTitle: 'Xin chào!',
+    publicChatWelcomeBody:
+      'Tôi là trợ lý AI của Thông Thái Space. Bạn có câu hỏi gì về dịch vụ của chúng tôi không?',
+    publicChatInputPlaceholder: 'Hỏi về dịch vụ của chúng tôi...',
+    portalChatOnlineTitle: 'Trợ lý AI đang trực tuyến',
+    portalChatOnlineSubtitle: 'Hỏi về dự án, hóa đơn hoặc cập nhật tiến độ.',
+    portalChatHeaderTitle: 'Trợ lý AI',
+    portalChatWelcomeBody: 'Xin chào! Tôi có thể giúp bạn hỏi về các dự án của bạn.',
+    portalChatInputPlaceholder: 'Hỏi điều gì đó...',
+    architectureAgentBadge: 'Tư vấn kiến trúc AI',
+    architectureAgentInputPlaceholder:
+      'Dự án của bạn cần gì hôm nay? Mô tả yêu cầu, tải file lên rồi nhấn Xem kiến trúc...',
+    architectureAgentGeneratingSteps: [
+      'Đang phân tích yêu cầu dự án...',
+      'Đang thiết kế các tầng hệ thống và luồng dữ liệu...',
+      'Đang vẽ sơ đồ kiến trúc...',
+    ],
+    architectureAgentCtaLabel: 'Xem kiến trúc',
+    architectureAgentGeneratingLabel: 'Đang tạo...',
+    architectureAgentSynthesizingLabel: 'Đang tổng hợp kiến trúc...',
+  },
+};
+
 // Pattern: Adapter — wraps each flat English payload into the per-locale envelope.
-// Admins can later populate the `vi` slice via the dashboard's locale tabs; until then,
-// the frontend's compile-time i18n messages serve Vietnamese visitors.
+// Sections with an explicit VI entry in DEFAULT_CONTENT_VI get a fully-translated
+// vi slice; all others stay vi: null so compile-time i18n messages cover them.
 export const DEFAULT_CONTENT: Record<
   string,
   { en: object; vi: object | null }
 > = Object.fromEntries(
   Object.entries(DEFAULT_CONTENT_EN).map(([section, payload]) => [
     section,
-    { en: payload, vi: null },
+    { en: payload, vi: DEFAULT_CONTENT_VI[section] ?? null },
   ]),
 );
