@@ -100,60 +100,86 @@ enum BlogPostStatus {
   PUBLISHED
 }
 
+enum RagDocumentSource {
+  UPLOAD
+  TEXT
+  URL
+}
+
+enum RagDocumentStatus {
+  PENDING
+  PROCESSING
+  INDEXED
+  FAILED
+}
+
+enum RagAnswerStatus {
+  DRAFT
+  APPROVED
+  REJECTED
+}
+
 // ==================== MODELS ====================
 
 model User {
-  id               String    @id @default(cuid())
-  email            String    @unique
-  googleId         String?   @unique
-  emailVerified    Boolean   @default(false)
-  emailVerifyToken String?   @unique
+  id                     String           @id @default(cuid())
+  email                  String           @unique
+  googleId               String?          @unique
+  emailVerified          Boolean          @default(false)
+  emailVerifyToken       String?          @unique
   emailVerifyTokenExpiry DateTime?
-  termsAcceptedAt  DateTime?
-  privacyAcceptedAt DateTime?
-  password         String
-  name             String
-  avatar           String?
-  phone            String?
-  role             UserRole  @default(CLIENT)
-  locale           Language  @default(EN)
-  motionPreference MotionPreference @default(SYSTEM)
-  isActive         Boolean   @default(true)
-  refreshTokenHash String?
-  lastLoginAt      DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  termsAcceptedAt        DateTime?
+  privacyAcceptedAt      DateTime?
+  password               String
+  name                   String
+  avatar                 String?
+  phone                  String?
+  role                   UserRole         @default(CLIENT)
+  locale                 Language         @default(EN)
+  motionPreference       MotionPreference @default(SYSTEM)
+  isActive               Boolean          @default(true)
+  refreshTokenHash       String?
+  lastLoginAt            DateTime?
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
 
   // Pattern: Quota - AI usage limits per user (monthly resets)
-  aiQuotaUsedTokens Int @default(0) // Cumulative tokens used this month
-  aiQuotaLimitTokens Int @default(100000) // Monthly token limit per user (configurable)
-  aiQuotaResetDate DateTime @default(now()) // Last reset date for monthly quota
+  aiQuotaUsedTokens  Int      @default(0) // Cumulative tokens used this month
+  aiQuotaLimitTokens Int      @default(100000) // Monthly token limit per user (configurable)
+  aiQuotaResetDate   DateTime @default(now()) // Last reset date for monthly quota
 
   // Relations
-  ownedProjects   Project[]        @relation("ProjectOwner")
-  assignedTasks   Task[]           @relation("TaskAssignee")
-  createdTasks    Task[]           @relation("TaskCreator")
-  comments        Comment[]
-  notifications      Notification[]
-  pushSubscriptions  PushSubscription[]
-  aiConversations AiConversation[]
-  invoicesCreated Invoice[]        @relation("InvoiceCreator")
-  timeEntries     TimeEntry[]
-  activities      Activity[]
+  ownedProjects     Project[]          @relation("ProjectOwner")
+  assignedTasks     Task[]             @relation("TaskAssignee")
+  createdTasks      Task[]             @relation("TaskCreator")
+  comments          Comment[]
+  notifications     Notification[]
+  pushSubscriptions PushSubscription[]
+  aiConversations   AiConversation[]
+  invoicesCreated   Invoice[]          @relation("InvoiceCreator")
+  timeEntries       TimeEntry[]
+  activities        Activity[]
 
   // Client relations
   clientProjects Project[] @relation("ProjectClient")
   clientInvoices Invoice[] @relation("InvoiceClient")
 
   // Messaging
-  sentMessages     Message[] @relation("MessageSender")
-  receivedMessages Message[] @relation("MessageReceiver")
-  aiUsageAudits    AiUsageAudit[]
+  sentMessages             Message[]        @relation("MessageSender")
+  receivedMessages         Message[]        @relation("MessageReceiver")
+  aiUsageAudits            AiUsageAudit[]
   aiApplyRequestsSubmitted AiApplyRequest[] @relation("AiApplyRequester")
   aiApplyRequestsReviewed  AiApplyRequest[] @relation("AiApplyReviewer")
 
   // Pattern: Authorship — blog posts authored by this user
-  blogPosts        BlogPost[]       @relation("BlogPostAuthor")
+  blogPosts BlogPost[] @relation("BlogPostAuthor")
+
+  // RAG knowledge base (clientId = tenant owner; uploader/asker/reviewer = staff)
+  ragDocumentsOwned    RagDocument[] @relation("RagDocumentClient")
+  ragDocumentsUploaded RagDocument[] @relation("RagDocumentUploader")
+  ragAnswersOwned      RagAnswer[]   @relation("RagAnswerClient")
+  ragAnswersAsked      RagAnswer[]   @relation("RagAnswerAsker")
+  ragAnswersReviewed   RagAnswer[]   @relation("RagAnswerReviewer")
 
   @@map("users")
 }
@@ -182,23 +208,23 @@ model Project {
   clientId String?
   client   User?   @relation("ProjectClient", fields: [clientId], references: [id])
 
-  tasks      Task[]
-  invoices   Invoice[]
-  comments      Comment[]
-  files         ProjectFile[]
-  milestones    Milestone[]
-  activities    Activity[]
-  messages      Message[]
-  aiUsageAudits AiUsageAudit[]
+  tasks           Task[]
+  invoices        Invoice[]
+  comments        Comment[]
+  files           ProjectFile[]
+  milestones      Milestone[]
+  activities      Activity[]
+  messages        Message[]
+  aiUsageAudits   AiUsageAudit[]
   aiApplyRequests AiApplyRequest[]
 
   // Portfolio
-  isShowcase    Boolean  @default(false)
-  showcaseOrder Int?
+  isShowcase       Boolean  @default(false)
+  showcaseOrder    Int?
   showcaseCategory String?
   showcaseResults  String?
-  thumbnailUrl  String?
-  screenshots   String[] @default([])
+  thumbnailUrl     String?
+  screenshots      String[] @default([])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -232,7 +258,7 @@ model Task {
 
   comments    Comment[]
   timeEntries TimeEntry[]
-  labels      String[]   @default([])
+  labels      String[]    @default([])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -293,11 +319,11 @@ model Invoice {
 
   // Relations
   projectId String?
-  project   Project? @relation(fields: [projectId], references: [id])
+  project   Project?      @relation(fields: [projectId], references: [id])
   clientId  String
-  client    User     @relation("InvoiceClient", fields: [clientId], references: [id])
+  client    User          @relation("InvoiceClient", fields: [clientId], references: [id])
   creatorId String
-  creator   User     @relation("InvoiceCreator", fields: [creatorId], references: [id])
+  creator   User          @relation("InvoiceCreator", fields: [creatorId], references: [id])
   items     InvoiceItem[]
 
   paidAt        DateTime?
@@ -331,9 +357,9 @@ model TimeEntry {
   billable    Boolean  @default(true)
 
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  user   User    @relation(fields: [userId], references: [id])
   taskId String?
-  task   Task?  @relation(fields: [taskId], references: [id])
+  task   Task?   @relation(fields: [taskId], references: [id])
 
   createdAt DateTime @default(now())
 
@@ -415,7 +441,7 @@ model AiUsageAudit {
   feedbackNote       String?
 
   userId String?
-  user   User?    @relation(fields: [userId], references: [id])
+  user   User?   @relation(fields: [userId], references: [id])
 
   projectId String?
   project   Project? @relation(fields: [projectId], references: [id])
@@ -441,10 +467,10 @@ model AiApplyRequest {
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   requesterId String
-  requester   User @relation("AiApplyRequester", fields: [requesterId], references: [id])
+  requester   User   @relation("AiApplyRequester", fields: [requesterId], references: [id])
 
   reviewerId String?
-  reviewer   User? @relation("AiApplyReviewer", fields: [reviewerId], references: [id])
+  reviewer   User?   @relation("AiApplyReviewer", fields: [reviewerId], references: [id])
 
   reviewedAt DateTime?
   appliedAt  DateTime?
@@ -567,4 +593,88 @@ model PushSubscription {
   @@unique([userId, endpoint])
   @@index([userId])
   @@map("push_subscriptions")
+}
+
+// ==================== RAG (AI Core, GĐ2) ====================
+// Tenant-isolated knowledge base: documents belong to a client (User role CLIENT).
+// NOTE: the migration must enable pgvector and add the vector column + index by
+// hand (Prisma manages everything except the Unsupported `embedding` column):
+//   CREATE EXTENSION IF NOT EXISTS vector;
+//   ALTER TABLE rag_chunks ADD COLUMN embedding vector(1024);
+//   CREATE INDEX rag_chunks_embedding_idx ON rag_chunks
+//     USING hnsw (embedding vector_cosine_ops);
+
+model RagDocument {
+  id               String            @id @default(cuid())
+  title            String
+  source           RagDocumentSource @default(UPLOAD)
+  originalFilename String?
+  mimeType         String?
+  status           RagDocumentStatus @default(PENDING)
+  error            String?
+  chunkCount       Int               @default(0)
+
+  // Tenant scope — the client who owns this document (plan §5.1 isolation).
+  clientId String
+  client   User   @relation("RagDocumentClient", fields: [clientId], references: [id], onDelete: Cascade)
+
+  uploadedById String
+  uploadedBy   User   @relation("RagDocumentUploader", fields: [uploadedById], references: [id])
+
+  chunks RagChunk[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientId, status])
+  @@map("rag_documents")
+}
+
+model RagChunk {
+  id         String      @id @default(cuid())
+  documentId String
+  document   RagDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  // Denormalized for fast tenant-filtered similarity search.
+  clientId String
+
+  chunkIndex Int
+  content    String
+  tokenCount Int?
+
+  // pgvector — Voyage voyage-3 = 1024 dims. Queried via $queryRaw, not the typed client.
+  embedding Unsupported("vector(1024)")?
+
+  createdAt DateTime @default(now())
+
+  @@index([clientId])
+  @@index([documentId])
+  @@map("rag_chunks")
+}
+
+// Pattern: Human-in-the-loop (plan §3.4 / §5.2) — a generated answer is a DRAFT
+// until a human reviews it; never auto-delivered to the client.
+model RagAnswer {
+  id            String          @id @default(cuid())
+  question      String
+  draftAnswer   String
+  citedChunkIds String[]        @default([])
+  status        RagAnswerStatus @default(DRAFT)
+
+  clientId String
+  client   User   @relation("RagAnswerClient", fields: [clientId], references: [id], onDelete: Cascade)
+
+  askedById String
+  askedBy   User   @relation("RagAnswerAsker", fields: [askedById], references: [id])
+
+  reviewerId String?
+  reviewer   User?     @relation("RagAnswerReviewer", fields: [reviewerId], references: [id])
+  reviewedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientId, status])
+  @@index([askedById, createdAt])
+  @@map("rag_answers")
 }
