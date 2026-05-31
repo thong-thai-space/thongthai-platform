@@ -1,12 +1,12 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { BlogPostStatus, Language } from '@prisma/client';
+import { BlogPost, BlogPostStatus, Language } from '@prisma/client';
 import type { BlogRepositoryPort } from '../domain/blog.repository.port';
 import { BlogPublishPolicy } from '../policies/blog-publish.policy';
 import { BlogAdminUseCases } from './admin.use-cases';
 
 // Pattern: Unit-test against ports — fake repository, real policy.
 
-function buildPost(overrides: Record<string, unknown> = {}) {
+function buildPost(overrides: Record<string, unknown> = {}): BlogPost {
   return {
     id: 'p_1',
     slug: 'hello',
@@ -22,7 +22,7 @@ function buildPost(overrides: Record<string, unknown> = {}) {
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
-  } as never;
+  } as BlogPost;
 }
 
 function buildSubject(existing: ReturnType<typeof buildPost> | null) {
