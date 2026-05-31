@@ -26,6 +26,9 @@ function buildSubject(retrieved: RetrievedChunk[] = []) {
       citedChunkIds: input.citedChunkIds,
       status: 'DRAFT' as const,
     })),
+    listDocuments: jest.fn(),
+    findAnswerStatus: jest.fn(),
+    applyAnswerReview: jest.fn(),
   };
 
   const embedder: EmbeddingProviderPort = {

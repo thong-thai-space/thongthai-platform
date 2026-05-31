@@ -47,6 +47,9 @@ function buildSubject(opts: {
     }),
     similaritySearch: jest.fn(),
     createAnswerDraft: jest.fn(),
+    listDocuments: jest.fn(),
+    findAnswerStatus: jest.fn(),
+    applyAnswerReview: jest.fn(),
   };
 
   const embedder: EmbeddingProviderPort = {
