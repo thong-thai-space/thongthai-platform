@@ -101,7 +101,7 @@ URLs: Frontend http://localhost:3000 · API http://localhost:4000/api/v1 · Swag
 | `PORT` | API port (default 4000) |
 | `FRONTEND_URL` | CORS origin |
 
-Feature-gated (enable as needed): `STORAGE_PROVIDER=r2` (+ R2 keys), `GOOGLE_CLIENT_ID/SECRET`, `RESEND_API_KEY`, `VAPID_*` (push notifications), `TURNSTILE_SECRET` (bot protection).
+Feature-gated (enable as needed): `STORAGE_PROVIDER=r2` (+ R2 keys), `GOOGLE_CLIENT_ID/SECRET`, `RESEND_API_KEY`, `VAPID_*` (push notifications), `TURNSTILE_SECRET` (bot protection), `VOYAGE_API_KEY` (RAG embeddings — standalone Voyage key, not MongoDB Atlas; RAG disabled when blank).
 
 `frontend/.env.local`: `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SOCKET_URL`.
 
