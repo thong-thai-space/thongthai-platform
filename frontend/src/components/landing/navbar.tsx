@@ -11,7 +11,6 @@ import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { LanguageSwitcher } from '@/components/language-switcher';
 
 type HeaderContent = {
-  navLinks?: Array<{ href: string; label: string }>;
   ctaText?: string;
   signInText?: string;
 };
@@ -21,19 +20,25 @@ export function Navbar() {
   const { user } = useAuth();
   const { data } = useSectionContent('header');
   const t = useTranslations('nav');
+  const tMeta = useTranslations('meta');
 
-  // CMS content (if present) wins over i18n defaults; i18n covers the rest.
+  // Nav links are i18n-driven so both locales stay complete and never go stale
+  // (a CMS-stored list silently dropped /blog in one locale — see git history).
+  const navLinks = [
+    { href: '/', label: t('home') },
+    { href: '/about', label: t('about') },
+    { href: '/services', label: t('services') },
+    { href: '/portfolio', label: t('portfolio') },
+    { href: '/blog', label: t('blog') },
+    { href: '/contact', label: t('contact') },
+  ];
+
+  // Brand mark: localized site name with " Space" highlighted in the primary colour.
+  const brandName = tMeta('siteName');
+  const brandLead = brandName.replace(/ Space$/, '');
+
+  // CMS may still override the CTA / sign-in labels; i18n covers the rest.
   const cms = (data?.data as HeaderContent) || {};
-  const navLinks = cms.navLinks?.length
-    ? cms.navLinks
-    : [
-        { href: '/', label: t('home') },
-        { href: '/about', label: t('about') },
-        { href: '/services', label: t('services') },
-        { href: '/portfolio', label: t('portfolio') },
-        { href: '/blog', label: t('blog') },
-        { href: '/contact', label: t('contact') },
-      ];
   const signInText = cms.signInText || t('signIn');
   const ctaText = cms.ctaText || t('cta');
 
@@ -44,7 +49,7 @@ export function Navbar() {
         <Link href="/" className="flex items-center gap-2">
           {/* <span className="inline-block h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_18px_color-mix(in_srgb,var(--primary)_45%,transparent)]" /> */}
           <span className="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
-            Thong Thai <span className="text-primary">Space</span>
+            {brandLead} <span className="text-primary">Space</span>
           </span>
         </Link>
 

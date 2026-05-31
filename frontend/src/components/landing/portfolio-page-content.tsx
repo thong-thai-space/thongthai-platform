@@ -3,6 +3,7 @@
 
 import Link from 'next/link';
 import { ExternalLink } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useSectionContent } from '@/hooks/use-content';
 import { useShowcaseProjects } from '@/hooks/use-projects';
 import type { Project } from '@/types';
@@ -51,74 +52,32 @@ type PortfolioDisplayItem = {
   figmaUrl?: string;
 };
 
-const defaults: PortfolioContent = {
-  hero: {
-    title: 'Featured Projects',
-    titleHighlight: 'Projects',
-    subtitle: 'Products we are proud to have built with our clients from concept to reality',
-  },
-  categories: ['All', 'Web', 'Mobile', 'AI', 'Web + Mobile'],
-  items: [
-    {
-      title: 'E-Commerce Platform',
-      client: 'Fashion Brand',
-      category: 'Web',
-      description: 'E-commerce platform with inventory management, online payments, and analytics dashboard.',
-      techStack: ['Next.js', 'Node.js', 'PostgreSQL', 'Stripe', 'Redis'],
-      results: 'Increased online revenue by 300% in the first 3 months.',
-    },
-    {
-      title: 'Healthcare Booking App',
-      client: 'MedTech Startup',
-      category: 'Mobile',
-      description: 'Appointment booking and online health consultation app for a clinic chain.',
-      techStack: ['React Native', 'NestJS', 'PostgreSQL', 'Socket.IO'],
-      results: '10,000+ downloads in the first month, 4.8-star rating.',
-    },
-    {
-      title: 'AI Analytics Dashboard',
-      client: 'Logistics Corp',
-      category: 'AI',
-      description: 'Shipping data analytics dashboard with AI-powered trend prediction and route optimization.',
-      techStack: ['React', 'Python', 'TensorFlow', 'D3.js', 'PostgreSQL'],
-      results: 'Reduced shipping costs by 40%, saving $80,000/year.',
-    },
-    {
-      title: 'Restaurant Management System',
-      client: 'Food Chain',
-      category: 'Web',
-      description: 'Restaurant management system: orders, inventory, staffing, and revenue reports.',
-      techStack: ['Next.js', 'NestJS', 'PostgreSQL', 'Redis', 'Docker'],
-      results: 'Deployed across 15 branches, reducing order processing time by 50%.',
-    },
-    {
-      title: 'Real Estate Platform',
-      client: 'Property Group',
-      category: 'Web',
-      description: 'Real estate listing platform with interactive maps, smart search, and chat.',
-      techStack: ['Next.js', 'Node.js', 'MongoDB', 'Mapbox', 'Socket.IO'],
-      results: '5,000+ listings, 50,000 monthly visits.',
-    },
-    {
-      title: 'Education LMS',
-      client: 'EdTech Startup',
-      category: 'Web + Mobile',
-      description: 'Online learning management system with video streaming, quizzes, and AI tutor features.',
-      techStack: ['React', 'React Native', 'NestJS', 'OpenAI', 'AWS S3'],
-      results: '2,000+ students, course completion rate increased by 60%.',
-    },
-  ],
-  cta: {
-    title: 'Want a similar product?',
-    subtitle: 'Tell us your idea and get a free quote.',
-    buttonText: 'Get a quote',
-    buttonHref: '/contact',
-  },
-};
+const ALL_CATEGORY = 'All';
 
 export function PortfolioPageContent() {
+  const t = useTranslations('portfolioPage');
   const { data } = useSectionContent('portfolio');
   const { data: showcaseProjects = [] } = useShowcaseProjects();
+
+  // i18n defaults; the CMS `portfolio` section may override hero/cta per locale.
+  // `items`/`categories` are derived from showcase projects below, so the defaults
+  // only need to carry hero + cta.
+  const defaults: PortfolioContent = {
+    hero: {
+      title: t('heroTitle'),
+      titleHighlight: t('heroTitleHighlight'),
+      subtitle: t('heroSubtitle'),
+    },
+    categories: [ALL_CATEGORY],
+    items: [],
+    cta: {
+      title: t('ctaTitle'),
+      subtitle: t('ctaSubtitle'),
+      buttonText: t('ctaButton'),
+      buttonHref: '/contact',
+    },
+  };
+
   const raw = (data?.data as Partial<PortfolioContent>) || {};
   const content: PortfolioContent = {
     ...defaults,
@@ -130,12 +89,12 @@ export function PortfolioPageContent() {
   const dbItems = useMemo<PortfolioDisplayItem[]>(() => showcaseProjects.map(mapProjectToPortfolioItem), [showcaseProjects]);
   const items: PortfolioDisplayItem[] = dbItems;
   const categories = useMemo(() => {
-    if (dbItems.length === 0) return ['All'];
+    if (dbItems.length === 0) return [ALL_CATEGORY];
 
     const unique = Array.from(new Set(dbItems.map((item) => item.category).filter(Boolean)));
-    return ['All', ...unique];
+    return [ALL_CATEGORY, ...unique];
   }, [dbItems]);
-  const [activeCategory, setActiveCategory] = useState('All');
+  const [activeCategory, setActiveCategory] = useState(ALL_CATEGORY);
 
   const filteredItems = useMemo(
     () => items.filter((item) => activeCategory === 'All' || item.category === activeCategory),
@@ -173,7 +132,7 @@ export function PortfolioPageContent() {
                     : 'rounded-full px-3 py-1 text-muted-foreground hover:bg-muted hover:text-foreground'
                 }`}
               >
-                {cat}
+                {cat === ALL_CATEGORY ? t('categoryAll') : cat}
               </button>
             ))}
           </div>
@@ -184,9 +143,7 @@ export function PortfolioPageContent() {
         <BrandContainer>
           {filteredItems.length === 0 ? (
             <BrandSurface className="rounded-xl border-dashed p-10 text-center">
-              <p className="tts-brand-body text-sm">
-                No featured projects configured yet. Please enable showcase projects in Dashboard → Content → Portfolio.
-              </p>
+              <p className="tts-brand-body text-sm">{t('empty')}</p>
             </BrandSurface>
           ) : (
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslations } from 'next-intl';
 import { Mail, Phone, MapPin, Send, CheckCircle } from 'lucide-react';
 import api from '@/lib/api';
 import { useSectionContent } from '@/hooks/use-content';
@@ -51,39 +52,13 @@ type ContactContent = {
   };
 };
 
-const defaults: ContactContent = {
-  hero: {
-    title: 'Contact Us',
-    titleHighlight: 'Us',
-    subtitle:
-      'Describe your project requirements, and we will provide a free consultation and quote within 24 hours',
-  },
-  infoTitle: 'Contact Information',
-  info: {
-    emailLabel: 'Email',
-    email: 'hoangthai229@gmail.com',
-    phoneLabel: 'Phone',
-    phone: '0345807906',
-    addressLabel: 'Address',
-    address: 'Ho Chi Minh City, Vietnam',
-  },
-  responseCard: {
-    title: 'Response Time',
-    body: 'We will get back to you within 24 business hours. For urgent requests, please call us directly.',
-  },
-  form: {
-    submitText: 'Submit Request',
-    sendingText: 'Sending...',
-    successTitle: 'Thank you!',
-    successSubtitle: 'We have received your message and will respond within 24 hours.',
-    errorText: 'An error occurred. Please try again later.',
-  },
-};
-
 /**
  * Pattern: Client Island — the contact form needs React Hook Form, submission state,
  * and API integration. The route page (`page.tsx`) stays a thin RSC wrapper for
  * `generateMetadata` and locale handling.
+ *
+ * i18n: defaults come from the `contactPage` messages (locale-correct out of the box);
+ * the CMS `contact` section may still override any field for the active locale.
  */
 export function ContactPageContent() {
   const [submitted, setSubmitted] = useState(false);
@@ -92,7 +67,37 @@ export function ContactPageContent() {
   const isTurnstileEnabled = Boolean(
     process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim(),
   );
+  const t = useTranslations('contactPage');
   const { data } = useSectionContent('contact');
+
+  const defaults: ContactContent = {
+    hero: {
+      title: t('heroTitle'),
+      titleHighlight: t('heroTitleHighlight'),
+      subtitle: t('heroSubtitle'),
+    },
+    infoTitle: t('infoTitle'),
+    info: {
+      emailLabel: t('emailLabel'),
+      email: 'hoangthai229@gmail.com',
+      phoneLabel: t('phoneLabel'),
+      phone: '0345807906',
+      addressLabel: t('addressLabel'),
+      address: t('address'),
+    },
+    responseCard: {
+      title: t('responseTitle'),
+      body: t('responseBody'),
+    },
+    form: {
+      submitText: t('submit'),
+      sendingText: t('sending'),
+      successTitle: t('successTitle'),
+      successSubtitle: t('successSubtitle'),
+      errorText: t('errorText'),
+    },
+  };
+
   const raw = (data?.data as Partial<ContactContent>) || {};
   const c: ContactContent = {
     ...defaults,
@@ -112,7 +117,7 @@ export function ContactPageContent() {
     try {
       setError('');
       if (isTurnstileEnabled && !turnstileToken) {
-        setError('Please complete the security challenge.');
+        setError(t('securityChallenge'));
         return;
       }
       await api.post('/contact', {
@@ -199,12 +204,12 @@ export function ContactPageContent() {
                 <div className="grid gap-6 sm:grid-cols-2">
                   <div>
                     <label className="text-sm font-medium">
-                      Full Name <span className="text-destructive">*</span>
+                      {t('fullName')} <span className="text-destructive">*</span>
                     </label>
                     <input
-                      {...register('name', { required: 'Please enter your name' })}
+                      {...register('name', { required: t('nameRequired') })}
                       className="mt-1 w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                      placeholder="John Doe"
+                      placeholder={t('fullNamePlaceholder')}
                     />
                     {errors.name && (
                       <p className="mt-1 text-xs text-destructive">{errors.name.message}</p>
@@ -212,78 +217,78 @@ export function ContactPageContent() {
                   </div>
                   <div>
                     <label className="text-sm font-medium">
-                      Email <span className="text-destructive">*</span>
+                      {t('emailField')} <span className="text-destructive">*</span>
                     </label>
                     <input
                       {...register('email', {
-                        required: 'Please enter your email',
-                        pattern: { value: /^\S+@\S+$/i, message: 'Invalid email address' },
+                        required: t('emailRequired'),
+                        pattern: { value: /^\S+@\S+$/i, message: t('emailInvalid') },
                       })}
                       type="email"
                       className="mt-1 w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                      placeholder="email@company.com"
+                      placeholder={t('emailPlaceholder')}
                     />
                     {errors.email && (
                       <p className="mt-1 text-xs text-destructive">{errors.email.message}</p>
                     )}
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Phone Number</label>
+                    <label className="text-sm font-medium">{t('phoneField')}</label>
                     <input
                       {...register('phone')}
                       className="mt-1 w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                      placeholder="0123 456 789"
+                      placeholder={t('phonePlaceholder')}
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Company</label>
+                    <label className="text-sm font-medium">{t('company')}</label>
                     <input
                       {...register('company')}
                       className="mt-1 w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                      placeholder="Company name"
+                      placeholder={t('companyPlaceholder')}
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Service of Interest</label>
+                    <label className="text-sm font-medium">{t('serviceLabel')}</label>
                     <select
                       {...register('service')}
                       className="mt-1 w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                     >
-                      <option value="">Select a service</option>
-                      <option value="web">Web Development</option>
-                      <option value="mobile">Mobile Apps</option>
-                      <option value="ai">AI Solutions</option>
-                      <option value="consulting">IT Consulting</option>
-                      <option value="other">Other</option>
+                      <option value="">{t('servicePlaceholder')}</option>
+                      <option value="web">{t('serviceWeb')}</option>
+                      <option value="mobile">{t('serviceMobile')}</option>
+                      <option value="ai">{t('serviceAi')}</option>
+                      <option value="consulting">{t('serviceConsulting')}</option>
+                      <option value="other">{t('serviceOther')}</option>
                     </select>
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Estimated Budget</label>
+                    <label className="text-sm font-medium">{t('budgetLabel')}</label>
                     <select
                       {...register('budget')}
                       className="mt-1 w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                     >
-                      <option value="">Select a budget range</option>
-                      <option value="<2k">Under $2,000</option>
-                      <option value="2k-5k">$2,000 - $5,000</option>
-                      <option value="5k-15k">$5,000 - $15,000</option>
-                      <option value="15k-25k">$15,000 - $25,000</option>
-                      <option value=">25k">Over $25,000</option>
+                      <option value="">{t('budgetPlaceholder')}</option>
+                      <option value="<2k">{t('budgetUnder2k')}</option>
+                      <option value="2k-5k">{t('budget2k5k')}</option>
+                      <option value="5k-15k">{t('budget5k15k')}</option>
+                      <option value="15k-25k">{t('budget15k25k')}</option>
+                      <option value=">25k">{t('budgetOver25k')}</option>
                     </select>
                   </div>
                 </div>
 
                 <div>
                   <label className="text-sm font-medium">
-                    Project Description <span className="text-destructive">*</span>
+                    {t('descriptionLabel')} <span className="text-destructive">*</span>
                   </label>
                   <textarea
                     {...register('message', {
-                      required: 'Please describe your project requirements',
+                      required: t('descriptionRequired'),
                     })}
                     rows={5}
                     className="mt-1 w-full resize-none rounded-lg border border-border bg-background px-4 py-2.5 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                    placeholder="Describe your project in detail: goals, desired features, timeline..."
+                    placeholder={t('descriptionPlaceholder')}
                   />
                   {errors.message && (
                     <p className="mt-1 text-xs text-destructive">{errors.message.message}</p>

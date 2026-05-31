@@ -21,11 +21,12 @@ export function Footer() {
   const { data } = useSectionContent('footer');
   const t = useTranslations('footer');
   const tNav = useTranslations('nav');
+  const tMeta = useTranslations('meta');
   const tServices = useTranslations('services.items');
   const cms = (data?.data as FooterShape) || {};
 
   const brand = {
-    name: cms.brand?.name ?? 'Thong Thai Space',
+    name: cms.brand?.name ?? tMeta('siteName'),
     description: cms.brand?.description ?? t('description'),
     email: cms.brand?.email ?? 'hoangthai229@gmail.com',
     phone: cms.brand?.phone ?? '0345807906',
@@ -46,7 +47,7 @@ export function Footer() {
     ],
     [t('columns.support')]: [
       { href: '/login', label: tNav('signIn') },
-      { href: '/register', label: 'Sign up' },
+      { href: '/register', label: tNav('signUp') },
     ],
   };
 
