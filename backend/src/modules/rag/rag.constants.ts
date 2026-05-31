@@ -4,6 +4,7 @@ export const RAG_REPOSITORY = Symbol('RAG_REPOSITORY');
 export const EMBEDDING_PROVIDER = Symbol('EMBEDDING_PROVIDER');
 export const TEXT_CHUNKER = Symbol('TEXT_CHUNKER');
 export const RAG_GENERATION = Symbol('RAG_GENERATION');
+export const DOCUMENT_PARSER = Symbol('DOCUMENT_PARSER');
 
 /** Voyage `voyage-3` produces 1024-dimensional embeddings — must match the pgvector column width. */
 export const EMBEDDING_DIMENSIONS = 1024;
@@ -23,3 +24,8 @@ export const MAX_EMBED_BATCH = 128;
 
 /** Token ceiling for a grounded RAG answer. */
 export const RAG_ANSWER_MAX_TOKENS = 1024;
+
+/** Document upload limits + the DOCX MIME type used for parser routing. */
+export const MAX_UPLOAD_BYTES = 20 * 1024 * 1024; // 20 MB
+export const DOCX_MIME =
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document';

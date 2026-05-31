@@ -11,7 +11,9 @@ import { RagRepository } from './repositories/rag.repository';
 import { RecursiveTextChunker } from './adapters/recursive-text-chunker';
 import { VoyageEmbeddingAdapter } from './adapters/voyage-embedding.adapter';
 import { RagGenerationAdapter } from './adapters/rag-generation.adapter';
+import { MultiFormatDocumentParser } from './adapters/multi-format-document.parser';
 import {
+  DOCUMENT_PARSER,
   EMBEDDING_PROVIDER,
   RAG_GENERATION,
   RAG_REPOSITORY,
@@ -32,6 +34,7 @@ import {
     { provide: RAG_REPOSITORY, useClass: RagRepository },
     { provide: EMBEDDING_PROVIDER, useClass: VoyageEmbeddingAdapter },
     { provide: RAG_GENERATION, useClass: RagGenerationAdapter },
+    { provide: DOCUMENT_PARSER, useClass: MultiFormatDocumentParser },
     // Chunker has primitive constructor args with defaults — instantiate
     // explicitly so Nest doesn't try to resolve Number dependencies.
     { provide: TEXT_CHUNKER, useFactory: () => new RecursiveTextChunker() },

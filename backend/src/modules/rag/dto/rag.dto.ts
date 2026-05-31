@@ -53,3 +53,15 @@ export class ReviewAnswerDto {
   @IsIn(['APPROVE', 'REJECT'])
   decision!: 'APPROVE' | 'REJECT';
 }
+
+// Multipart upload — `file` is handled by FileInterceptor; these are the text fields.
+export class UploadDocumentDto {
+  @IsString()
+  @IsNotEmpty()
+  clientId!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  title?: string;
+}

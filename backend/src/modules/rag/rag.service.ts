@@ -1,6 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { RAG_REPOSITORY } from './rag.constants';
+import { DOCUMENT_PARSER, RAG_REPOSITORY } from './rag.constants';
 import type { RagRepositoryPort } from './domain/rag.repository.port';
+import type {
+  DocumentParserPort,
+  ParsableFile,
+} from './domain/document-parser.port';
 import type { RagReviewDecision } from './domain/rag.types';
 import { IngestDocumentUseCase } from './use-cases/ingest-document.use-case';
 import { QueryKnowledgeUseCase } from './use-cases/query-knowledge.use-case';
@@ -18,6 +22,7 @@ export class RagService {
     private readonly queryKnowledge: QueryKnowledgeUseCase,
     private readonly reviewAnswer: ReviewAnswerUseCase,
     @Inject(RAG_REPOSITORY) private readonly repo: RagRepositoryPort,
+    @Inject(DOCUMENT_PARSER) private readonly parser: DocumentParserPort,
   ) {}
 
   ingestText(input: {
@@ -27,6 +32,25 @@ export class RagService {
     text: string;
   }) {
     return this.ingestDocument.execute({ ...input, source: 'TEXT' });
+  }
+
+  /** Parse an uploaded file to text, then ingest it as an UPLOAD-source document. */
+  async ingestFile(input: {
+    clientId: string;
+    uploadedById: string;
+    title: string;
+    file: ParsableFile;
+  }) {
+    const text = await this.parser.extractText(input.file);
+    return this.ingestDocument.execute({
+      clientId: input.clientId,
+      uploadedById: input.uploadedById,
+      title: input.title,
+      source: 'UPLOAD',
+      text,
+      mimeType: input.file.mimeType,
+      originalFilename: input.file.filename,
+    });
   }
 
   listDocuments(clientId: string) {
