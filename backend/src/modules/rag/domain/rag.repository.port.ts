@@ -2,6 +2,8 @@ import type {
   ChunkEmbedding,
   IngestDocumentInput,
   RagAnswerDraft,
+  RagAnswerStatus,
+  RagDocumentSummary,
   RetrievedChunk,
 } from './rag.types';
 
@@ -42,4 +44,19 @@ export interface RagRepositoryPort {
     draftAnswer: string;
     citedChunkIds: string[];
   }): Promise<RagAnswerDraft>;
+
+  /** List a client's documents and their ingest status (tenant-scoped). */
+  listDocuments(clientId: string): Promise<RagDocumentSummary[]>;
+
+  /** Lightweight status lookup for the review state-machine check. */
+  findAnswerStatus(
+    answerId: string,
+  ): Promise<{ id: string; status: RagAnswerStatus } | null>;
+
+  /** Apply a human review decision to a draft answer. */
+  applyAnswerReview(
+    answerId: string,
+    status: Exclude<RagAnswerStatus, 'DRAFT'>,
+    reviewerId: string,
+  ): Promise<RagAnswerDraft>;
 }

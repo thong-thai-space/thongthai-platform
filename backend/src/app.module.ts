@@ -17,6 +17,7 @@ import { ClientModule } from './modules/client/client.module';
 import { InvoiceModule } from './modules/invoice/invoice.module';
 import { PortfolioModule } from './modules/portfolio/portfolio.module';
 import { AiModule } from './modules/ai/ai.module';
+import { RagModule } from './modules/rag/rag.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { FileModule } from './modules/file/file.module';
 import { MessageModule } from './modules/message/message.module';
@@ -74,6 +75,7 @@ import { SecurityModule } from './modules/security/security.module';
     InvoiceModule,
     PortfolioModule,
     AiModule,
+    RagModule,
     NotificationModule,
     FileModule,
     MessageModule,

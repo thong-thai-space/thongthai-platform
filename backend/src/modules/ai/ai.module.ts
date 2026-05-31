@@ -56,6 +56,8 @@ import { AiStrategicPlanUseCase } from './use-cases/ai-strategic-plan.use-case';
     { provide: AI_NOTIFICATION_PORT, useExisting: AiNotificationAdapter },
     { provide: AI_PROVIDER_PORT, useExisting: AiProviderAdapter },
   ],
-  exports: [AiService],
+  // AI_PROVIDER_PORT is exported so the RAG module can reuse the LLM provider
+  // for grounded answer generation (its Provider Router stays the single seam).
+  exports: [AiService, AI_PROVIDER_PORT],
 })
 export class AiModule {}

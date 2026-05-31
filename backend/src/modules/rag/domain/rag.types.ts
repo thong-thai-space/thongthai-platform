@@ -53,3 +53,15 @@ export interface RagAnswerDraft {
   citedChunkIds: string[];
   status: RagAnswerStatus;
 }
+
+export type RagDocumentStatus = 'PENDING' | 'PROCESSING' | 'INDEXED' | 'FAILED';
+
+export type RagReviewDecision = 'APPROVE' | 'REJECT';
+
+export interface RagDocumentSummary {
+  id: string;
+  title: string;
+  status: RagDocumentStatus;
+  chunkCount: number;
+  createdAt: Date;
+}
