@@ -17,6 +17,11 @@ import {
   invoiceToPdfDocument,
   invoicesToRevenueReport,
 } from '../support/invoice-document.mapper';
+import {
+  quotePdfFilename,
+  quoteToPdfDocument,
+} from '../support/quote-document.mapper';
+import { QuoteDto } from '../dto/quote.dto';
 
 // Pattern: Use Case
 @Injectable()
@@ -75,6 +80,21 @@ export class InvoiceUseCases {
     });
     const stamp = new Date().toISOString().slice(0, 10);
     return { buffer, filename: `revenue-report-${stamp}.xlsx` };
+  }
+
+  /** Render a pre-sale quote ("báo giá") to PDF. Not persisted. */
+  async generateQuotePdf(
+    quote: QuoteDto,
+  ): Promise<{ buffer: Buffer; filename: string }> {
+    if (!quote.items?.length) {
+      throw new BadRequestException('A quote needs at least one line item');
+    }
+    const document = quoteToPdfDocument(quote);
+    const buffer = await this.exportService.generate({
+      format: ExportFormat.PDF,
+      data: document as unknown as Record<string, unknown>,
+    });
+    return { buffer, filename: quotePdfFilename(quote.clientName) };
   }
 
   async create(dto: CreateInvoiceDto, creatorId: string) {

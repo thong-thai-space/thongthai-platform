@@ -24,7 +24,7 @@ export function formatMoney(
   return `${formatted} ${currency}`;
 }
 
-function formatDate(date: Date | string): string {
+export function formatDate(date: Date | string): string {
   return new Intl.DateTimeFormat('vi-VN', {
     day: '2-digit',
     month: '2-digit',

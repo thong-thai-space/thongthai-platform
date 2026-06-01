@@ -16,7 +16,7 @@ import { extractApiErrorMessage } from '@/lib/api-error';
 import Link from 'next/link';
 import { useState } from 'react';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { Plus, Search, X, FileDown, Loader2, Pencil, Trash2, Sparkles, Sheet } from 'lucide-react';
+import { Plus, Search, X, FileDown, Loader2, Pencil, Trash2, Sparkles, Sheet, FileSignature } from 'lucide-react';
 import type { Invoice, InvoiceStatus } from '@/types';
 
 const statusLabels: Record<InvoiceStatus, string> = {
@@ -194,6 +194,14 @@ export default function InvoicesPage() {
             >
               <Sparkles className="h-4 w-4" /> AI for Invoices
             </Link>
+            {isOwnerOrAdmin && (
+              <Link
+                href="/dashboard/quotes"
+                className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-muted"
+              >
+                <FileSignature className="h-4 w-4" /> New quote
+              </Link>
+            )}
             {isOwnerOrAdmin && (
               <button
                 onClick={handleExportReport}

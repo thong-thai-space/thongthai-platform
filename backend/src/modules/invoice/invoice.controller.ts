@@ -15,6 +15,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { InvoiceService } from './invoice.service';
 import { CreateInvoiceDto, UpdateInvoiceDto } from './dto/invoice.dto';
+import { QuoteDto } from './dto/quote.dto';
 import { Roles } from '../../shared/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { CurrentUser } from '../../shared/decorators/current-user.decorator';
@@ -51,6 +52,23 @@ export class InvoiceController {
       await this.invoiceService.generateRevenueReport(userId, role);
     res.set({
       'Content-Type': XLSX_MIME,
+      'Content-Disposition': `attachment; filename="${filename}"`,
+    });
+    return new StreamableFile(buffer);
+  }
+
+  // Pre-sale quote PDF — staff-only, not persisted.
+  @Post('quote/pdf')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  async quotePdf(
+    @Body() dto: QuoteDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<StreamableFile> {
+    const { buffer, filename } =
+      await this.invoiceService.generateQuotePdf(dto);
+    res.set({
+      'Content-Type': 'application/pdf',
       'Content-Disposition': `attachment; filename="${filename}"`,
     });
     return new StreamableFile(buffer);

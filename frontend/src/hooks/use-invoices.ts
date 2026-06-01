@@ -78,3 +78,29 @@ export async function downloadRevenueReport() {
   const stamp = new Date().toISOString().slice(0, 10);
   saveBlob(res as unknown as BlobResponse, `revenue-report-${stamp}.xlsx`);
 }
+
+export interface QuoteItemInput {
+  description: string;
+  quantity: number;
+  unitPrice: number;
+}
+
+export interface QuoteInput {
+  clientName: string;
+  clientEmail?: string;
+  clientPhone?: string;
+  currency: 'VND' | 'USD';
+  validUntil?: string;
+  introNote?: string;
+  taxRate?: number;
+  discount?: number;
+  items: QuoteItemInput[];
+}
+
+/** Generate and download a pre-sale quote PDF (OWNER/ADMIN, not persisted). */
+export async function downloadQuotePdf(quote: QuoteInput) {
+  const res = await api.post('/invoices/quote/pdf', quote, {
+    responseType: 'blob',
+  });
+  saveBlob(res as unknown as BlobResponse, 'quote.pdf');
+}

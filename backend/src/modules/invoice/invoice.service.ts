@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
 import { CreateInvoiceDto, UpdateInvoiceDto } from './dto/invoice.dto';
+import { QuoteDto } from './dto/quote.dto';
 import { InvoiceUseCases } from './use-cases/invoice.use-cases';
 
 @Injectable()
@@ -33,5 +34,9 @@ export class InvoiceService {
 
   async generateRevenueReport(userId: string, role: UserRole) {
     return this.invoiceUseCases.generateRevenueReport(userId, role);
+  }
+
+  async generateQuotePdf(quote: QuoteDto) {
+    return this.invoiceUseCases.generateQuotePdf(quote);
   }
 }
