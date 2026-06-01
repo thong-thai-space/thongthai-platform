@@ -19,6 +19,7 @@ import {
   Inbox,
   Newspaper,
   BookOpen,
+  GraduationCap,
 } from 'lucide-react';
 import { useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
@@ -27,6 +28,7 @@ const navItems = [
   { href: '/dashboard/leads', icon: Inbox, label: 'Leads' },
   { href: '/dashboard/ai-assistant', icon: Bot, label: 'AI Assistant' },
   { href: '/dashboard/rag', icon: BookOpen, label: 'Knowledge Base' },
+  { href: '/dashboard/academy', icon: GraduationCap, label: 'Academy' },
   { href: '/dashboard/tasks', icon: CheckSquare, label: 'Tasks' },
   { href: '/dashboard/users', icon: UsersRound, label: 'Users' },
   { href: '/dashboard/invoices', icon: FileText, label: 'Invoices' },
