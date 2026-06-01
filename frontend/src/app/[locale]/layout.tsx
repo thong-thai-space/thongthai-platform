@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Montserrat, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -14,16 +14,22 @@ import { OrganizationJsonLd, WebSiteJsonLd } from "@/components/seo/json-ld";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://thongthaispace.com";
 
-// Montserrat with Vietnamese subset so accented characters render correctly.
-const montserrat = Montserrat({
+const montserrat = localFont({
+  src: [
+    { path: "../../../public/fonts/montserrat-var-latin.woff2", weight: "100 900", style: "normal" },
+    { path: "../../../public/fonts/montserrat-var-latin-ext.woff2", weight: "100 900", style: "normal" },
+    { path: "../../../public/fonts/montserrat-var-vietnamese.woff2", weight: "100 900", style: "normal" },
+  ],
   variable: "--font-geist-sans",
-  subsets: ["latin", "latin-ext", "vietnamese"],
   display: "swap",
 });
 
-const jetbrainsMono = JetBrains_Mono({
+const jetbrainsMono = localFont({
+  src: [
+    { path: "../../../public/fonts/jetbrains-mono-var-latin.woff2", weight: "100 800", style: "normal" },
+    { path: "../../../public/fonts/jetbrains-mono-var-latin-ext.woff2", weight: "100 800", style: "normal" },
+  ],
   variable: "--font-geist-mono",
-  subsets: ["latin"],
   display: "swap",
 });
 
