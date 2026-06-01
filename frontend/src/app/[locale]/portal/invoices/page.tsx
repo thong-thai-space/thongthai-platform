@@ -1,9 +1,10 @@
 'use client';
 
 import { PortalHeader } from '@/components/portal/header';
-import { useInvoices } from '@/hooks/use-invoices';
+import { useInvoices, downloadInvoicePdf } from '@/hooks/use-invoices';
+import { extractApiErrorMessage } from '@/lib/api-error';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { Search, FileText } from 'lucide-react';
+import { Search, FileText, FileDown, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 
 const statusLabels: Record<string, string> = {
@@ -26,6 +27,18 @@ export default function PortalInvoicesPage() {
   const { data: invoices, isLoading } = useInvoices();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [exportingId, setExportingId] = useState<string | null>(null);
+
+  const handleExportPdf = async (id: string, invoiceNumber: string) => {
+    try {
+      setExportingId(id);
+      await downloadInvoicePdf(id, invoiceNumber);
+    } catch (error) {
+      alert(extractApiErrorMessage(error, 'Failed to download invoice'));
+    } finally {
+      setExportingId(null);
+    }
+  };
 
   const filtered = invoices?.filter((inv) => {
     const matchSearch =
@@ -122,6 +135,7 @@ export default function PortalInvoicesPage() {
                   <th className="px-4 py-3 text-left font-medium">Due Date</th>
                   <th className="px-4 py-3 text-right font-medium">Amount</th>
                   <th className="px-4 py-3 text-center font-medium">Status</th>
+                  <th className="px-4 py-3 text-right font-medium">PDF</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -149,6 +163,24 @@ export default function PortalInvoicesPage() {
                       >
                         {statusLabels[invoice.status]}
                       </span>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleExportPdf(invoice.id, invoice.invoiceNumber)
+                        }
+                        disabled={exportingId === invoice.id}
+                        title="Download PDF"
+                        className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50"
+                      >
+                        {exportingId === invoice.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <FileDown className="h-3.5 w-3.5" />
+                        )}
+                        PDF
+                      </button>
                     </td>
                   </tr>
                 ))}

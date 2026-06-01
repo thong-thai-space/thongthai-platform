@@ -41,3 +41,40 @@ export function useDeleteInvoice() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
   });
 }
+
+// ─── Binary downloads (server-rendered PDF / XLSX) ───────────────────────────
+
+interface BlobResponse {
+  data: Blob;
+  headers: Record<string, string>;
+}
+
+/** Saves a blob response, honouring the server's Content-Disposition filename. */
+function saveBlob(res: BlobResponse, fallbackName: string) {
+  if (typeof window === 'undefined') return;
+  const disposition = res.headers['content-disposition'];
+  const match = disposition?.match(/filename="?([^"]+)"?/);
+  const filename = match?.[1] ?? fallbackName;
+
+  const url = URL.createObjectURL(res.data);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+/** Download a server-rendered invoice PDF (proper Vietnamese typography). */
+export async function downloadInvoicePdf(id: string, invoiceNumber: string) {
+  const res = await api.get(`/invoices/${id}/pdf`, { responseType: 'blob' });
+  saveBlob(res as unknown as BlobResponse, `invoice-${invoiceNumber}.pdf`);
+}
+
+/** Download the revenue report spreadsheet (OWNER/ADMIN). */
+export async function downloadRevenueReport() {
+  const res = await api.get('/invoices/report/revenue', { responseType: 'blob' });
+  const stamp = new Date().toISOString().slice(0, 10);
+  saveBlob(res as unknown as BlobResponse, `revenue-report-${stamp}.xlsx`);
+}
