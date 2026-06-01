@@ -26,7 +26,7 @@ export class InvoiceRepository implements InvoiceRepositoryPort {
         where,
         orderBy: [{ createdAt: 'desc' }],
       });
-    } catch (error) {
+    } catch {
       throw new InternalServerErrorException('Failed to fetch invoices');
     }
   }
@@ -39,7 +39,27 @@ export class InvoiceRepository implements InvoiceRepositoryPort {
       return await this.prisma.invoice.findUnique({
         where: { id },
       });
-    } catch (error) {
+    } catch {
+      throw new InternalServerErrorException('Failed to find invoice');
+    }
+  }
+
+  /**
+   * Find invoice by ID with items + client + creator + project, for rendering
+   * a PDF or report. Items are ordered for a stable document layout.
+   */
+  async findByIdWithRelations(id: string) {
+    try {
+      return await this.prisma.invoice.findUnique({
+        where: { id },
+        include: {
+          items: { orderBy: { id: 'asc' } },
+          client: true,
+          creator: true,
+          project: true,
+        },
+      });
+    } catch {
       throw new InternalServerErrorException('Failed to find invoice');
     }
   }
@@ -115,7 +135,7 @@ export class InvoiceRepository implements InvoiceRepositoryPort {
         where: { clientId },
         orderBy: [{ createdAt: 'desc' }],
       });
-    } catch (error) {
+    } catch {
       throw new InternalServerErrorException('Failed to find client invoices');
     }
   }
@@ -129,7 +149,7 @@ export class InvoiceRepository implements InvoiceRepositoryPort {
         where: { status },
         orderBy: [{ dueDate: 'asc' }, { createdAt: 'desc' }],
       });
-    } catch (error) {
+    } catch {
       throw new InternalServerErrorException(
         'Failed to find invoices by status',
       );
@@ -149,7 +169,7 @@ export class InvoiceRepository implements InvoiceRepositoryPort {
           },
         },
       });
-    } catch (error) {
+    } catch {
       throw new InternalServerErrorException('Failed to find overdue invoices');
     }
   }
@@ -160,7 +180,7 @@ export class InvoiceRepository implements InvoiceRepositoryPort {
   async count(where?: Prisma.InvoiceWhereInput): Promise<number> {
     try {
       return await this.prisma.invoice.count({ where });
-    } catch (error) {
+    } catch {
       throw new InternalServerErrorException('Failed to count invoices');
     }
   }
@@ -181,7 +201,7 @@ export class InvoiceRepository implements InvoiceRepositoryPort {
         : 1;
 
       return `${prefix}${String(nextSeq).padStart(6, '0')}`;
-    } catch (error) {
+    } catch {
       throw new InternalServerErrorException(
         'Failed to generate invoice number',
       );
@@ -196,7 +216,7 @@ export class InvoiceRepository implements InvoiceRepositoryPort {
         where: { id: clientId },
         select: { id: true, role: true, isActive: true },
       });
-    } catch (error) {
+    } catch {
       throw new InternalServerErrorException('Failed to fetch client');
     }
   }
@@ -209,7 +229,7 @@ export class InvoiceRepository implements InvoiceRepositoryPort {
         where: { id: projectId },
         select: { id: true, clientId: true },
       });
-    } catch (error) {
+    } catch {
       throw new InternalServerErrorException('Failed to fetch project');
     }
   }

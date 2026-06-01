@@ -26,4 +26,12 @@ export class InvoiceService {
   async remove(id: string) {
     return this.invoiceUseCases.remove(id);
   }
+
+  async generatePdf(id: string, userId: string, role: UserRole) {
+    return this.invoiceUseCases.generatePdf(id, userId, role);
+  }
+
+  async generateRevenueReport(userId: string, role: UserRole) {
+    return this.invoiceUseCases.generateRevenueReport(userId, role);
+  }
 }

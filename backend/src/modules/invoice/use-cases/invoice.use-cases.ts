@@ -4,12 +4,19 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InvoiceStatus, Prisma, UserRole } from '@prisma/client';
+import { Prisma, UserRole } from '@prisma/client';
 import { CreateInvoiceDto, UpdateInvoiceDto } from '../dto/invoice.dto';
 import { TaxCalculator } from '../../../shared/utils/tax-calculator';
 import { INVOICE_REPOSITORY } from '../invoice.constants';
 import type { InvoiceRepositoryPort } from '../domain/invoice.repository.port';
 import { InvoicePolicy } from '../policies/invoice.policy';
+import { ExportService } from '../../export/export.service';
+import { ExportFormat } from '../../export/dto/export.dto';
+import {
+  invoicePdfFilename,
+  invoiceToPdfDocument,
+  invoicesToRevenueReport,
+} from '../support/invoice-document.mapper';
 
 // Pattern: Use Case
 @Injectable()
@@ -18,6 +25,7 @@ export class InvoiceUseCases {
     @Inject(INVOICE_REPOSITORY)
     private invoiceRepository: InvoiceRepositoryPort,
     private invoicePolicy: InvoicePolicy,
+    private exportService: ExportService,
   ) {}
 
   async findAll(userId: string, role: UserRole) {
@@ -33,15 +41,47 @@ export class InvoiceUseCases {
     return invoice;
   }
 
+  /** Render an invoice to a downloadable PDF (same view authorization as findOne). */
+  async generatePdf(
+    id: string,
+    userId: string,
+    role: UserRole,
+  ): Promise<{ buffer: Buffer; filename: string }> {
+    const invoice = await this.invoiceRepository.findByIdWithRelations(id);
+    if (!invoice) throw new NotFoundException('Invoice not found');
+
+    this.invoicePolicy.assertCanView(role, invoice, userId);
+
+    const document = invoiceToPdfDocument(invoice);
+    const buffer = await this.exportService.generate({
+      format: ExportFormat.PDF,
+      data: document as unknown as Record<string, unknown>,
+    });
+    return { buffer, filename: invoicePdfFilename(invoice.invoiceNumber) };
+  }
+
+  /** Revenue spreadsheet across invoices; clients are scoped to their own. */
+  async generateRevenueReport(
+    userId: string,
+    role: UserRole,
+  ): Promise<{ buffer: Buffer; filename: string }> {
+    const where = role === UserRole.CLIENT ? { clientId: userId } : undefined;
+    const invoices = await this.invoiceRepository.findAll(where);
+
+    const report = invoicesToRevenueReport(invoices);
+    const buffer = await this.exportService.generate({
+      format: ExportFormat.XLSX,
+      data: report as unknown as Record<string, unknown>,
+    });
+    const stamp = new Date().toISOString().slice(0, 10);
+    return { buffer, filename: `revenue-report-${stamp}.xlsx` };
+  }
+
   async create(dto: CreateInvoiceDto, creatorId: string) {
-    const {
-      items,
-      taxRate,
-      subtotal: _subtotal,
-      tax: _tax,
-      total: _total,
-      ...invoiceData
-    } = dto;
+    // subtotal/tax/total are intentionally not pulled out here: they are
+    // recomputed below and set explicitly on createData, which overrides any
+    // client-supplied values that flow through ...invoiceData.
+    const { items, taxRate, ...invoiceData } = dto;
 
     if (!items?.length) {
       throw new BadRequestException(
