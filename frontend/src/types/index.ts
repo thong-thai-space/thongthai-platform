@@ -307,3 +307,30 @@ export interface BlogSitemapSlug {
   slug: string;
   updatedAt: string;
 }
+
+// ==================== RAG (AI Knowledge Base) ====================
+
+export type RagDocumentStatus = 'PENDING' | 'PROCESSING' | 'INDEXED' | 'FAILED';
+
+export type RagAnswerStatus = 'DRAFT' | 'APPROVED' | 'REJECTED';
+
+export interface RagDocumentSummary {
+  id: string;
+  title: string;
+  status: RagDocumentStatus;
+  chunkCount: number;
+  createdAt: string;
+}
+
+export interface RagIngestResult {
+  documentId: string;
+  chunkCount: number;
+}
+
+export interface RagAnswerDraft {
+  id: string;
+  question: string;
+  draftAnswer: string;
+  citedChunkIds: string[];
+  status: RagAnswerStatus;
+}
