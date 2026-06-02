@@ -136,7 +136,7 @@ modules/<name>/
 └── <name>.controller.ts
 ```
 
-**Modules** (`backend/src/modules/`): auth, user, project, task, client, invoice, ai, notification, message, file, portfolio, contact, content, export, health, email, security.
+**Modules** (`backend/src/modules/`): auth, user, project, task, client, invoice, ai, rag, academy, notification, message, file, portfolio, contact, content, blog, export, health, email, security.
 
 ### Frontend (Next.js 15, React 19)
 
@@ -151,7 +151,7 @@ modules/<name>/
 
 PostgreSQL 16 via Prisma 7 with `@prisma/adapter-pg` (driver adapter — no `url` in datasource).
 Roles: `OWNER > ADMIN > MEMBER > CLIENT`. Enforced via `@Roles()` + `RolesGuard`.
-14 models. Enums: `Language`, `Currency`, `UserRole`, `ProjectStatus`, `TaskStatus`, `InvoiceStatus`, `NotificationType`, `AiFeature`.
+25 models. Enums: `UserRole`, `ProjectStatus`, `TaskStatus`, `TaskPriority`, `InvoiceStatus`, `NotificationType`, `Language`, `MotionPreference`, `Currency`, `AiFeature`, `AiApplyRequestStatus`, `BlogPostStatus`, `RagDocumentSource`, `RagDocumentStatus`, `RagAnswerStatus`, `PlaybookStatus`, `PlaybookAssignmentStatus`, `ContactRequestStatus`.
 
 ## Engineering Judgment
 
@@ -228,7 +228,7 @@ The rules in **Engineering Standards** are _heuristics_, not commandments. Apply
 | Issue | Severity | Notes |
 |---|---|---|
 | `portfolio`, `health`, `email`, `export`, `security` modules | 🟢 | Repository-only (no `domain/` + `use-cases/`); functional but inconsistent with the rest |
-| Frontend untouched in current refactor | 🟢 | Backend Clean Arch done — frontend follow-up pending |
+| Frontend not layered like the backend (no ports/use-cases) | 🟢 | Standard Next.js app; UI now built across dashboard/portal/member + GĐ2 (RAG, academy, invoices/quotes) |
 | No integration / E2E tests for cross-module flows | 🟡 | Only unit tests at use-case level today |
 | No Sentry / structured JSON logging | 🟡 | Pre-production checklist |
 | Strategic-plan apply uses Saga (idempotent), not `$transaction` | 🟢 | Intentional: avoids long-running locks. Documented in `ai-strategic-plan.use-case.ts` |
