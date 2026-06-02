@@ -119,6 +119,19 @@ enum RagAnswerStatus {
   REJECTED
 }
 
+// Academy (GĐ2) — packaged AI-usage Playbooks delivered to clients (Dịch vụ 2).
+enum PlaybookStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum PlaybookAssignmentStatus {
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+}
+
 // ==================== MODELS ====================
 
 model User {
@@ -180,6 +193,11 @@ model User {
   ragAnswersOwned      RagAnswer[]   @relation("RagAnswerClient")
   ragAnswersAsked      RagAnswer[]   @relation("RagAnswerAsker")
   ragAnswersReviewed   RagAnswer[]   @relation("RagAnswerReviewer")
+
+  // Academy (author = staff; assignment client = tenant owner; assigner = staff)
+  playbooksAuthored        Playbook[]           @relation("PlaybookAuthor")
+  playbookAssignmentsOwned PlaybookAssignment[] @relation("PlaybookAssignmentClient")
+  playbookAssignmentsMade  PlaybookAssignment[] @relation("PlaybookAssignmentAssigner")
 
   @@map("users")
 }
@@ -677,4 +695,55 @@ model RagAnswer {
   @@index([clientId, status])
   @@index([askedById, createdAt])
   @@map("rag_answers")
+}
+
+// ==================== ACADEMY (Dịch vụ 2, GĐ2) ====================
+// A Playbook is a packaged AI-usage handbook authored by staff, published, then
+// assigned to clients. Delivery is tenant-scoped via PlaybookAssignment.
+
+model Playbook {
+  id          String         @id @default(cuid())
+  slug        String         @unique
+  title       String
+  summary     String?
+  contentMdx  String
+  tags        String[]       @default([])
+  status      PlaybookStatus @default(DRAFT)
+  publishedAt DateTime?
+
+  authorId String
+  author   User   @relation("PlaybookAuthor", fields: [authorId], references: [id])
+
+  assignments PlaybookAssignment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, publishedAt])
+  @@map("playbooks")
+}
+
+model PlaybookAssignment {
+  id     String                   @id @default(cuid())
+  status PlaybookAssignmentStatus @default(ASSIGNED)
+
+  playbookId String
+  playbook   Playbook @relation(fields: [playbookId], references: [id], onDelete: Cascade)
+
+  // Tenant scope — the client this playbook is delivered to (plan §5.1).
+  clientId String
+  client   User   @relation("PlaybookAssignmentClient", fields: [clientId], references: [id], onDelete: Cascade)
+
+  assignedById String
+  assignedBy   User   @relation("PlaybookAssignmentAssigner", fields: [assignedById], references: [id])
+
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([playbookId, clientId])
+  @@index([clientId, status])
+  @@map("playbook_assignments")
 }

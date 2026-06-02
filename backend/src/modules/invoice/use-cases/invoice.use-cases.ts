@@ -4,12 +4,24 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InvoiceStatus, Prisma, UserRole } from '@prisma/client';
+import { Prisma, UserRole } from '@prisma/client';
 import { CreateInvoiceDto, UpdateInvoiceDto } from '../dto/invoice.dto';
 import { TaxCalculator } from '../../../shared/utils/tax-calculator';
 import { INVOICE_REPOSITORY } from '../invoice.constants';
 import type { InvoiceRepositoryPort } from '../domain/invoice.repository.port';
 import { InvoicePolicy } from '../policies/invoice.policy';
+import { ExportService } from '../../export/export.service';
+import { ExportFormat } from '../../export/dto/export.dto';
+import {
+  invoicePdfFilename,
+  invoiceToPdfDocument,
+  invoicesToRevenueReport,
+} from '../support/invoice-document.mapper';
+import {
+  quotePdfFilename,
+  quoteToPdfDocument,
+} from '../support/quote-document.mapper';
+import { QuoteDto } from '../dto/quote.dto';
 
 // Pattern: Use Case
 @Injectable()
@@ -18,6 +30,7 @@ export class InvoiceUseCases {
     @Inject(INVOICE_REPOSITORY)
     private invoiceRepository: InvoiceRepositoryPort,
     private invoicePolicy: InvoicePolicy,
+    private exportService: ExportService,
   ) {}
 
   async findAll(userId: string, role: UserRole) {
@@ -33,15 +46,58 @@ export class InvoiceUseCases {
     return invoice;
   }
 
+  /** Render an invoice to a downloadable PDF (same view authorization as findOne). */
+  async generatePdf(
+    id: string,
+    userId: string,
+    role: UserRole,
+  ): Promise<{ buffer: Buffer; filename: string }> {
+    const invoice = await this.invoiceRepository.findByIdWithRelations(id);
+    if (!invoice) throw new NotFoundException('Invoice not found');
+
+    this.invoicePolicy.assertCanView(role, invoice, userId);
+
+    const document = invoiceToPdfDocument(invoice);
+    const buffer = await this.exportService.generate({
+      format: ExportFormat.PDF,
+      data: document as unknown as Record<string, unknown>,
+    });
+    return { buffer, filename: invoicePdfFilename(invoice.invoiceNumber) };
+  }
+
+  /** Revenue spreadsheet across all invoices (endpoint is OWNER/ADMIN-only). */
+  async generateRevenueReport(): Promise<{ buffer: Buffer; filename: string }> {
+    const invoices = await this.invoiceRepository.findAll();
+
+    const report = invoicesToRevenueReport(invoices);
+    const buffer = await this.exportService.generate({
+      format: ExportFormat.XLSX,
+      data: report as unknown as Record<string, unknown>,
+    });
+    const stamp = new Date().toISOString().slice(0, 10);
+    return { buffer, filename: `revenue-report-${stamp}.xlsx` };
+  }
+
+  /** Render a pre-sale quote ("báo giá") to PDF. Not persisted. */
+  async generateQuotePdf(
+    quote: QuoteDto,
+  ): Promise<{ buffer: Buffer; filename: string }> {
+    if (!quote.items?.length) {
+      throw new BadRequestException('A quote needs at least one line item');
+    }
+    const document = quoteToPdfDocument(quote);
+    const buffer = await this.exportService.generate({
+      format: ExportFormat.PDF,
+      data: document as unknown as Record<string, unknown>,
+    });
+    return { buffer, filename: quotePdfFilename(quote.clientName) };
+  }
+
   async create(dto: CreateInvoiceDto, creatorId: string) {
-    const {
-      items,
-      taxRate,
-      subtotal: _subtotal,
-      tax: _tax,
-      total: _total,
-      ...invoiceData
-    } = dto;
+    // subtotal/tax/total are intentionally not pulled out here: they are
+    // recomputed below and set explicitly on createData, which overrides any
+    // client-supplied values that flow through ...invoiceData.
+    const { items, taxRate, ...invoiceData } = dto;
 
     if (!items?.length) {
       throw new BadRequestException(

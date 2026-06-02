@@ -6,17 +6,18 @@ import {
   useCreateInvoice,
   useUpdateInvoice,
   useDeleteInvoice,
+  downloadInvoicePdf,
+  downloadRevenueReport,
 } from '@/hooks/use-invoices';
 import { useClients } from '@/hooks/use-clients';
 import { useProjects } from '@/hooks/use-projects';
 import { useAuth } from '@/lib/auth';
-import api from '@/lib/api';
 import { extractApiErrorMessage } from '@/lib/api-error';
 import Link from 'next/link';
 import { useState } from 'react';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { Plus, Search, X, FileDown, Loader2, Pencil, Trash2, Sparkles } from 'lucide-react';
-import type { Invoice, InvoiceStatus, User } from '@/types';
+import { Plus, Search, X, FileDown, Loader2, Pencil, Trash2, Sparkles, Sheet, FileSignature } from 'lucide-react';
+import type { Invoice, InvoiceStatus } from '@/types';
 
 const statusLabels: Record<InvoiceStatus, string> = {
   DRAFT: 'Draft',
@@ -46,6 +47,7 @@ export default function InvoicesPage() {
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [showForm, setShowForm] = useState(false);
   const [exportingId, setExportingId] = useState<string | null>(null);
+  const [exportingReport, setExportingReport] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [editForm, setEditForm] = useState({
     status: 'DRAFT' as InvoiceStatus,
@@ -137,13 +139,25 @@ export default function InvoicesPage() {
     deleteInvoice.mutate(invoiceId);
   };
 
-  const handleExportPdf = async (invoiceId: string) => {
+  const handleExportPdf = async (invoiceId: string, invoiceNumber: string) => {
     try {
       setExportingId(invoiceId);
-      const detail = await api.get(`/invoices/${invoiceId}`).then((r) => r.data as InvoiceDetail);
-      exportInvoiceAsPdf(detail);
+      await downloadInvoicePdf(invoiceId, invoiceNumber);
+    } catch (error) {
+      alert(extractApiErrorMessage(error, 'Failed to export invoice PDF'));
     } finally {
       setExportingId(null);
+    }
+  };
+
+  const handleExportReport = async () => {
+    try {
+      setExportingReport(true);
+      await downloadRevenueReport();
+    } catch (error) {
+      alert(extractApiErrorMessage(error, 'Failed to export revenue report'));
+    } finally {
+      setExportingReport(false);
     }
   };
 
@@ -180,6 +194,28 @@ export default function InvoicesPage() {
             >
               <Sparkles className="h-4 w-4" /> AI for Invoices
             </Link>
+            {isOwnerOrAdmin && (
+              <Link
+                href="/dashboard/quotes"
+                className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-muted"
+              >
+                <FileSignature className="h-4 w-4" /> New quote
+              </Link>
+            )}
+            {isOwnerOrAdmin && (
+              <button
+                onClick={handleExportReport}
+                disabled={exportingReport}
+                className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50"
+              >
+                {exportingReport ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Sheet className="h-4 w-4" />
+                )}
+                Revenue report
+              </button>
+            )}
             {isOwnerOrAdmin && (
               <button
                 onClick={() => setShowForm(true)}
@@ -360,7 +396,7 @@ export default function InvoicesPage() {
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
-                          onClick={() => handleExportPdf(inv.id)}
+                          onClick={() => handleExportPdf(inv.id, inv.invoiceNumber)}
                           disabled={exportingId === inv.id}
                           className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50"
                         >
@@ -467,125 +503,4 @@ export default function InvoicesPage() {
       </main>
     </>
   );
-}
-
-type InvoiceDetail = Invoice & {
-  client?: Pick<User, 'id' | 'name' | 'email' | 'phone'>;
-  creator?: Pick<User, 'id' | 'name'>;
-};
-
-function exportInvoiceAsPdf(invoice: InvoiceDetail) {
-  if (typeof window === 'undefined') return;
-
-  const esc = (s: string | null | undefined) =>
-    String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-  const itemRows = (invoice.items || []).map((item, i) => `
-    <tr>
-      <td>${i + 1}</td>
-      <td>${esc(item.description)}</td>
-      <td style="text-align:center">${item.quantity ?? 1}</td>
-      <td style="text-align:right">${formatCurrency(item.unitPrice, invoice.currency)}</td>
-      <td style="text-align:right">${formatCurrency(item.amount, invoice.currency)}</td>
-    </tr>`).join('');
-
-  const totalUsdRow = invoice.totalUsd
-    ? `<tr><td colspan="4" style="text-align:right;color:#6b7280">Total (USD)</td><td style="text-align:right">${formatCurrency(invoice.totalUsd, 'USD')}</td></tr>`
-    : '';
-
-  const notesSection = invoice.notes
-    ? `<div style="margin-top:24px"><strong>Notes</strong><p style="color:#374151;margin:6px 0">${esc(invoice.notes)}</p></div>`
-    : '';
-
-  const statusColor: Record<string, string> = {
-    DRAFT: '#6b7280', SENT: '#2563eb', PAID: '#16a34a', OVERDUE: '#dc2626', CANCELLED: '#9ca3af',
-  };
-  const sc = statusColor[invoice.status] ?? '#6b7280';
-
-  const html = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <title>Invoice ${esc(invoice.invoiceNumber)}</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { font-family: "Segoe UI", Arial, sans-serif; color: #1f2937; margin: 0; padding: 40px 48px; }
-    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; }
-    .company { font-size: 22px; font-weight: 700; color: #0f172a; }
-    .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700;
-             background: ${sc}22; color: ${sc}; border: 1px solid ${sc}55; }
-    .invoice-no { font-size: 13px; color: #6b7280; margin-top: 6px; }
-    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 28px;
-                 padding: 20px; background: #f8fafc; border-radius: 8px; }
-    .meta-block { font-size: 12px; }
-    .meta-block .label { color: #6b7280; margin-bottom: 4px; }
-    .meta-block .value { font-weight: 600; color: #111827; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 12px; }
-    thead th { background: #1e3a8a; color: #fff; padding: 9px 10px; text-align: left; }
-    tbody td { padding: 8px 10px; border-bottom: 1px solid #e5e7eb; }
-    tbody tr:nth-child(even) td { background: #f9fafb; }
-    .totals td { padding: 6px 10px; border: none; }
-    .totals tr.grand td { font-weight: 700; font-size: 14px; background: #eff6ff; }
-    @media print { body { padding: 20px 28px; } }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <div>
-      <div class="company">Thông Thái Space</div>
-      <div class="invoice-no">${esc(invoice.invoiceNumber)}</div>
-    </div>
-    <div style="text-align:right">
-      <div class="badge">${esc(invoice.status)}</div>
-      <div style="font-size:12px;color:#6b7280;margin-top:8px">Issued: ${formatDate(invoice.issueDate)}</div>
-      <div style="font-size:12px;color:#6b7280">Due: ${formatDate(invoice.dueDate)}</div>
-    </div>
-  </div>
-
-  <div class="meta-grid">
-    <div class="meta-block">
-      <div class="label">Bill To</div>
-      <div class="value">${esc(invoice.client?.name)}</div>
-      <div style="color:#374151">${esc(invoice.client?.email)}</div>
-      ${invoice.client?.phone ? `<div style="color:#374151">${esc(invoice.client.phone)}</div>` : ''}
-    </div>
-    <div class="meta-block">
-      <div class="label">Project</div>
-      <div class="value">${esc(invoice.project?.name || '—')}</div>
-      <div class="label" style="margin-top:12px">Created by</div>
-      <div class="value">${esc(invoice.creator?.name)}</div>
-    </div>
-  </div>
-
-  <table>
-    <thead>
-      <tr>
-        <th style="width:36px">#</th>
-        <th>Description</th>
-        <th style="width:60px;text-align:center">Qty</th>
-        <th style="width:130px;text-align:right">Unit Price</th>
-        <th style="width:130px;text-align:right">Amount</th>
-      </tr>
-    </thead>
-    <tbody>${itemRows}</tbody>
-    <tbody class="totals">
-      <tr><td colspan="4" style="text-align:right;color:#6b7280">Subtotal</td><td style="text-align:right">${formatCurrency(invoice.subtotal, invoice.currency)}</td></tr>
-      <tr><td colspan="4" style="text-align:right;color:#6b7280">Tax</td><td style="text-align:right">${formatCurrency(invoice.tax, invoice.currency)}</td></tr>
-      <tr><td colspan="4" style="text-align:right;color:#6b7280">Discount</td><td style="text-align:right">-${formatCurrency(invoice.discount, invoice.currency)}</td></tr>
-      ${totalUsdRow}
-      <tr class="grand"><td colspan="4" style="text-align:right">Total (${esc(invoice.currency)})</td><td style="text-align:right">${formatCurrency(invoice.total, invoice.currency)}</td></tr>
-    </tbody>
-  </table>
-
-  ${notesSection}
-</body>
-</html>`;
-
-  const win = window.open('', '_blank', 'width=900,height=700');
-  if (!win) return;
-  win.document.open();
-  win.document.write(html);
-  win.document.close();
-  win.focus();
-  setTimeout(() => win.print(), 400);
 }

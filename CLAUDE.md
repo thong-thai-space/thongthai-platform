@@ -85,6 +85,17 @@ pnpm start:dev                                # 4. Run backend
 cd ../frontend && pnpm install && pnpm dev    # 5. Run frontend
 ```
 
+**No Docker?** Prisma 7 ships a built-in local Postgres (`prisma dev`, PGlite —
+real pgvector, no daemon). One command provisions it:
+```bash
+cd backend
+pnpm db:dev:seed     # start local DB + migrate + seed demo data (prints DATABASE_URL)
+pnpm db:dev          # same, without seeding
+pnpm db:dev:stop     # stop it
+```
+Put the printed `DATABASE_URL` in `backend/.env`. Redis is still required for the
+full app (rate-limit/cache/sockets); this only provisions Postgres.
+
 URLs: Frontend http://localhost:3000 · API http://localhost:4000/api/v1 · Swagger http://localhost:4000/api/v1/docs · Health probe http://localhost:4000/api/healthz
 
 ## Environment

@@ -307,3 +307,94 @@ export interface BlogSitemapSlug {
   slug: string;
   updatedAt: string;
 }
+
+// ==================== RAG (AI Knowledge Base) ====================
+
+export type RagDocumentStatus = 'PENDING' | 'PROCESSING' | 'INDEXED' | 'FAILED';
+
+export type RagAnswerStatus = 'DRAFT' | 'APPROVED' | 'REJECTED';
+
+export interface RagDocumentSummary {
+  id: string;
+  title: string;
+  status: RagDocumentStatus;
+  chunkCount: number;
+  createdAt: string;
+}
+
+export interface RagIngestResult {
+  documentId: string;
+  chunkCount: number;
+}
+
+export interface RagAnswerDraft {
+  id: string;
+  question: string;
+  draftAnswer: string;
+  citedChunkIds: string[];
+  status: RagAnswerStatus;
+}
+
+// ==================== Academy (Playbooks) ====================
+
+export type PlaybookStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+export type PlaybookAssignmentStatus =
+  | 'ASSIGNED'
+  | 'IN_PROGRESS'
+  | 'COMPLETED';
+
+export interface Playbook {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string | null;
+  contentMdx: string;
+  tags: string[];
+  status: PlaybookStatus;
+  publishedAt: string | null;
+  authorId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PlaybookListResult {
+  items: Playbook[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+/** Admin view: who a playbook is delivered to. */
+export interface PlaybookAssignee {
+  id: string;
+  status: PlaybookAssignmentStatus;
+  startedAt: string | null;
+  completedAt: string | null;
+  createdAt: string;
+  client: { id: string; name: string; email: string };
+}
+
+/** Client portal: a playbook assigned to me (list projection, no content). */
+export interface MyPlaybookSummary {
+  id: string;
+  status: PlaybookAssignmentStatus;
+  startedAt: string | null;
+  completedAt: string | null;
+  createdAt: string;
+  playbook: {
+    id: string;
+    slug: string;
+    title: string;
+    summary: string | null;
+    tags: string[];
+  };
+}
+
+/** Client portal: full read of one assigned playbook (with content). */
+export interface MyPlaybookDetail {
+  id: string;
+  status: PlaybookAssignmentStatus;
+  startedAt: string | null;
+  completedAt: string | null;
+  playbook: Playbook;
+}

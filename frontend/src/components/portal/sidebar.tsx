@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   FolderKanban,
   FileText,
+  GraduationCap,
   Settings,
   LogOut,
   ChevronLeft,
@@ -20,6 +21,7 @@ const navItems = [
   { href: '/portal', icon: LayoutDashboard, label: 'Overview' },
   { href: '/portal/projects', icon: FolderKanban, label: 'Projects' },
   { href: '/portal/invoices', icon: FileText, label: 'Invoices' },
+  { href: '/portal/academy', icon: GraduationCap, label: 'Playbooks' },
   { href: '/portal/settings', icon: Settings, label: 'Settings' },
 ];
 

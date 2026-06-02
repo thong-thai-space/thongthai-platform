@@ -4,13 +4,15 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { useSectionContent } from "@/hooks/use-content";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Montserrat } from "next/font/google";
+import localFont from "next/font/local";
 import { type ReactNode, useMemo, useState } from "react";
 
-// Heavy weight for the hero display heading.
-const displayFont = Montserrat({
-  weight: ["800"],
-  subsets: ["latin", "latin-ext", "vietnamese"],
+const displayFont = localFont({
+  src: [
+    { path: "../../../public/fonts/montserrat-800-latin.woff2", weight: "800", style: "normal" },
+    { path: "../../../public/fonts/montserrat-800-latin-ext.woff2", weight: "800", style: "normal" },
+    { path: "../../../public/fonts/montserrat-800-vietnamese.woff2", weight: "800", style: "normal" },
+  ],
   display: "swap",
 });
 
