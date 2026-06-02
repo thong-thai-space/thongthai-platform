@@ -44,12 +44,10 @@ export class InvoiceController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   async revenueReport(
-    @CurrentUser('id') userId: string,
-    @CurrentUser('role') role: UserRole,
     @Res({ passthrough: true }) res: Response,
   ): Promise<StreamableFile> {
     const { buffer, filename } =
-      await this.invoiceService.generateRevenueReport(userId, role);
+      await this.invoiceService.generateRevenueReport();
     res.set({
       'Content-Type': XLSX_MIME,
       'Content-Disposition': `attachment; filename="${filename}"`,

@@ -9,7 +9,7 @@ const doc: XlsxDocumentPayload = {
     { header: 'Tổng tiền', key: 'total', numeric: true },
   ],
   rows: [{ invoiceNumber: 'INV-2026-001', total: 1000000 }],
-  totals: { invoiceNumber: 'TỔNG', total: 1000000 },
+  totals: [{ invoiceNumber: 'TỔNG', total: 1000000 }],
 };
 
 describe('XlsxGenerator', () => {

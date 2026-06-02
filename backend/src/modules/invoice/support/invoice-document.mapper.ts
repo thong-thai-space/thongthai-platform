@@ -121,8 +121,21 @@ export function invoicesToRevenueReport(
     paid: inv.paidAt ? Number(inv.paidAmount ?? inv.total) : 0,
   }));
 
-  const sum = (key: 'total' | 'paid') =>
-    rows.reduce((acc, r) => acc + r[key], 0);
+  // One totals row per currency — summing VND and USD into a single number is
+  // meaningless, so each currency is aggregated on its own line.
+  const byCurrency = new Map<string, { total: number; paid: number }>();
+  for (const r of rows) {
+    const acc = byCurrency.get(r.currency) ?? { total: 0, paid: 0 };
+    acc.total += r.total;
+    acc.paid += r.paid;
+    byCurrency.set(r.currency, acc);
+  }
+  const totals = [...byCurrency.entries()].map(([currency, sums]) => ({
+    invoiceNumber: `TỔNG (${currency})`,
+    currency,
+    total: sums.total,
+    paid: sums.paid,
+  }));
 
   return {
     sheetName: 'Doanh thu',
@@ -136,10 +149,6 @@ export function invoicesToRevenueReport(
       { header: 'Đã thu', key: 'paid', width: 18, numeric: true },
     ],
     rows,
-    totals: {
-      invoiceNumber: 'TỔNG',
-      total: sum('total'),
-      paid: sum('paid'),
-    },
+    totals,
   };
 }

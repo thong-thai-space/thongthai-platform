@@ -59,11 +59,11 @@ export class XlsxGenerator implements ExportGenerator {
       });
     });
 
-    // Totals row.
-    if (doc.totals) {
+    // Totals rows (one per group, e.g. per currency).
+    for (const totals of doc.totals ?? []) {
       const totalsRow = sheet.addRow(
         doc.columns.reduce<Record<string, string | number>>((acc, c) => {
-          acc[c.key] = doc.totals?.[c.key] ?? '';
+          acc[c.key] = totals[c.key] ?? '';
           return acc;
         }, {}),
       );

@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import {
+  ArrayMinSize,
   IsArray,
   IsEnum,
   IsNumber,
@@ -69,6 +70,7 @@ export class QuoteDto {
   discount?: number;
 
   @IsArray()
+  @ArrayMinSize(1)
   @ValidateNested({ each: true })
   @Type(() => QuoteItemDto)
   items: QuoteItemDto[];

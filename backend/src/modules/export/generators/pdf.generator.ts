@@ -49,9 +49,12 @@ export class PdfGenerator implements ExportGenerator {
 
     const chunks: Buffer[] = [];
     pdf.on('data', (c: Buffer) => chunks.push(c));
-    const done = new Promise<Buffer>((resolve) =>
-      pdf.on('end', () => resolve(Buffer.concat(chunks))),
-    );
+    // Reject on stream errors (e.g. font load failure) so the awaiting request
+    // surfaces a 5xx instead of hanging until the client times out.
+    const done = new Promise<Buffer>((resolve, reject) => {
+      pdf.on('error', reject);
+      pdf.on('end', () => resolve(Buffer.concat(chunks)));
+    });
 
     this.drawHeader(pdf, doc);
     this.drawInfoBlocks(pdf, doc);

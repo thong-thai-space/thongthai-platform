@@ -62,6 +62,10 @@ export interface XlsxDocumentPayload {
   title?: string;
   columns: XlsxColumn[];
   rows: Record<string, string | number | null>[];
-  /** Optional footer row of pre-aggregated totals, keyed by column. */
-  totals?: Record<string, string | number>;
+  /**
+   * Optional footer rows of pre-aggregated totals, keyed by column. One row per
+   * group (e.g. one per currency) — summing across incompatible units in a
+   * single row would be meaningless.
+   */
+  totals?: Record<string, string | number>[];
 }

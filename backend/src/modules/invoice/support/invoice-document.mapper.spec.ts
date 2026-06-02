@@ -106,7 +106,7 @@ describe('invoiceToPdfDocument', () => {
 });
 
 describe('invoicesToRevenueReport', () => {
-  it('sums totals and paid amounts into a totals row', () => {
+  it('sums totals and paid amounts into one totals row per currency', () => {
     const report = invoicesToRevenueReport([
       buildInvoice({ total: 1000000 as never }),
       buildInvoice({
@@ -116,7 +116,22 @@ describe('invoicesToRevenueReport', () => {
       }),
     ]);
     expect(report.rows).toHaveLength(2);
-    expect(report.totals?.total).toBe(1500000);
-    expect(report.totals?.paid).toBe(500000);
+    // Both invoices are VND → a single VND totals row.
+    expect(report.totals).toHaveLength(1);
+    const vnd = report.totals?.find((t) => t.currency === 'VND');
+    expect(vnd?.total).toBe(1500000);
+    expect(vnd?.paid).toBe(500000);
+  });
+
+  it('does not mix currencies — one totals row each for VND and USD', () => {
+    const report = invoicesToRevenueReport([
+      buildInvoice({ total: 1000000 as never, currency: 'VND' as never }),
+      buildInvoice({ total: 50 as never, currency: 'USD' as never }),
+    ]);
+    expect(report.totals).toHaveLength(2);
+    expect(report.totals?.find((t) => t.currency === 'VND')?.total).toBe(
+      1000000,
+    );
+    expect(report.totals?.find((t) => t.currency === 'USD')?.total).toBe(50);
   });
 });

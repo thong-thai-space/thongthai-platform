@@ -32,8 +32,8 @@ export class InvoiceService {
     return this.invoiceUseCases.generatePdf(id, userId, role);
   }
 
-  async generateRevenueReport(userId: string, role: UserRole) {
-    return this.invoiceUseCases.generateRevenueReport(userId, role);
+  async generateRevenueReport() {
+    return this.invoiceUseCases.generateRevenueReport();
   }
 
   async generateQuotePdf(quote: QuoteDto) {

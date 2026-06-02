@@ -65,13 +65,9 @@ export class InvoiceUseCases {
     return { buffer, filename: invoicePdfFilename(invoice.invoiceNumber) };
   }
 
-  /** Revenue spreadsheet across invoices; clients are scoped to their own. */
-  async generateRevenueReport(
-    userId: string,
-    role: UserRole,
-  ): Promise<{ buffer: Buffer; filename: string }> {
-    const where = role === UserRole.CLIENT ? { clientId: userId } : undefined;
-    const invoices = await this.invoiceRepository.findAll(where);
+  /** Revenue spreadsheet across all invoices (endpoint is OWNER/ADMIN-only). */
+  async generateRevenueReport(): Promise<{ buffer: Buffer; filename: string }> {
+    const invoices = await this.invoiceRepository.findAll();
 
     const report = invoicesToRevenueReport(invoices);
     const buffer = await this.exportService.generate({
