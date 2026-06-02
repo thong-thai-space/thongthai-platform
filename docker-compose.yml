@@ -41,7 +41,8 @@ services:
 
   # ── PostgreSQL ──
   postgres:
-    image: postgres:16-alpine
+    # pgvector-enabled Postgres 16 (RAG embeddings need the `vector` extension).
+    image: pgvector/pgvector:pg16
     container_name: thongthai-postgres
     restart: unless-stopped
     ports:
