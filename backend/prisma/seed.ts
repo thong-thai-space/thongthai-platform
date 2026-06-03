@@ -8,6 +8,7 @@
  * Note: RAG retrieval needs VOYAGE_API_KEY to embed at query time; the seeded
  * document is metadata-only so the Knowledge Base list looks realistic.
  */
+import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import * as bcrypt from 'bcryptjs';
