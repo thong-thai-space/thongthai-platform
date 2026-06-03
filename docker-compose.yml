@@ -9,13 +9,21 @@ services:
       - "4000:4000"
     env_file:
       - ./backend/.env
+    environment:
+      # In-container networking: reach Postgres/Redis by compose service name, not
+      # the localhost URLs that backend/.env uses for host-based dev.
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-thongthai}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-thongthai_space}?schema=public"
+      REDIS_URL: "redis://redis:6379"
     depends_on:
       - postgres
       - redis
     volumes:
       - ./backend:/app
       - /app/node_modules
-    command: pnpm start:dev
+    # Generate the Prisma client at startup: the `deps` build target skips it, and
+    # the anonymous node_modules volume hides the host-generated client. Running it
+    # here keeps the container's client in sync with the bind-mounted schema.
+    command: sh -c "pnpm prisma generate && pnpm start:dev"
     networks:
       - app-network
 
