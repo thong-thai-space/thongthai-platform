@@ -95,7 +95,7 @@ export default async function BlogPostPage({
   const t = await getTranslations({ locale, namespace: "nav" });
   const isDefault = locale === routing.defaultLocale;
   const home = isDefault ? "/" : `/${locale}`;
-  const blogUrl = isDefault ? "/blog" : `/${locale}/blog`;
+  const blogUrl = isDefault ? "/#blog" : `/${locale}#blog`;
   const postUrl = isDefault ? `/blog/${slug}` : `/${locale}/blog/${slug}`;
 
   return (

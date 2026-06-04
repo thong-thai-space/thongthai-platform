@@ -1,14 +1,11 @@
 'use client';
 
 import {
-  ArchitectureAgentGate,
   HeroSection,
   ServicesSection,
   PortfolioSection,
-  ProcessSection,
+  BlogSection,
   SectionDivider,
-  TestimonialsSection,
-  CtaSection,
 } from '@/components/landing';
 import { Navbar } from '@/components/landing/navbar';
 import { Footer } from '@/components/landing/footer';
@@ -20,27 +17,17 @@ import { PublicAiChatWidget } from '@/components/landing/ai-chat-widget';
  * RSC wrapper so `generateMetadata` and per-locale crawling still work.
  */
 export function HomeContent() {
-  const canRenderArchitectureAgent = true;
-
   return (
     <>
       <Navbar />
       <main className="pt-4 sm:pt-5 lg:pt-6">
-        <HeroSection
-          architectureOverlay={
-            <ArchitectureAgentGate canRenderAgent={canRenderArchitectureAgent} />
-          }
-        />
+        <HeroSection />
         <SectionDivider tone="primary" />
         <ServicesSection />
         <SectionDivider tone="accent" />
         <PortfolioSection />
         <SectionDivider tone="primary" />
-        <ProcessSection />
-        <SectionDivider tone="accent" />
-        <TestimonialsSection />
-        <SectionDivider tone="primary" />
-        <CtaSection />
+        <BlogSection />
       </main>
       <Footer />
       <PublicAiChatWidget />

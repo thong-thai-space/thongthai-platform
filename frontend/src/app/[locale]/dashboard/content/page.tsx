@@ -118,7 +118,7 @@ const HERO_DEFAULTS = {
     'Thong Thai Space specializes in Web & App development, AI integration, and IT consulting.',
   youtubeVideoUrl: '',
   primaryCta: { text: 'Get a free quote', href: '/contact' },
-  secondaryCta: { text: 'View our projects', href: '/portfolio' },
+  secondaryCta: { text: 'View our projects', href: '/#portfolio' },
   stats: [
     { value: '50+', label: 'Projects completed' },
     { value: '30+', label: 'Trusted clients' },
@@ -180,12 +180,13 @@ const FOOTER_DEFAULTS = {
   },
   links: {
     Services: [
-      { href: '/services#web', label: 'Web Development' },
-      { href: '/services#app', label: 'Mobile Apps' },
+      { href: '/#services', label: 'Web Development' },
+      { href: '/#services', label: 'Mobile Apps' },
     ],
     Company: [
       { href: '/about', label: 'About' },
-      { href: '/portfolio', label: 'Portfolio' },
+      { href: '/#portfolio', label: 'Portfolio' },
+      { href: '/#blog', label: 'Blog' },
     ],
     Support: [
       { href: '/login', label: 'Sign in' },
@@ -901,7 +902,7 @@ function PortfolioDatabaseManager({ contentValue }: { contentValue: unknown }) {
         <div className="space-y-3">
           {showcaseProjects.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border bg-background p-6 text-sm text-muted-foreground">
-              No projects found yet. Create projects first in Dashboard → Projects, then enable "Show on Portfolio" here.
+              No projects found yet. Create projects first in Dashboard → Projects, then enable &quot;Show on Portfolio&quot; here.
             </div>
           ) : (
             showcaseProjects.map((project) => (

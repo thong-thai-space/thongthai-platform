@@ -28,7 +28,7 @@ export function BlogPostContent({ slug }: { slug: string }) {
   const t = useTranslations('blog');
   const { data: post, isLoading, isError } = useBlogPost(slug);
 
-  const backHref = locale === 'vi' ? '/blog' : `/${locale}/blog`;
+  const backHref = locale === 'vi' ? '/#blog' : `/${locale}#blog`;
 
   if (isLoading) {
     return (
