@@ -9,9 +9,6 @@ const SITE_URL =
 const PUBLIC_ROUTES = [
   "",
   "/about",
-  "/services",
-  "/portfolio",
-  "/blog",
   "/contact",
   "/privacy-policy",
   "/terms-and-conditions",

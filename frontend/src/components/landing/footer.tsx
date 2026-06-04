@@ -35,14 +35,15 @@ export function Footer() {
 
   const links: Record<string, FooterLink[]> = cms.links ?? {
     [t('columns.services')]: [
-      { href: '/services#web', label: tServices('web.title') },
-      { href: '/services#app', label: tServices('mobile.title') },
-      { href: '/services#ai', label: tServices('ai.title') },
-      { href: '/services#consulting', label: tServices('consulting.title') },
+      { href: '/#services', label: tServices('web.title') },
+      { href: '/#services', label: tServices('mobile.title') },
+      { href: '/#services', label: tServices('ai.title') },
+      { href: '/#services', label: tServices('consulting.title') },
     ],
     [t('columns.company')]: [
       { href: '/about', label: tNav('about') },
-      { href: '/portfolio', label: tNav('portfolio') },
+      { href: '/#portfolio', label: tNav('portfolio') },
+      { href: '/#blog', label: tNav('blog') },
       { href: '/contact', label: tNav('contact') },
     ],
     [t('columns.support')]: [
@@ -87,7 +88,7 @@ export function Footer() {
               <h3 className="text-sm font-semibold">{title}</h3>
               <ul className="mt-3 space-y-2">
                 {columnLinks.map((link) => (
-                  <li key={link.href}>
+                  <li key={`${link.href}-${link.label}`}>
                     <Link
                       href={link.href}
                       className="tts-brand-body text-sm transition-colors hover:text-foreground"
