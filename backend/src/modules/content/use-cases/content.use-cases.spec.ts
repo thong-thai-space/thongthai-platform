@@ -9,16 +9,23 @@ import type {
 
 describe('ContentUseCases', () => {
   let repo: jest.Mocked<ContentRepositoryPort>;
+  let storage: { uploadPublicFile: jest.Mock };
   let useCases: ContentUseCases;
 
   beforeEach(() => {
     repo = {
       findByLocale: jest.fn(),
+      findOne: jest.fn(),
       upsert: jest.fn(),
       remove: jest.fn(),
     };
+    storage = { uploadPublicFile: jest.fn() };
     // Use the real policy — its rules are part of the use-case contract.
-    useCases = new ContentUseCases(repo, new ContentOverridePolicy());
+    useCases = new ContentUseCases(
+      repo,
+      new ContentOverridePolicy(),
+      storage as never,
+    );
   });
 
   describe('getOverridesForLocale', () => {
@@ -82,6 +89,67 @@ describe('ContentUseCases', () => {
       await expect(
         useCases.removeOverride('vi', 'nope'),
       ).rejects.toThrow(BadRequestException);
+      expect(repo.remove).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('setImage', () => {
+    const file = { mimetype: 'image/png' } as Express.Multer.File;
+
+    it('uploads then writes the URL into a nested field for EVERY locale', async () => {
+      storage.uploadPublicFile.mockResolvedValue('https://cdn/x.png');
+      repo.findOne.mockResolvedValue({ title: 'keep me' });
+
+      const result = await useCases.setImage(
+        'services',
+        'items.web.imageUrl',
+        file,
+      );
+
+      expect(result).toEqual({ url: 'https://cdn/x.png' });
+      // Written for both VI and EN, preserving existing content.
+      expect(repo.upsert).toHaveBeenCalledTimes(2);
+      expect(repo.upsert).toHaveBeenCalledWith('services', Language.VI, {
+        title: 'keep me',
+        items: { web: { imageUrl: 'https://cdn/x.png' } },
+      });
+      expect(repo.upsert).toHaveBeenCalledWith('services', Language.EN, {
+        title: 'keep me',
+        items: { web: { imageUrl: 'https://cdn/x.png' } },
+      });
+    });
+
+    it('rejects a field that is not a registered image field', async () => {
+      await expect(
+        useCases.setImage('hero', 'title', file),
+      ).rejects.toThrow(BadRequestException);
+      expect(storage.uploadPublicFile).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('removeImage', () => {
+    it('clears the image field across all locales, deleting empty rows', async () => {
+      repo.findOne.mockResolvedValue({ imageUrl: 'https://cdn/x.png' });
+
+      await useCases.removeImage('hero', 'imageUrl');
+
+      // After removing the only key the row is empty -> deleted.
+      expect(repo.remove).toHaveBeenCalledWith('hero', Language.VI);
+      expect(repo.remove).toHaveBeenCalledWith('hero', Language.EN);
+      expect(repo.upsert).not.toHaveBeenCalled();
+    });
+
+    it('keeps other fields when clearing an image', async () => {
+      repo.findOne.mockResolvedValue({
+        title: 'Hero',
+        imageUrl: 'https://cdn/x.png',
+      });
+
+      await useCases.removeImage('hero', 'imageUrl');
+
+      expect(repo.upsert).toHaveBeenCalledWith('hero', Language.VI, {
+        title: 'Hero',
+      });
       expect(repo.remove).not.toHaveBeenCalled();
     });
   });

@@ -24,6 +24,18 @@ export class ContentRepository implements ContentRepositoryPort {
     }
   }
 
+  async findOne(namespace: string, locale: Language) {
+    try {
+      const row = await this.prisma.contentOverride.findUnique({
+        where: { namespace_locale: { namespace, locale } },
+        select: { data: true },
+      });
+      return row?.data ?? null;
+    } catch {
+      throw new InternalServerErrorException('Failed to load content override');
+    }
+  }
+
   async upsert(
     namespace: string,
     locale: Language,

@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { Globe } from 'lucide-react';
 import {
   EDITABLE_NAMESPACES,
+  IMAGE_FIELDS,
   NAMESPACE_LABELS,
   getNamespaceDefaults,
   type EditableNamespace,
@@ -11,8 +12,10 @@ import {
 } from '@/lib/cms-namespaces';
 import {
   useContentOverrides,
+  useRemoveContentImage,
   useResetOverride,
   useUpdateOverride,
+  useUploadContentImage,
 } from '@/hooks/use-content';
 import { NamespaceEditor } from './_components/namespace-editor';
 
@@ -26,20 +29,32 @@ export default function ContentEditorPage() {
   const [namespace, setNamespace] = useState<EditableNamespace>(
     EDITABLE_NAMESPACES[0],
   );
+  const [uploadingPath, setUploadingPath] = useState<string | null>(null);
 
   const { data: overrides = {}, isLoading } = useContentOverrides(locale);
   const updateOverride = useUpdateOverride();
   const resetOverride = useResetOverride();
+  const uploadImage = useUploadContentImage();
+  const removeImage = useRemoveContentImage();
 
   const defaults = useMemo(
     () => getNamespaceDefaults(locale, namespace),
     [locale, namespace],
   );
+  const imageFields = IMAGE_FIELDS[namespace] ?? [];
 
   // An empty override object ({}) is equivalent to "no override".
   const hasOverride = (ns: string) => {
     const value = overrides[ns];
     return Boolean(value && Object.keys(value).length > 0);
+  };
+
+  const handleUploadImage = (field: string, file: File) => {
+    setUploadingPath(field);
+    uploadImage.mutate(
+      { namespace, field, file },
+      { onSettled: () => setUploadingPath(null) },
+    );
   };
 
   return (
@@ -49,6 +64,7 @@ export default function ContentEditorPage() {
         <p className="mt-1 text-sm text-muted-foreground">
           Chỉnh sửa nội dung hiển thị của trang công khai theo từng ngôn ngữ. Bỏ
           trống một ô để dùng lại nội dung mặc định (gợi ý là chữ xám trong ô).
+          Ảnh dùng chung cho cả hai ngôn ngữ.
         </p>
       </header>
 
@@ -106,12 +122,16 @@ export default function ContentEditorPage() {
             defaults={defaults}
             initialOverride={overrides[namespace] ?? {}}
             hasOverride={hasOverride(namespace)}
+            imageFields={imageFields}
+            uploadingPath={uploadingPath}
             isSaving={updateOverride.isPending}
             isResetting={resetOverride.isPending}
             onSave={(data) =>
               updateOverride.mutateAsync({ locale, namespace, data })
             }
             onReset={() => resetOverride.mutateAsync({ locale, namespace })}
+            onUploadImage={handleUploadImage}
+            onRemoveImage={(field) => removeImage.mutate({ namespace, field })}
           />
         )}
       </div>

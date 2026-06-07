@@ -49,6 +49,8 @@ export function AboutPageContent() {
     team: [] as AboutTeamMember[],
   };
 
+  const heroImage = resolveBackendAssetUrl(t('heroImageUrl') || '');
+
   return (
     <div>
       <BrandSection className="tts-brand-grid bg-linear-to-br from-background via-background to-primary/5">
@@ -57,6 +59,15 @@ export function AboutPageContent() {
             {c.hero.title}
           </h1>
           <p className="tts-brand-body mt-6 text-lg leading-8">{c.hero.subtitle}</p>
+          {heroImage && (
+            <div className="mx-auto mt-10 max-w-4xl overflow-hidden rounded-2xl border border-border shadow-sm">
+              <img
+                src={heroImage}
+                alt={c.hero.title}
+                className="h-auto w-full object-cover"
+              />
+            </div>
+          )}
         </BrandHeroContainer>
       </BrandSection>
 

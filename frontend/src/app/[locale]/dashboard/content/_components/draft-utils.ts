@@ -49,6 +49,56 @@ export function prune(obj: Record<string, unknown>): Record<string, unknown> {
   return out;
 }
 
+// Returns a copy of `obj` with the given dotted paths removed (and empty parent
+// objects pruned). Used to keep image fields out of the text draft — images are
+// managed separately and shared across locales.
+export function omitPaths(
+  obj: Record<string, unknown>,
+  dottedPaths: string[],
+): Record<string, unknown> {
+  let result: Record<string, unknown> = JSON.parse(JSON.stringify(obj));
+  for (const dotted of dottedPaths) {
+    result = removePath(result, dotted.split('.'));
+  }
+  return result;
+}
+
+function removePath(
+  node: Record<string, unknown>,
+  keys: string[],
+): Record<string, unknown> {
+  const [head, ...rest] = keys;
+  if (!(head in node)) return node;
+  const clone = { ...node };
+  if (rest.length === 0) {
+    delete clone[head];
+    return clone;
+  }
+  if (isPlainObject(clone[head])) {
+    const updated = removePath(clone[head] as Record<string, unknown>, rest);
+    if (Object.keys(updated).length === 0) delete clone[head];
+    else clone[head] = updated;
+  }
+  return clone;
+}
+
+// Builds an object containing only the given dotted paths that exist in `obj`.
+// Used to preserve image fields when saving/resetting text (PUT replaces the row).
+export function pickPaths(
+  obj: Record<string, unknown>,
+  dottedPaths: string[],
+): Record<string, unknown> {
+  let result: Record<string, unknown> = {};
+  for (const dotted of dottedPaths) {
+    const keys = dotted.split('.');
+    const value = getIn(obj, keys);
+    if (typeof value === 'string' || Array.isArray(value)) {
+      result = setIn(result, keys, value as DraftValue);
+    }
+  }
+  return result;
+}
+
 // camelCase / single word -> "Title Case" for field labels.
 export function humanizeKey(key: string): string {
   const spaced = key

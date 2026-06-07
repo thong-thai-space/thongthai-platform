@@ -37,7 +37,8 @@
       "clients": "Khách hàng tin cậy",
       "experience": "Năm kinh nghiệm",
       "satisfaction": "Khách hàng hài lòng"
-    }
+    },
+    "imageUrl": ""
   },
   "services": {
     "title": "Dịch vụ của chúng tôi",
@@ -51,7 +52,8 @@
           "Ứng dụng web",
           "Thương mại điện tử",
           "Trang quản trị"
-        ]
+        ],
+        "imageUrl": ""
       },
       "mobile": {
         "title": "Ứng dụng di động",
@@ -61,7 +63,8 @@
           "Đa nền tảng",
           "Thiết kế UI/UX",
           "Xuất bản App Store"
-        ]
+        ],
+        "imageUrl": ""
       },
       "ai": {
         "title": "Giải pháp AI",
@@ -71,7 +74,8 @@
           "Phân tích dữ liệu",
           "Tự động hóa",
           "Giải pháp NLP"
-        ]
+        ],
+        "imageUrl": ""
       },
       "consulting": {
         "title": "Tư vấn CNTT",
@@ -81,7 +85,8 @@
           "Kiến trúc hệ thống",
           "Đánh giá công nghệ",
           "Đào tạo đội ngũ"
-        ]
+        ],
+        "imageUrl": ""
       }
     }
   },
@@ -216,7 +221,8 @@
       }
     },
     "teamTitle": "Đội ngũ",
-    "teamSubtitle": "Những con người đằng sau mỗi dự án thành công"
+    "teamSubtitle": "Những con người đằng sau mỗi dự án thành công",
+    "heroImageUrl": ""
   },
   "meta": {
     "siteName": "Thông Thái Space",

@@ -2,39 +2,51 @@
 
 import { useState } from 'react';
 import { RotateCcw, Save } from 'lucide-react';
+import { deepMerge } from '@/lib/deep-merge';
 import { NamespaceFields } from './namespace-fields';
-import { prune, setIn, type DraftValue } from './draft-utils';
+import {
+  omitPaths,
+  pickPaths,
+  prune,
+  setIn,
+  type DraftValue,
+} from './draft-utils';
 
 type Props = {
   title: string;
   defaults: Record<string, unknown>;
   initialOverride: Record<string, unknown>;
   hasOverride: boolean;
+  imageFields: string[];
+  uploadingPath: string | null;
   isSaving: boolean;
   isResetting: boolean;
   onSave: (data: Record<string, unknown>) => Promise<void>;
   onReset: () => Promise<void>;
+  onUploadImage: (field: string, file: File) => void;
+  onRemoveImage: (field: string) => void;
 };
 
-function clone(value: Record<string, unknown>): Record<string, unknown> {
-  return JSON.parse(JSON.stringify(value));
-}
-
-// Holds the editable draft for one (namespace, locale). The parent remounts this
-// via a `key`, so the draft initializes straight from props — no syncing effect,
-// and switching target never mixes one locale's edits into another.
+// Holds the editable TEXT draft for one (namespace, locale). Image fields are kept
+// out of the draft — they're managed separately (shared across locales, persisted
+// immediately). Because PUT replaces the whole row, text writes re-merge the
+// current images so an image is never wiped by a text save/reset.
 export function NamespaceEditor({
   title,
   defaults,
   initialOverride,
   hasOverride,
+  imageFields,
+  uploadingPath,
   isSaving,
   isResetting,
   onSave,
   onReset,
+  onUploadImage,
+  onRemoveImage,
 }: Props) {
   const [draft, setDraft] = useState<Record<string, unknown>>(() =>
-    clone(initialOverride),
+    omitPaths(initialOverride, imageFields),
   );
   const [saved, setSaved] = useState(false);
 
@@ -44,12 +56,10 @@ export function NamespaceEditor({
   };
 
   const handleSave = async () => {
-    const payload = prune(draft);
-    // An all-blank form means "use defaults" — delete the row instead of
-    // persisting an empty override.
+    // Merge the persisted images back in so the text PUT doesn't drop them.
+    const payload = deepMerge(prune(draft), pickPaths(initialOverride, imageFields));
     if (Object.keys(payload).length === 0) {
       await onReset();
-      setDraft({});
     } else {
       await onSave(payload);
     }
@@ -57,7 +67,13 @@ export function NamespaceEditor({
   };
 
   const handleReset = async () => {
-    await onReset();
+    // Reset clears text but preserves images (shared across locales).
+    const images = pickPaths(initialOverride, imageFields);
+    if (Object.keys(images).length > 0) {
+      await onSave(images);
+    } else {
+      await onReset();
+    }
     setDraft({});
     setSaved(false);
   };
@@ -98,6 +114,11 @@ export function NamespaceEditor({
         defaults={defaults}
         draft={draft}
         onChange={handleChange}
+        imageFields={new Set(imageFields)}
+        savedOverride={initialOverride}
+        uploadingPath={uploadingPath}
+        onUploadImage={(path, file) => onUploadImage(path.join('.'), file)}
+        onRemoveImage={(path) => onRemoveImage(path.join('.'))}
       />
     </section>
   );

@@ -3,6 +3,7 @@ import { Language } from '@prisma/client';
 import {
   AppLocale,
   EDITABLE_NAMESPACES,
+  IMAGE_FIELDS,
   MAX_OVERRIDE_BYTES,
   MAX_OVERRIDE_DEPTH,
   SUPPORTED_LOCALES,
@@ -28,6 +29,16 @@ export class ContentOverridePolicy {
   assertEditableNamespace(namespace: string): void {
     if (!(EDITABLE_NAMESPACES as readonly string[]).includes(namespace)) {
       throw new BadRequestException(`Namespace not editable: ${namespace}`);
+    }
+  }
+
+  // Uploads may only target a registered image field, so the endpoint can't be
+  // used to write arbitrary nested fields.
+  assertImageField(namespace: string, field: string): void {
+    if (!(IMAGE_FIELDS[namespace] ?? []).includes(field)) {
+      throw new BadRequestException(
+        `Not an image field: ${namespace}.${field}`,
+      );
     }
   }
 
