@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { Prisma } from '@prisma/client';
+import { captureException } from '../observability/sentry';
 
 interface ErrorResponse {
   success: false;
@@ -80,6 +81,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         `Exception: ${JSON.stringify(exception)}`,
         exception instanceof Error ? exception.stack : undefined,
       );
+      // Report unexpected (5xx) errors to Sentry (no-op without SENTRY_DSN).
+      captureException(exception);
     }
 
     // Send standardized error response

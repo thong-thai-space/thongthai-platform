@@ -10,10 +10,21 @@ import { AppModule } from './app.module';
 import { RedisIoAdapter } from './common/redis-io.adapter';
 import { GlobalExceptionFilter } from './shared/filters/global-exception.filter';
 import { ResponseEnvelopeInterceptor } from './shared/interceptors/response-envelope.interceptor';
+import { RequestLoggingInterceptor } from './shared/interceptors/request-logging.interceptor';
+import { JsonLogger } from './shared/logging/json.logger';
+import { initSentry } from './shared/observability/sentry';
 
 async function bootstrap() {
+  // Initialize error reporting before anything else (no-op without SENTRY_DSN).
+  const sentryEnabled = initSentry();
+
   const logger = new Logger('Bootstrap');
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bufferLogs: true,
+  });
+  // Structured JSON logs in production; pretty console in dev/test.
+  app.useLogger(new JsonLogger());
+  logger.log(`Sentry error reporting: ${sentryEnabled ? 'enabled' : 'disabled'}`);
 
   // Security
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
@@ -67,8 +78,11 @@ async function bootstrap() {
   // Pattern: Global Exception Handling
   app.useGlobalFilters(new GlobalExceptionFilter());
 
-  // Pattern: Response Envelope
-  app.useGlobalInterceptors(new ResponseEnvelopeInterceptor());
+  // Pattern: Response Envelope + structured request logging
+  app.useGlobalInterceptors(
+    new ResponseEnvelopeInterceptor(),
+    new RequestLoggingInterceptor(),
+  );
 
   // Pattern: API Versioning
   app.setGlobalPrefix('api/v1');
