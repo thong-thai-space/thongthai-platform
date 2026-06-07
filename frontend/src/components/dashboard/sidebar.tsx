@@ -15,7 +15,6 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  PanelTop,
   Inbox,
   Newspaper,
   BookOpen,
@@ -32,7 +31,6 @@ const navItems = [
   { href: '/dashboard/tasks', icon: CheckSquare, label: 'Tasks' },
   { href: '/dashboard/users', icon: UsersRound, label: 'Users' },
   { href: '/dashboard/invoices', icon: FileText, label: 'Invoices' },
-  { href: '/dashboard/content', icon: PanelTop, label: 'Content' },
   { href: '/dashboard/blog', icon: Newspaper, label: 'Blog' },
   { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
 ];

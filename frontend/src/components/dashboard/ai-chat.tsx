@@ -1,12 +1,11 @@
 'use client';
 
 import { useAiChat } from '@/hooks/use-ai';
-import { useSectionContent } from '@/hooks/use-content';
 import { chatStore } from '@/stores/chat-store';
 import { MarkdownContent } from '@/components/ui/markdown-content';
-import { parseAiUiContent } from '@/lib/ai-ui-content';
+import { AI_UI_DEFAULTS } from '@/lib/ai-ui-content';
 import { Bot, Send, User, Loader2 } from 'lucide-react';
-import { useRef, useEffect, useSyncExternalStore, useState, useMemo } from 'react';
+import { useRef, useEffect, useSyncExternalStore, useState } from 'react';
 
 export function AiChat() {
   const state = useSyncExternalStore(
@@ -16,8 +15,7 @@ export function AiChat() {
   );
   const [input, setInput] = useState('');
   const chatMutation = useAiChat();
-  const { data: aiUiSection } = useSectionContent('ai-ui');
-  const aiUi = useMemo(() => parseAiUiContent(aiUiSection?.data), [aiUiSection?.data]);
+  const aiUi = AI_UI_DEFAULTS;
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 

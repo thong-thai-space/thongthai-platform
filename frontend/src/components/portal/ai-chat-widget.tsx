@@ -4,8 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Bot, X, Send, Minimize2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAiChat } from '@/hooks/use-ai';
-import { useSectionContent } from '@/hooks/use-content';
-import { parseAiUiContent } from '@/lib/ai-ui-content';
+import { AI_UI_DEFAULTS } from '@/lib/ai-ui-content';
 import { MarkdownContent } from '@/components/ui/markdown-content';
 
 function TypingIndicator() {
@@ -31,8 +30,7 @@ export function AiChatWidget() {
   >([]);
   const [conversationId, setConversationId] = useState<string>();
   const chatMutation = useAiChat();
-  const { data: aiUiSection } = useSectionContent('ai-ui');
-  const aiUi = parseAiUiContent(aiUiSection?.data);
+  const aiUi = AI_UI_DEFAULTS;
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

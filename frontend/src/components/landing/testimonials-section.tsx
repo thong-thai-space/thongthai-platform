@@ -1,16 +1,14 @@
 'use client';
 
 import { Star } from 'lucide-react';
-import { useSectionContent } from '@/hooks/use-content';
 import { useTranslations } from 'next-intl';
 import { MotionCard, MotionReveal, MotionSection } from '@/components/motion/motion-primitives';
 
 type Testimonial = { name: string; role: string; content: string; rating: number };
-type TestimonialsShape = { title?: string; subtitle?: string; items?: Testimonial[] };
 
-// Quotes are intentionally only in the CMS — translating real customer
-// quotes would misrepresent them. The fallback list is the same in both locales.
-const FALLBACK_ITEMS: Testimonial[] = [
+// Real customer quotes are intentionally not translated — rendering them verbatim
+// (the same list in both locales) avoids misrepresenting what clients actually said.
+const TESTIMONIAL_ITEMS: Testimonial[] = [
   {
     name: 'Nguyen Minh Tuan',
     role: 'CEO, TechStart Vietnam',
@@ -35,13 +33,11 @@ const FALLBACK_ITEMS: Testimonial[] = [
 ];
 
 export function TestimonialsSection() {
-  const { data } = useSectionContent('testimonials');
   const t = useTranslations('testimonials');
-  const cms = (data?.data as TestimonialsShape) || {};
 
-  const title = cms.title ?? t('title');
-  const subtitle = cms.subtitle ?? t('subtitle');
-  const items: Testimonial[] = cms.items?.length ? cms.items : FALLBACK_ITEMS;
+  const title = t('title');
+  const subtitle = t('subtitle');
+  const items: Testimonial[] = TESTIMONIAL_ITEMS;
 
   return (
     <MotionSection className="tts-landing-section relative overflow-hidden py-20 sm:py-28">

@@ -9,8 +9,7 @@ import {
   type ArchitectureAgentResponse,
   useArchitectureAgent,
 } from "@/hooks/use-ai";
-import { useSectionContent } from "@/hooks/use-content";
-import { parseAiUiContent } from "@/lib/ai-ui-content";
+import { AI_UI_DEFAULTS } from "@/lib/ai-ui-content";
 import { AiParticleFormation } from "./ai-particle-formation";
 
 const ALLOWED_FILE_TYPES =
@@ -30,8 +29,7 @@ export function ArchitectureAgentGate({
   const router = useRouter();
   const { user, loading } = useAuth();
   const architectureAgent = useArchitectureAgent();
-  const { data: aiUiSection } = useSectionContent('ai-ui');
-  const aiUi = useMemo(() => parseAiUiContent(aiUiSection?.data), [aiUiSection?.data]);
+  const aiUi = AI_UI_DEFAULTS;
   const generatingSteps = aiUi.architectureAgentGeneratingSteps;
 
   const [message, setMessage] = useState("");

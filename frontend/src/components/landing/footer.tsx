@@ -1,39 +1,26 @@
 'use client';
 
 import { Mail, Phone, MapPin } from 'lucide-react';
-import { useSectionContent } from '@/hooks/use-content';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 
 type FooterLink = { href: string; label: string };
-type FooterShape = {
-  brand?: {
-    name?: string;
-    description?: string;
-    email?: string;
-    phone?: string;
-    address?: string;
-  };
-  links?: Record<string, FooterLink[]>;
-};
 
 export function Footer() {
-  const { data } = useSectionContent('footer');
   const t = useTranslations('footer');
   const tNav = useTranslations('nav');
   const tMeta = useTranslations('meta');
   const tServices = useTranslations('services.items');
-  const cms = (data?.data as FooterShape) || {};
 
   const brand = {
-    name: cms.brand?.name ?? tMeta('siteName'),
-    description: cms.brand?.description ?? t('description'),
-    email: cms.brand?.email ?? 'hoangthai229@gmail.com',
-    phone: cms.brand?.phone ?? '0345807906',
-    address: cms.brand?.address ?? 'Ho Chi Minh City, Vietnam',
+    name: tMeta('siteName'),
+    description: t('description'),
+    email: 'hoangthai229@gmail.com',
+    phone: '0345807906',
+    address: 'Ho Chi Minh City, Vietnam',
   };
 
-  const links: Record<string, FooterLink[]> = cms.links ?? {
+  const links: Record<string, FooterLink[]> = {
     [t('columns.services')]: [
       { href: '/#services', label: tServices('web.title') },
       { href: '/#services', label: tServices('mobile.title') },

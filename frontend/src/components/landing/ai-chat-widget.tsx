@@ -5,8 +5,7 @@ import { X, Send, Minimize2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import { usePublicAiChat } from '@/hooks/use-ai';
-import { useSectionContent } from '@/hooks/use-content';
-import { parseAiUiContent } from '@/lib/ai-ui-content';
+import { AI_UI_DEFAULTS } from '@/lib/ai-ui-content';
 import { MarkdownContent } from '@/components/ui/markdown-content';
 import { ChatFaceAvatar } from '@/components/landing/chat-face-avatar';
 
@@ -33,8 +32,7 @@ export function PublicAiChatWidget() {
     Array<{ role: 'user' | 'assistant'; content: string }>
   >([]);
   const chatMutation = usePublicAiChat();
-  const { data: aiUiSection } = useSectionContent('ai-ui');
-  const aiUi = parseAiUiContent(aiUiSection?.data);
+  const aiUi = AI_UI_DEFAULTS;
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
