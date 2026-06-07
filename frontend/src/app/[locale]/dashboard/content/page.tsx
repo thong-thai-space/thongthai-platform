@@ -57,6 +57,16 @@ export default function ContentEditorPage() {
     );
   };
 
+  // Mark the field busy during removal too, so text Save/Reset can't race the
+  // in-flight image mutation (and restore a just-deleted image).
+  const handleRemoveImage = (field: string) => {
+    setUploadingPath(field);
+    removeImage.mutate(
+      { namespace, field },
+      { onSettled: () => setUploadingPath(null) },
+    );
+  };
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <header className="mb-6">
@@ -131,7 +141,7 @@ export default function ContentEditorPage() {
             }
             onReset={() => resetOverride.mutateAsync({ locale, namespace })}
             onUploadImage={handleUploadImage}
-            onRemoveImage={(field) => removeImage.mutate({ namespace, field })}
+            onRemoveImage={handleRemoveImage}
           />
         )}
       </div>

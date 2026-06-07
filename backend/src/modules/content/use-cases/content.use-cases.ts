@@ -1,14 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Language } from '@prisma/client';
 import { CONTENT_REPOSITORY } from '../content.constants';
 import type { ContentRepositoryPort } from '../domain/content.repository.port';
 import type { LocaleOverrides } from '../domain/content.types';
 import { ContentOverridePolicy } from '../policies/content-override.policy';
 import { R2StorageService } from '../../../shared/storage/r2-storage.service';
 import { setAtPath, unsetAtPath } from '../content.path.util';
-
-// Images are shared across languages — an upload writes the URL into every locale.
-const ALL_LOCALES: Language[] = [Language.VI, Language.EN];
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -72,7 +68,8 @@ export class ContentUseCases {
       keyPrefix: `${namespace}-${field.replace(/\./g, '_')}-`,
     });
 
-    for (const locale of ALL_LOCALES) {
+    // Images are shared across languages — write the URL into every locale.
+    for (const locale of this.policy.allLocales()) {
       const existing = await this.repo.findOne(namespace, locale);
       const base = isPlainObject(existing) ? existing : {};
       const data = setAtPath(base, field, url);
@@ -88,7 +85,7 @@ export class ContentUseCases {
     this.policy.assertEditableNamespace(namespace);
     this.policy.assertImageField(namespace, field);
 
-    for (const locale of ALL_LOCALES) {
+    for (const locale of this.policy.allLocales()) {
       const existing = await this.repo.findOne(namespace, locale);
       if (!isPlainObject(existing)) continue;
       const data = unsetAtPath(existing, field);

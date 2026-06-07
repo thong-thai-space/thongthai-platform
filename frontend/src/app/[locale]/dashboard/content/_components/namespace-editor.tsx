@@ -50,6 +50,10 @@ export function NamespaceEditor({
   );
   const [saved, setSaved] = useState(false);
 
+  // An image upload/remove is in flight — block text Save/Reset so a whole-row
+  // PUT/DELETE can't clobber or restore the image mid-operation.
+  const imageBusy = uploadingPath !== null;
+
   const handleChange = (path: string[], value: DraftValue) => {
     setSaved(false);
     setDraft((prev) => setIn(prev, path, value));
@@ -86,7 +90,7 @@ export function NamespaceEditor({
           <button
             type="button"
             onClick={handleReset}
-            disabled={isResetting || !hasOverride}
+            disabled={isResetting || !hasOverride || imageBusy}
             className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm font-medium transition-colors hover:bg-muted disabled:opacity-50"
           >
             <RotateCcw className="h-3.5 w-3.5" />
@@ -95,7 +99,7 @@ export function NamespaceEditor({
           <button
             type="button"
             onClick={handleSave}
-            disabled={isSaving}
+            disabled={isSaving || imageBusy}
             className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
           >
             <Save className="h-3.5 w-3.5" />

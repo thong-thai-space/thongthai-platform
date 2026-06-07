@@ -26,6 +26,12 @@ export class ContentOverridePolicy {
     return (locale as AppLocale) === 'vi' ? Language.VI : Language.EN;
   }
 
+  // Every supported locale as a Language enum — the single source of truth for
+  // "all locales" (used by the shared-image flow).
+  allLocales(): Language[] {
+    return SUPPORTED_LOCALES.map((locale) => this.parseLocale(locale));
+  }
+
   assertEditableNamespace(namespace: string): void {
     if (!(EDITABLE_NAMESPACES as readonly string[]).includes(namespace)) {
       throw new BadRequestException(`Namespace not editable: ${namespace}`);
