@@ -1,22 +1,58 @@
 'use client';
 
 import { getIn, humanizeKey, type DraftValue } from './draft-utils';
+import { ImageField } from './image-field';
 
 type Props = {
   defaults: Record<string, unknown>;
   draft: Record<string, unknown>;
   onChange: (path: string[], value: DraftValue) => void;
+  // Image fields (dotted paths) render as upload widgets; their value lives in
+  // the saved override (persisted immediately, shared across locales).
+  imageFields: Set<string>;
+  savedOverride: Record<string, unknown>;
+  uploadingPath: string | null;
+  onUploadImage: (path: string[], file: File) => void;
+  onRemoveImage: (path: string[]) => void;
   path?: string[];
 };
 
 // Recursively renders an editable form for one next-intl namespace, driven by the
-// shape of its static defaults. Leaves: string (input/textarea) or string[]
-// (one item per line). Nested objects become labeled groups.
-export function NamespaceFields({ defaults, draft, onChange, path = [] }: Props) {
+// shape of its static defaults. Leaves: image fields (upload widget), strings
+// (input/textarea), or string[] (one item per line). Nested objects become groups.
+export function NamespaceFields(props: Props) {
+  const {
+    defaults,
+    draft,
+    onChange,
+    imageFields,
+    savedOverride,
+    uploadingPath,
+    onUploadImage,
+    onRemoveImage,
+    path = [],
+  } = props;
+
   return (
     <div className="space-y-4">
       {Object.entries(defaults).map(([key, defaultValue]) => {
         const fieldPath = [...path, key];
+        const dotted = fieldPath.join('.');
+
+        if (imageFields.has(dotted)) {
+          const current = getIn(savedOverride, fieldPath);
+          return (
+            <ImageField
+              key={key}
+              label={humanizeKey(key)}
+              value={typeof current === 'string' ? current : undefined}
+              uploading={uploadingPath === dotted}
+              onUpload={(file) => onUploadImage(fieldPath, file)}
+              onRemove={() => onRemoveImage(fieldPath)}
+            />
+          );
+        }
+
         const draftValue = getIn(draft, fieldPath);
 
         if (typeof defaultValue === 'string') {
@@ -82,9 +118,8 @@ export function NamespaceFields({ defaults, draft, onChange, path = [] }: Props)
                 {humanizeKey(key)}
               </legend>
               <NamespaceFields
+                {...props}
                 defaults={defaultValue as Record<string, unknown>}
-                draft={draft}
-                onChange={onChange}
                 path={fieldPath}
               />
             </fieldset>

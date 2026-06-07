@@ -46,6 +46,20 @@ export const NAMESPACE_LABELS: Record<EditableNamespace, string> = {
   aiWidget: 'Widget AI',
 };
 
+// Image fields per namespace (dotted paths within the namespace). The editor
+// renders these as upload widgets instead of text inputs, and images are shared
+// across locales. MUST stay in sync with the backend IMAGE_FIELDS allowlist.
+export const IMAGE_FIELDS: Record<string, string[]> = {
+  hero: ['imageUrl'],
+  about: ['heroImageUrl'],
+  services: [
+    'items.web.imageUrl',
+    'items.mobile.imageUrl',
+    'items.ai.imageUrl',
+    'items.consulting.imageUrl',
+  ],
+};
+
 // The default (static) message subtree for a namespace in a given locale.
 export function getNamespaceDefaults(
   locale: EditorLocale,

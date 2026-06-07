@@ -3,6 +3,7 @@ import { Language } from '@prisma/client';
 import {
   AppLocale,
   EDITABLE_NAMESPACES,
+  IMAGE_FIELDS,
   MAX_OVERRIDE_BYTES,
   MAX_OVERRIDE_DEPTH,
   SUPPORTED_LOCALES,
@@ -25,9 +26,25 @@ export class ContentOverridePolicy {
     return (locale as AppLocale) === 'vi' ? Language.VI : Language.EN;
   }
 
+  // Every supported locale as a Language enum — the single source of truth for
+  // "all locales" (used by the shared-image flow).
+  allLocales(): Language[] {
+    return SUPPORTED_LOCALES.map((locale) => this.parseLocale(locale));
+  }
+
   assertEditableNamespace(namespace: string): void {
     if (!(EDITABLE_NAMESPACES as readonly string[]).includes(namespace)) {
       throw new BadRequestException(`Namespace not editable: ${namespace}`);
+    }
+  }
+
+  // Uploads may only target a registered image field, so the endpoint can't be
+  // used to write arbitrary nested fields.
+  assertImageField(namespace: string, field: string): void {
+    if (!(IMAGE_FIELDS[namespace] ?? []).includes(field)) {
+      throw new BadRequestException(
+        `Not an image field: ${namespace}.${field}`,
+      );
     }
   }
 

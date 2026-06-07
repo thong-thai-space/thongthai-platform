@@ -1,8 +1,10 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element */
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { resolveBackendAssetUrl } from "@/lib/asset-url";
 import localFont from "next/font/local";
 
 const displayFont = localFont({
@@ -31,7 +33,10 @@ export function HeroSection() {
       { value: "5+", label: t("stats.experience") },
       { value: "99%", label: t("stats.satisfaction") },
     ],
+    imageUrl: t("imageUrl") || "",
   };
+
+  const heroImage = c.imageUrl ? resolveBackendAssetUrl(c.imageUrl) : null;
 
   return (
     <section className="tts-premium-hero relative overflow-hidden bg-linear-to-br from-slate-50 via-white to-sky-50/70 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
@@ -80,6 +85,17 @@ export function HeroSection() {
             </div>
           </div>
         </div>
+
+        {/* Optional hero image (CMS-managed) */}
+        {heroImage && (
+          <div className="mx-auto mt-8 max-w-5xl overflow-hidden rounded-2xl border border-slate-200/60 shadow-sm dark:border-white/10">
+            <img
+              src={heroImage}
+              alt={c.title}
+              className="h-auto w-full object-cover"
+            />
+          </div>
+        )}
 
         {/* Stats strip */}
         <div className="tts-brand-surface mx-auto mt-8 max-w-5xl p-5 sm:p-6">

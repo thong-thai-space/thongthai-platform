@@ -37,7 +37,8 @@
       "clients": "Trusted clients",
       "experience": "Years of experience",
       "satisfaction": "Client satisfaction"
-    }
+    },
+    "imageUrl": ""
   },
   "services": {
     "title": "Our Services",
@@ -51,7 +52,8 @@
           "Web application",
           "E-commerce",
           "Admin dashboard"
-        ]
+        ],
+        "imageUrl": ""
       },
       "mobile": {
         "title": "Mobile Apps",
@@ -61,7 +63,8 @@
           "Cross-platform",
           "UI/UX Design",
           "App Store publish"
-        ]
+        ],
+        "imageUrl": ""
       },
       "ai": {
         "title": "AI Solutions",
@@ -71,7 +74,8 @@
           "Data Analytics",
           "Process Automation",
           "NLP Solutions"
-        ]
+        ],
+        "imageUrl": ""
       },
       "consulting": {
         "title": "IT Consulting",
@@ -81,7 +85,8 @@
           "System Architecture",
           "Tech Audit",
           "Team Training"
-        ]
+        ],
+        "imageUrl": ""
       }
     }
   },
@@ -216,7 +221,8 @@
       }
     },
     "teamTitle": "Our Team",
-    "teamSubtitle": "The people behind every successful project"
+    "teamSubtitle": "The people behind every successful project",
+    "heroImageUrl": ""
   },
   "meta": {
     "siteName": "Thong Thai Space",

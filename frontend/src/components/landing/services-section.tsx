@@ -42,6 +42,7 @@ export function ServicesSection() {
     title: t(`items.${key}.title`),
     description: t(`items.${key}.description`),
     features: t.raw(`items.${key}.features`) as string[],
+    imageUrl: t(`items.${key}.imageUrl`) || undefined,
   }));
 
   return (

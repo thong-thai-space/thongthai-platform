@@ -22,4 +22,16 @@ export class ContentService {
   removeOverride(locale: string, namespace: string): Promise<void> {
     return this.useCases.removeOverride(locale, namespace);
   }
+
+  setImage(
+    namespace: string,
+    field: string,
+    file: Express.Multer.File,
+  ): Promise<{ url: string }> {
+    return this.useCases.setImage(namespace, field, file);
+  }
+
+  removeImage(namespace: string, field: string): Promise<void> {
+    return this.useCases.removeImage(namespace, field);
+  }
 }

@@ -9,6 +9,7 @@ export interface NamespaceOverride {
 // Pattern: Repository Port — persistence contract for content overrides.
 export interface ContentRepositoryPort {
   findByLocale(locale: Language): Promise<NamespaceOverride[]>;
+  findOne(namespace: string, locale: Language): Promise<Prisma.JsonValue | null>;
   upsert(
     namespace: string,
     locale: Language,
