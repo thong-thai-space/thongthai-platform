@@ -80,35 +80,37 @@ export function AboutPageContent() {
         </BrandContainer>
       </BrandSection>
 
-      <BrandSection className="bg-muted/30">
-        <BrandContainer>
-          <h2 className="tts-landing-title text-center text-3xl font-bold">{c.teamTitle}</h2>
-          <p className="tts-brand-body mt-4 text-center">{c.teamSubtitle}</p>
-          <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {c.team.map((member, index) => (
-              <BrandSurface
-                key={`${member.name}-${index}`}
-                className="p-6 text-center"
-              >
-                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 text-2xl font-bold text-primary">
-                  {member.avatar ? (
-                    <img
-                      src={resolveAssetUrl(member.avatar)}
-                      alt={member.name}
-                      className="h-20 w-20 rounded-full object-cover"
-                    />
-                  ) : (
-                    member.name.charAt(0)
-                  )}
-                </div>
-                <h3 className="mt-4 text-lg font-semibold">{member.name}</h3>
-                <div className="text-sm text-primary">{member.role}</div>
-                <p className="tts-brand-body mt-2 text-sm">{member.bio}</p>
-              </BrandSurface>
-            ))}
-          </div>
-        </BrandContainer>
-      </BrandSection>
+      {c.team.length > 0 && (
+        <BrandSection className="bg-muted/30">
+          <BrandContainer>
+            <h2 className="tts-landing-title text-center text-3xl font-bold">{c.teamTitle}</h2>
+            <p className="tts-brand-body mt-4 text-center">{c.teamSubtitle}</p>
+            <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              {c.team.map((member, index) => (
+                <BrandSurface
+                  key={`${member.name}-${index}`}
+                  className="p-6 text-center"
+                >
+                  <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 text-2xl font-bold text-primary">
+                    {member.avatar ? (
+                      <img
+                        src={resolveAssetUrl(member.avatar)}
+                        alt={member.name}
+                        className="h-20 w-20 rounded-full object-cover"
+                      />
+                    ) : (
+                      member.name.charAt(0)
+                    )}
+                  </div>
+                  <h3 className="mt-4 text-lg font-semibold">{member.name}</h3>
+                  <div className="text-sm text-primary">{member.role}</div>
+                  <p className="tts-brand-body mt-2 text-sm">{member.bio}</p>
+                </BrandSurface>
+              ))}
+            </div>
+          </BrandContainer>
+        </BrandSection>
+      )}
     </div>
   );
 }

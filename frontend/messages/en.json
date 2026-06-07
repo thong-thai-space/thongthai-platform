@@ -319,5 +319,28 @@
     "ctaTitle": "Want a similar product?",
     "ctaSubtitle": "Tell us your idea and get a free quote.",
     "ctaButton": "Get a quote"
+  },
+  "aiWidget": {
+    "publicChatOnlineTitle": "AI Assistant is online",
+    "publicChatOnlineSubtitle": "Need help? Ask me anything about our services.",
+    "publicChatWelcomeTitle": "Hello!",
+    "publicChatWelcomeBody": "I'm the AI assistant of Thong Thai Space. Do you have any questions about our services?",
+    "publicChatInputPlaceholder": "Ask about our services...",
+    "portalChatOnlineTitle": "AI Assistant is online",
+    "portalChatOnlineSubtitle": "Ask about projects, invoices, or progress updates.",
+    "portalChatHeaderTitle": "AI Assistant",
+    "portalChatWelcomeBody": "Hello! I can help you ask about your projects.",
+    "portalChatInputPlaceholder": "Ask something...",
+    "dashboardAiChatEmptyState": "Ask the AI assistant a question. I can help you with coding, project consulting, code review...",
+    "dashboardAiChatInputPlaceholder": "Type a message... (Enter to send, Shift+Enter for new line)",
+    "architectureAgentInputPlaceholder": "How can I help your project today? Describe your requirements, upload a file, then click View Architecture...",
+    "architectureAgentCtaLabel": "View Architecture",
+    "architectureAgentGeneratingLabel": "Generating...",
+    "architectureAgentSynthesizingLabel": "Synthesizing architecture review...",
+    "architectureAgentGeneratingSteps": [
+      "Analyzing project requirements...",
+      "Designing system layers and data flow...",
+      "Rendering architecture diagram..."
+    ]
   }
 }

@@ -9,7 +9,7 @@ import {
   type ArchitectureAgentResponse,
   useArchitectureAgent,
 } from "@/hooks/use-ai";
-import { AI_UI_DEFAULTS } from "@/lib/ai-ui-content";
+import { useTranslations } from "next-intl";
 import { AiParticleFormation } from "./ai-particle-formation";
 
 const ALLOWED_FILE_TYPES =
@@ -29,8 +29,8 @@ export function ArchitectureAgentGate({
   const router = useRouter();
   const { user, loading } = useAuth();
   const architectureAgent = useArchitectureAgent();
-  const aiUi = AI_UI_DEFAULTS;
-  const generatingSteps = aiUi.architectureAgentGeneratingSteps;
+  const t = useTranslations("aiWidget");
+  const generatingSteps = t.raw("architectureAgentGeneratingSteps") as string[];
 
   const [message, setMessage] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -327,7 +327,7 @@ export function ArchitectureAgentGate({
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             rows={3}
-            placeholder={aiUi.architectureAgentInputPlaceholder}
+            placeholder={t("architectureAgentInputPlaceholder")}
             className={`w-full resize-none rounded-2xl border border-slate-200 bg-white/74 px-4 py-3 text-sm text-slate-800 placeholder:text-slate-500 focus:border-cyan-500/60 focus:outline-none dark:border-white/15 dark:bg-slate-900/70 dark:text-white dark:placeholder:text-slate-400 dark:focus:border-cyan-400/70 ${
               isVisible ? "ai-agent-stagger-1" : ""
             }`}
@@ -372,8 +372,8 @@ export function ArchitectureAgentGate({
                 className="rounded-xl bg-cyan-400 px-4 py-1.5 text-xs font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:opacity-60"
               >
                 {architectureAgent.isPending
-                  ? aiUi.architectureAgentGeneratingLabel
-                  : aiUi.architectureAgentCtaLabel}
+                  ? t("architectureAgentGeneratingLabel")
+                  : t("architectureAgentCtaLabel")}
               </button>
             </div>
           </div>
@@ -394,7 +394,7 @@ export function ArchitectureAgentGate({
           {showReviewFormation ? (
             <div className="mt-3 rounded-2xl border border-cyan-300/40 bg-white/70 p-3 dark:border-cyan-400/25 dark:bg-slate-900/75">
               <p className="mb-2 text-xs font-medium text-cyan-700 dark:text-cyan-200">
-                {aiUi.architectureAgentSynthesizingLabel}
+                {t("architectureAgentSynthesizingLabel")}
               </p>
               <AiParticleFormation
                 key={reviewFxKey}
