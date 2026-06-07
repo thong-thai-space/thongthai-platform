@@ -2,7 +2,6 @@
 
 import { MessageSquare, Lightbulb, Code, Rocket } from 'lucide-react';
 import type { ComponentType } from 'react';
-import { useSectionContent } from '@/hooks/use-content';
 import { useTranslations } from 'next-intl';
 import { MotionReveal, MotionSection } from '@/components/motion/motion-primitives';
 
@@ -14,7 +13,6 @@ const iconMap: Record<string, ComponentType<{ className?: string }>> = {
 };
 
 type ProcessStep = { icon: string; step: string; title: string; description: string };
-type ProcessShape = { title?: string; subtitle?: string; steps?: ProcessStep[] };
 
 const I18N_STEP_KEYS = ['discuss', 'design', 'develop', 'deploy'] as const;
 const I18N_STEP_ICONS: Record<(typeof I18N_STEP_KEYS)[number], string> = {
@@ -25,21 +23,16 @@ const I18N_STEP_ICONS: Record<(typeof I18N_STEP_KEYS)[number], string> = {
 };
 
 export function ProcessSection() {
-  const { data } = useSectionContent('process');
   const t = useTranslations('process');
-  const cms = (data?.data as ProcessShape) || {};
 
-  const title = cms.title ?? t('title');
-  const subtitle = cms.subtitle ?? t('subtitle');
-  const steps: ProcessStep[] =
-    cms.steps?.length
-      ? cms.steps
-      : I18N_STEP_KEYS.map((key, index) => ({
-          icon: I18N_STEP_ICONS[key],
-          step: String(index + 1).padStart(2, '0'),
-          title: t(`steps.${key}.title`),
-          description: t(`steps.${key}.description`),
-        }));
+  const title = t('title');
+  const subtitle = t('subtitle');
+  const steps: ProcessStep[] = I18N_STEP_KEYS.map((key, index) => ({
+    icon: I18N_STEP_ICONS[key],
+    step: String(index + 1).padStart(2, '0'),
+    title: t(`steps.${key}.title`),
+    description: t(`steps.${key}.description`),
+  }));
 
   return (
     <MotionSection className="tts-landing-section relative overflow-hidden bg-linear-to-b from-slate-50 to-white py-20 sm:py-28 dark:from-slate-950 dark:to-slate-900">

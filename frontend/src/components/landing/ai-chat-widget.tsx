@@ -5,8 +5,7 @@ import { X, Send, Minimize2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import { usePublicAiChat } from '@/hooks/use-ai';
-import { useSectionContent } from '@/hooks/use-content';
-import { parseAiUiContent } from '@/lib/ai-ui-content';
+import { useTranslations } from 'next-intl';
 import { MarkdownContent } from '@/components/ui/markdown-content';
 import { ChatFaceAvatar } from '@/components/landing/chat-face-avatar';
 
@@ -33,8 +32,7 @@ export function PublicAiChatWidget() {
     Array<{ role: 'user' | 'assistant'; content: string }>
   >([]);
   const chatMutation = usePublicAiChat();
-  const { data: aiUiSection } = useSectionContent('ai-ui');
-  const aiUi = parseAiUiContent(aiUiSection?.data);
+  const t = useTranslations('aiWidget');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -105,8 +103,8 @@ export function PublicAiChatWidget() {
                   }}
                   className="max-w-60 rounded-2xl border border-primary/20 bg-background px-3 py-2 text-left text-xs shadow-lg"
                 >
-                  <p className="font-medium text-foreground">{aiUi.publicChatOnlineTitle}</p>
-                  <p className="mt-0.5 text-muted-foreground">{aiUi.publicChatOnlineSubtitle}</p>
+                  <p className="font-medium text-foreground">{t('publicChatOnlineTitle')}</p>
+                  <p className="mt-0.5 text-muted-foreground">{t('publicChatOnlineSubtitle')}</p>
                 </motion.button>
               )}
             </AnimatePresence>
@@ -174,8 +172,8 @@ export function PublicAiChatWidget() {
                   <div className="mx-auto w-fit">
                     <ChatFaceAvatar size={54} variant="fullbody" renderMode="image" />
                   </div>
-                  <p className="font-medium">{aiUi.publicChatWelcomeTitle}</p>
-                  <p>{aiUi.publicChatWelcomeBody}</p>
+                  <p className="font-medium">{t('publicChatWelcomeTitle')}</p>
+                  <p>{t('publicChatWelcomeBody')}</p>
                 </motion.div>
               )}
               {messages.map((msg, i) => (
@@ -217,7 +215,7 @@ export function PublicAiChatWidget() {
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder={aiUi.publicChatInputPlaceholder}
+                placeholder={t('publicChatInputPlaceholder')}
                 className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               />
               <button

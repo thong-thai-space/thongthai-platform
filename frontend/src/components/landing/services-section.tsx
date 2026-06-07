@@ -3,7 +3,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { Globe, Smartphone, Brain, MessageSquare } from 'lucide-react';
 import type { ComponentType } from 'react';
-import { useSectionContent } from '@/hooks/use-content';
 import { useTranslations } from 'next-intl';
 import { resolveBackendAssetUrl } from '@/lib/asset-url';
 import { MotionCard, MotionReveal, MotionSection } from '@/components/motion/motion-primitives';
@@ -24,13 +23,7 @@ type ServiceItem = {
   imageUrl?: string;
 };
 
-type ServicesShape = {
-  title?: string;
-  subtitle?: string;
-  items?: ServiceItem[];
-};
-
-// Stable keys for the i18n fallback items. CMS overrides whichever fields it provides.
+// Stable keys for the i18n-driven service items.
 const I18N_ITEM_KEYS = ['web', 'mobile', 'ai', 'consulting'] as const;
 const I18N_ICONS: Record<(typeof I18N_ITEM_KEYS)[number], string> = {
   web: 'Globe',
@@ -40,22 +33,16 @@ const I18N_ICONS: Record<(typeof I18N_ITEM_KEYS)[number], string> = {
 };
 
 export function ServicesSection() {
-  const { data } = useSectionContent('services');
   const t = useTranslations('services');
-  const cms = (data?.data as ServicesShape) || {};
 
-  // Pattern: Chain of Responsibility (CMS payload → i18n translations → compile-time fallback)
-  const title = cms.title ?? t('title');
-  const subtitle = cms.subtitle ?? t('subtitle');
-  const items: ServiceItem[] =
-    cms.items?.length
-      ? cms.items
-      : I18N_ITEM_KEYS.map((key) => ({
-          icon: I18N_ICONS[key],
-          title: t(`items.${key}.title`),
-          description: t(`items.${key}.description`),
-          features: t.raw(`items.${key}.features`) as string[],
-        }));
+  const title = t('title');
+  const subtitle = t('subtitle');
+  const items: ServiceItem[] = I18N_ITEM_KEYS.map((key) => ({
+    icon: I18N_ICONS[key],
+    title: t(`items.${key}.title`),
+    description: t(`items.${key}.description`),
+    features: t.raw(`items.${key}.features`) as string[],
+  }));
 
   return (
     <MotionSection id="services" className="tts-landing-section relative overflow-hidden bg-linear-to-b from-white to-slate-50 py-20 sm:py-28 dark:from-slate-950 dark:to-slate-900">

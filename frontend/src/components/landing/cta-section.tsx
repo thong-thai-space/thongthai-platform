@@ -1,34 +1,18 @@
 'use client';
 
 import { ArrowRight, Sparkles } from 'lucide-react';
-import { useSectionContent } from '@/hooks/use-content';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { MotionReveal, MotionSection } from '@/components/motion/motion-primitives';
 
-type CtaShape = {
-  title?: string;
-  subtitle?: string;
-  primaryCta?: { text?: string; href?: string };
-  secondaryCta?: { text?: string; href?: string };
-};
-
 export function CtaSection() {
-  const { data } = useSectionContent('cta');
   const t = useTranslations('cta');
-  const cms = (data?.data as CtaShape) || {};
 
   const c = {
-    title: cms.title ?? t('title'),
-    subtitle: cms.subtitle ?? t('subtitle'),
-    primaryCta: {
-      text: cms.primaryCta?.text ?? t('primary'),
-      href: cms.primaryCta?.href ?? '/contact',
-    },
-    secondaryCta: {
-      text: cms.secondaryCta?.text ?? t('secondary'),
-      href: cms.secondaryCta?.href ?? '/services',
-    },
+    title: t('title'),
+    subtitle: t('subtitle'),
+    primaryCta: { text: t('primary'), href: '/contact' },
+    secondaryCta: { text: t('secondary'), href: '/services' },
   };
 
   return (

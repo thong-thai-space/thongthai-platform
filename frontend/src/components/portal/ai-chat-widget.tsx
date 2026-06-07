@@ -4,8 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Bot, X, Send, Minimize2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAiChat } from '@/hooks/use-ai';
-import { useSectionContent } from '@/hooks/use-content';
-import { parseAiUiContent } from '@/lib/ai-ui-content';
+import { useTranslations } from 'next-intl';
 import { MarkdownContent } from '@/components/ui/markdown-content';
 
 function TypingIndicator() {
@@ -31,8 +30,7 @@ export function AiChatWidget() {
   >([]);
   const [conversationId, setConversationId] = useState<string>();
   const chatMutation = useAiChat();
-  const { data: aiUiSection } = useSectionContent('ai-ui');
-  const aiUi = parseAiUiContent(aiUiSection?.data);
+  const t = useTranslations('aiWidget');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -100,8 +98,8 @@ export function AiChatWidget() {
                   }}
                   className="max-w-60 rounded-2xl border border-accent/20 bg-background px-3 py-2 text-left text-xs shadow-lg"
                 >
-                  <p className="font-medium text-foreground">{aiUi.portalChatOnlineTitle}</p>
-                  <p className="mt-0.5 text-muted-foreground">{aiUi.portalChatOnlineSubtitle}</p>
+                  <p className="font-medium text-foreground">{t('portalChatOnlineTitle')}</p>
+                  <p className="mt-0.5 text-muted-foreground">{t('portalChatOnlineSubtitle')}</p>
                 </motion.button>
               )}
             </AnimatePresence>
@@ -141,7 +139,7 @@ export function AiChatWidget() {
             <div className="flex items-center justify-between rounded-t-2xl bg-accent px-4 py-3 text-accent-foreground">
               <div className="flex items-center gap-2">
                 <Bot className="h-5 w-5" />
-                <span className="text-sm font-semibold">{aiUi.portalChatHeaderTitle}</span>
+                <span className="text-sm font-semibold">{t('portalChatHeaderTitle')}</span>
               </div>
               <div className="flex gap-1">
                 <button onClick={() => setIsOpen(false)} className="rounded p-1 hover:bg-accent-foreground/10">
@@ -169,7 +167,7 @@ export function AiChatWidget() {
                   transition={{ delay: 0.2 }}
                   className="flex h-full items-center justify-center text-center text-sm text-muted-foreground"
                 >
-                  <p>{aiUi.portalChatWelcomeBody}</p>
+                  <p>{t('portalChatWelcomeBody')}</p>
                 </motion.div>
               )}
               {messages.map((msg, i) => (
@@ -211,7 +209,7 @@ export function AiChatWidget() {
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder={aiUi.portalChatInputPlaceholder}
+                placeholder={t('portalChatInputPlaceholder')}
                 className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
               />
               <button

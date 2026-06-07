@@ -3,17 +3,11 @@
 
 import { ExternalLink } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { useSectionContent } from '@/hooks/use-content';
 import { useTranslations } from 'next-intl';
 import { useShowcaseProjects } from '@/hooks/use-projects';
 import type { Project } from '@/types';
 import { resolveBackendAssetUrl } from '@/lib/asset-url';
 import { MotionCard, MotionReveal, MotionSection } from '@/components/motion/motion-primitives';
-
-type PortfolioShape = {
-  title?: string;
-  subtitle?: string;
-};
 
 type PortfolioDisplayItem = {
   title: string;
@@ -33,14 +27,12 @@ const ALL_CATEGORY = 'All';
 // Home is now the only portfolio surface, so this section shows the full
 // showcase grid with category filtering (the standalone /portfolio page is gone).
 export function PortfolioSection() {
-  const { data } = useSectionContent('portfolio');
   const { data: showcaseProjects = [] } = useShowcaseProjects();
   const t = useTranslations('portfolio');
   const tPage = useTranslations('portfolioPage');
-  const cms = (data?.data as PortfolioShape) || {};
 
-  const title = cms.title ?? t('title');
-  const subtitle = cms.subtitle ?? t('subtitle');
+  const title = t('title');
+  const subtitle = t('subtitle');
   const fallbackClient = t('fallbackClient');
   const fallbackDescription = t('fallbackDescription');
 

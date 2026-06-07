@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { Mail, Phone, MapPin, Send, CheckCircle } from 'lucide-react';
 import api from '@/lib/api';
-import { useSectionContent } from '@/hooks/use-content';
 import {
   BrandContainer,
   BrandHeroContainer,
@@ -57,8 +56,7 @@ type ContactContent = {
  * and API integration. The route page (`page.tsx`) stays a thin RSC wrapper for
  * `generateMetadata` and locale handling.
  *
- * i18n: defaults come from the `contactPage` messages (locale-correct out of the box);
- * the CMS `contact` section may still override any field for the active locale.
+ * i18n: all copy comes from the `contactPage` messages (locale-correct out of the box).
  */
 export function ContactPageContent() {
   const [submitted, setSubmitted] = useState(false);
@@ -68,9 +66,8 @@ export function ContactPageContent() {
     process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim(),
   );
   const t = useTranslations('contactPage');
-  const { data } = useSectionContent('contact');
 
-  const defaults: ContactContent = {
+  const c: ContactContent = {
     hero: {
       title: t('heroTitle'),
       titleHighlight: t('heroTitleHighlight'),
@@ -98,15 +95,6 @@ export function ContactPageContent() {
     },
   };
 
-  const raw = (data?.data as Partial<ContactContent>) || {};
-  const c: ContactContent = {
-    ...defaults,
-    ...raw,
-    hero: { ...defaults.hero, ...raw.hero },
-    info: { ...defaults.info, ...raw.info },
-    responseCard: { ...defaults.responseCard, ...raw.responseCard },
-    form: { ...defaults.form, ...raw.form },
-  };
   const {
     register,
     handleSubmit,
@@ -126,7 +114,7 @@ export function ContactPageContent() {
       });
       setSubmitted(true);
     } catch {
-      setError(c.form.errorText || defaults.form.errorText);
+      setError(c.form.errorText);
     }
   };
 

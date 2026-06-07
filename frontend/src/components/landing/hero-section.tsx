@@ -1,7 +1,6 @@
 "use client";
 
 import { ArrowRight, Sparkles } from "lucide-react";
-import { useSectionContent } from "@/hooks/use-content";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import localFont from "next/font/local";
@@ -15,44 +14,23 @@ const displayFont = localFont({
   display: "swap",
 });
 
-type HeroCmsShape = {
-  badge?: string;
-  title?: string;
-  titleHighlight?: string;
-  titleEnd?: string;
-  subtitle?: string;
-  primaryCta?: { text?: string; href?: string };
-  secondaryCta?: { text?: string; href?: string };
-  stats?: Array<{ value: string; label: string }>;
-};
-
 export function HeroSection() {
   const t = useTranslations("hero");
-  const { data } = useSectionContent("hero");
-  const raw = (data?.data as HeroCmsShape) || {};
 
-  // CMS values win over i18n defaults; i18n covers anything CMS doesn't provide.
-  const defaultStats = [
-    { value: "50+", label: t("stats.projects") },
-    { value: "30+", label: t("stats.clients") },
-    { value: "5+", label: t("stats.experience") },
-    { value: "99%", label: t("stats.satisfaction") },
-  ];
   const c = {
-    badge: raw.badge ?? t("badge"),
-    title: raw.title ?? t("title"),
-    titleHighlight: raw.titleHighlight ?? t("titleHighlight"),
-    titleEnd: raw.titleEnd ?? t("titleEnd"),
-    subtitle: raw.subtitle ?? t("subtitle"),
-    primaryCta: {
-      text: raw.primaryCta?.text ?? t("primaryCta"),
-      href: raw.primaryCta?.href ?? "/contact",
-    },
-    secondaryCta: {
-      text: raw.secondaryCta?.text ?? t("secondaryCta"),
-      href: raw.secondaryCta?.href ?? "/#portfolio",
-    },
-    stats: raw.stats?.length ? raw.stats : defaultStats,
+    badge: t("badge"),
+    title: t("title"),
+    titleHighlight: t("titleHighlight"),
+    titleEnd: t("titleEnd"),
+    subtitle: t("subtitle"),
+    primaryCta: { text: t("primaryCta"), href: "/contact" },
+    secondaryCta: { text: t("secondaryCta"), href: "/#portfolio" },
+    stats: [
+      { value: "50+", label: t("stats.projects") },
+      { value: "30+", label: t("stats.clients") },
+      { value: "5+", label: t("stats.experience") },
+      { value: "99%", label: t("stats.satisfaction") },
+    ],
   };
 
   return (

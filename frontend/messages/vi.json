@@ -319,5 +319,28 @@
     "ctaTitle": "Muốn có sản phẩm tương tự?",
     "ctaSubtitle": "Chia sẻ ý tưởng của bạn và nhận báo giá miễn phí.",
     "ctaButton": "Nhận báo giá"
+  },
+  "aiWidget": {
+    "publicChatOnlineTitle": "Trợ lý AI đang trực tuyến",
+    "publicChatOnlineSubtitle": "Cần hỗ trợ? Hãy hỏi tôi bất cứ điều gì về dịch vụ của chúng tôi.",
+    "publicChatWelcomeTitle": "Xin chào!",
+    "publicChatWelcomeBody": "Tôi là trợ lý AI của Thông Thái Space. Bạn có câu hỏi gì về dịch vụ của chúng tôi không?",
+    "publicChatInputPlaceholder": "Hỏi về dịch vụ của chúng tôi...",
+    "portalChatOnlineTitle": "Trợ lý AI đang trực tuyến",
+    "portalChatOnlineSubtitle": "Hỏi về dự án, hóa đơn, hoặc cập nhật tiến độ.",
+    "portalChatHeaderTitle": "Trợ lý AI",
+    "portalChatWelcomeBody": "Xin chào! Tôi có thể giúp bạn hỏi về các dự án của mình.",
+    "portalChatInputPlaceholder": "Hỏi điều gì đó...",
+    "dashboardAiChatEmptyState": "Đặt câu hỏi cho trợ lý AI. Tôi có thể giúp bạn về lập trình, tư vấn dự án, review code...",
+    "dashboardAiChatInputPlaceholder": "Nhập tin nhắn... (Enter để gửi, Shift+Enter để xuống dòng)",
+    "architectureAgentInputPlaceholder": "Hôm nay tôi có thể giúp gì cho dự án của bạn? Mô tả yêu cầu, tải lên tệp, rồi nhấn Xem kiến trúc...",
+    "architectureAgentCtaLabel": "Xem kiến trúc",
+    "architectureAgentGeneratingLabel": "Đang tạo...",
+    "architectureAgentSynthesizingLabel": "Đang tổng hợp đánh giá kiến trúc...",
+    "architectureAgentGeneratingSteps": [
+      "Đang phân tích yêu cầu dự án...",
+      "Đang thiết kế các tầng hệ thống và luồng dữ liệu...",
+      "Đang dựng sơ đồ kiến trúc..."
+    ]
   }
 }

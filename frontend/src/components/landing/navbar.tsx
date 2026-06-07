@@ -6,19 +6,12 @@ import { Menu, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
-import { useSectionContent } from '@/hooks/use-content';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { LanguageSwitcher } from '@/components/language-switcher';
-
-type HeaderContent = {
-  ctaText?: string;
-  signInText?: string;
-};
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user } = useAuth();
-  const { data } = useSectionContent('header');
   const t = useTranslations('nav');
   const tMeta = useTranslations('meta');
 
@@ -37,10 +30,8 @@ export function Navbar() {
   const brandName = tMeta('siteName');
   const brandLead = brandName.replace(/ Space$/, '');
 
-  // CMS may still override the CTA / sign-in labels; i18n covers the rest.
-  const cms = (data?.data as HeaderContent) || {};
-  const signInText = cms.signInText || t('signIn');
-  const ctaText = cms.ctaText || t('cta');
+  const signInText = t('signIn');
+  const ctaText = t('cta');
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/72 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/66">
