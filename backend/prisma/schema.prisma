@@ -571,6 +571,22 @@ model SiteContent {
   @@map("site_contents")
 }
 
+// CMS override layer for i18n messages. One independent row per (namespace, locale)
+// — locales never share a record, so editing VI can't clobber EN (the root cause of
+// the old per-locale-envelope bug). `data` is a deep-partial of the next-intl
+// namespace; it is merged over the static messages/{locale}.json at render time.
+model ContentOverride {
+  id        String   @id @default(cuid())
+  namespace String
+  locale    Language
+  data      Json
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@unique([namespace, locale])
+  @@map("content_overrides")
+}
+
 // Pattern: Aggregate Root — a published blog post is the unit of public CMS content
 // for organic SEO. `(locale, slug)` is unique so the same content can be re-slugged
 // per locale. `contentMdx` is rendered server-side at request time (GĐ1) and later
