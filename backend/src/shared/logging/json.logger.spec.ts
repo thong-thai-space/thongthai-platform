@@ -42,6 +42,21 @@ describe('JsonLogger (JSON mode)', () => {
     spy.mockRestore();
   });
 
+  it('treats a single optional arg on error as the stack (Nest signature)', () => {
+    const spy = jest
+      .spyOn(process.stderr, 'write')
+      .mockImplementation(() => true);
+    logger.error('boom', 'STACK_ONLY');
+
+    const parsed = JSON.parse(spy.mock.calls[0][0] as string) as Record<
+      string,
+      unknown
+    >;
+    expect(parsed.stack).toBe('STACK_ONLY');
+    expect(parsed.context).toBeUndefined();
+    spy.mockRestore();
+  });
+
   it('serializes non-string messages', () => {
     const spy = jest
       .spyOn(process.stdout, 'write')

@@ -81,7 +81,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         `Exception: ${JSON.stringify(exception)}`,
         exception instanceof Error ? exception.stack : undefined,
       );
-      // Report unexpected (5xx) errors to Sentry (no-op without SENTRY_DSN).
+      // Report 500 (unexpected server) errors to Sentry (no-op without
+      // SENTRY_DSN). 4xx and 503 readiness failures are intentionally excluded.
       captureException(exception);
     }
 

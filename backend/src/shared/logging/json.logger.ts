@@ -46,12 +46,18 @@ export class JsonLogger implements LoggerService {
       return;
     }
 
-    // Nest's convention: error(message, stack?, context?); others: (message, context?).
+    // Nest's LoggerService contract: error(message, stack?, context?); other
+    // levels: (message, context?). With a single optional arg on error, it's the
+    // stack (the common `logger.error(msg, err.stack)` call) — not the context.
     let context: string | undefined;
     let stack: string | undefined;
-    if (level === 'error' && optional.length >= 2) {
-      stack = asString(optional[0]);
-      context = asString(optional[1]);
+    if (level === 'error') {
+      if (optional.length >= 2) {
+        stack = asString(optional[0]);
+        context = asString(optional[1]);
+      } else if (optional.length === 1) {
+        stack = asString(optional[0]);
+      }
     } else {
       context = asString(optional[optional.length - 1]);
     }

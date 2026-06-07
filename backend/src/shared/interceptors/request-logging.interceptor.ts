@@ -31,7 +31,8 @@ export class RequestLoggingInterceptor implements NestInterceptor {
       originalUrl?: string;
       url: string;
     }>();
-    const url = req.originalUrl ?? req.url ?? '';
+    // Strip the query string — it can carry tokens/emails/PII we must not log.
+    const url = (req.originalUrl ?? req.url ?? '').split('?')[0];
     if (isProbe(url)) return next.handle();
 
     const start = Date.now();
