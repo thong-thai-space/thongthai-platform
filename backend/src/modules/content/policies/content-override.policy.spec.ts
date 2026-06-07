@@ -75,5 +75,19 @@ describe('ContentOverridePolicy', () => {
       for (let i = 0; i < 8; i++) deep = { nest: deep };
       expect(() => policy.validatePayload(deep)).toThrow(BadRequestException);
     });
+
+    it('rejects prototype-pollution keys', () => {
+      // JSON.parse creates an own enumerable "__proto__" property (unlike a literal).
+      const protoPayload = JSON.parse('{"__proto__":{"polluted":"x"}}');
+      expect(() => policy.validatePayload(protoPayload)).toThrow(
+        BadRequestException,
+      );
+      expect(() =>
+        policy.validatePayload({ constructor: { evil: 'x' } }),
+      ).toThrow(BadRequestException);
+      expect(() =>
+        policy.validatePayload({ nested: { prototype: 'z' } }),
+      ).toThrow(BadRequestException);
+    });
   });
 });

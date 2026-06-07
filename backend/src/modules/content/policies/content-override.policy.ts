@@ -9,6 +9,10 @@ import {
 } from '../content.constants';
 import type { OverrideData } from '../domain/content.types';
 
+// Keys that could pollute Object.prototype once the payload is merged into the
+// message catalog — rejected regardless of value type.
+const DANGEROUS_KEYS = ['__proto__', 'constructor', 'prototype'];
+
 // Pattern: Policy — centralizes the validation rules for content overrides so the
 // use cases stay focused on orchestration.
 @Injectable()
@@ -52,6 +56,9 @@ export class ContentOverridePolicy {
     }
 
     for (const [key, child] of Object.entries(value)) {
+      if (DANGEROUS_KEYS.includes(key)) {
+        throw new BadRequestException(`Disallowed key: ${key}`);
+      }
       if (typeof child === 'string') continue;
       if (this.isStringArray(child)) continue;
       if (this.isPlainObject(child)) {

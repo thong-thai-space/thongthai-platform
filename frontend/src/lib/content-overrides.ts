@@ -25,11 +25,15 @@ export async function fetchContentOverrides(
     if (!res.ok) return {};
 
     const json: unknown = await res.json();
-    // Unwrap the API envelope ({ success, data }) if present.
-    const data =
-      json && typeof json === 'object' && 'data' in json
-        ? (json as { data: unknown }).data
-        : json;
+    // Unwrap the API envelope only when it actually looks like one ({ success, data }),
+    // matching the Axios interceptor — so a non-envelope object with a `data` field
+    // isn't silently mistaken for an envelope.
+    const isEnvelope =
+      json !== null &&
+      typeof json === 'object' &&
+      'success' in json &&
+      'data' in json;
+    const data = isEnvelope ? (json as { data: unknown }).data : json;
 
     return data && typeof data === 'object'
       ? (data as Record<string, Record<string, unknown>>)

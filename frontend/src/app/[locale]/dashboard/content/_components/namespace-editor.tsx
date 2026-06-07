@@ -44,7 +44,15 @@ export function NamespaceEditor({
   };
 
   const handleSave = async () => {
-    await onSave(prune(draft));
+    const payload = prune(draft);
+    // An all-blank form means "use defaults" — delete the row instead of
+    // persisting an empty override.
+    if (Object.keys(payload).length === 0) {
+      await onReset();
+      setDraft({});
+    } else {
+      await onSave(payload);
+    }
     setSaved(true);
   };
 

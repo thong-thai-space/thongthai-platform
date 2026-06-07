@@ -39,4 +39,13 @@ describe('deepMerge', () => {
     deepMerge(base, { nested: { value: 'changed' } });
     expect(base.nested.value).toBe('original');
   });
+
+  it('ignores prototype-pollution keys in the override', () => {
+    const base = { title: 'EN' };
+    // JSON.parse yields an own enumerable "__proto__" key (a real attack shape).
+    const malicious = JSON.parse('{"__proto__":{"polluted":"yes"},"title":"VI"}');
+    const result = deepMerge(base, malicious);
+    expect(result).toEqual({ title: 'VI' });
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+  });
 });

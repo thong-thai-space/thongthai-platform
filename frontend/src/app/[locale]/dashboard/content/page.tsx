@@ -36,6 +36,12 @@ export default function ContentEditorPage() {
     [locale, namespace],
   );
 
+  // An empty override object ({}) is equivalent to "no override".
+  const hasOverride = (ns: string) => {
+    const value = overrides[ns];
+    return Boolean(value && Object.keys(value).length > 0);
+  };
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <header className="mb-6">
@@ -80,7 +86,7 @@ export default function ContentEditorPage() {
               }`}
             >
               <span>{NAMESPACE_LABELS[ns]}</span>
-              {overrides[ns] && (
+              {hasOverride(ns) && (
                 <span
                   className="h-1.5 w-1.5 rounded-full bg-primary"
                   title="Đã có nội dung tùy chỉnh"
@@ -99,7 +105,7 @@ export default function ContentEditorPage() {
             title={NAMESPACE_LABELS[namespace]}
             defaults={defaults}
             initialOverride={overrides[namespace] ?? {}}
-            hasOverride={Boolean(overrides[namespace])}
+            hasOverride={hasOverride(namespace)}
             isSaving={updateOverride.isPending}
             isResetting={resetOverride.isPending}
             onSave={(data) =>
