@@ -58,4 +58,18 @@ describe('GeminiProviderAdapter', () => {
     expect(arg.contents[0].parts[0]).toEqual({ text: 'Hi' });
     expect(arg.generationConfig.maxOutputTokens).toBe(50);
   });
+
+  it('throws a clear error when GEMINI_API_KEY is blank', async () => {
+    const adapter = new GeminiProviderAdapter({
+      get: () => '',
+    } as unknown as ConfigService);
+    await expect(
+      adapter.createMessage({
+        model: 'x',
+        maxTokens: 10,
+        system: 's',
+        messages: [{ role: 'user', content: 'q' }],
+      }),
+    ).rejects.toThrow(/GEMINI_API_KEY is required/);
+  });
 });

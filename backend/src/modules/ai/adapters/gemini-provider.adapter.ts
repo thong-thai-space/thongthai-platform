@@ -19,9 +19,11 @@ export class GeminiProviderAdapter implements AiProviderPort {
   // protected so tests can substitute a fake client without mocking the SDK module.
   protected getClient(): GoogleGenerativeAI {
     if (!this.client) {
-      this.client = new GoogleGenerativeAI(
-        this.config.getOrThrow<string>('GEMINI_API_KEY'),
-      );
+      const apiKey = this.config.get<string>('GEMINI_API_KEY')?.trim();
+      if (!apiKey) {
+        throw new Error('GEMINI_API_KEY is required when AI_PROVIDER=gemini');
+      }
+      this.client = new GoogleGenerativeAI(apiKey);
     }
     return this.client;
   }
@@ -32,8 +34,9 @@ export class GeminiProviderAdapter implements AiProviderPort {
     system: string;
     messages: AiMessageParam[];
   }) {
+    // `|| ` (not `??`) so a blank GEMINI_MODEL falls back to the default.
     const modelName =
-      this.config.get<string>('GEMINI_MODEL') ?? DEFAULT_GEMINI_MODEL;
+      this.config.get<string>('GEMINI_MODEL')?.trim() || DEFAULT_GEMINI_MODEL;
     const model = this.getClient().getGenerativeModel({
       model: modelName,
       systemInstruction: params.system,

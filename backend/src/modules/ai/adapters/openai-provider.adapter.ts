@@ -19,9 +19,11 @@ export class OpenAiProviderAdapter implements AiProviderPort {
   // protected so tests can substitute a fake client without mocking the SDK module.
   protected getClient(): OpenAI {
     if (!this.client) {
-      this.client = new OpenAI({
-        apiKey: this.config.getOrThrow<string>('OPENAI_API_KEY'),
-      });
+      const apiKey = this.config.get<string>('OPENAI_API_KEY')?.trim();
+      if (!apiKey) {
+        throw new Error('OPENAI_API_KEY is required when AI_PROVIDER=openai');
+      }
+      this.client = new OpenAI({ apiKey });
     }
     return this.client;
   }
@@ -32,8 +34,9 @@ export class OpenAiProviderAdapter implements AiProviderPort {
     system: string;
     messages: AiMessageParam[];
   }) {
+    // `|| ` (not `??`) so a blank OPENAI_MODEL falls back to the default.
     const model =
-      this.config.get<string>('OPENAI_MODEL') ?? DEFAULT_OPENAI_MODEL;
+      this.config.get<string>('OPENAI_MODEL')?.trim() || DEFAULT_OPENAI_MODEL;
     const response = await this.getClient().chat.completions.create({
       model,
       max_tokens: params.maxTokens,

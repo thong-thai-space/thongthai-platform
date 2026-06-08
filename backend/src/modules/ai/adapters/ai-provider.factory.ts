@@ -9,7 +9,8 @@ import { GeminiProviderAdapter } from './gemini-provider.adapter';
  * `AI_PROVIDER` env var (claude | openai | gemini, default claude). Switching
  * providers is a config change, not a code change — the one AiProviderPort seam
  * stays untouched for every use case and the RAG module. Only the selected
- * adapter is constructed, so unused providers' API keys aren't required to boot.
+ * adapter is constructed, and env validation requires only the selected
+ * provider's API key, so unused providers' keys aren't needed.
  */
 export function createAiProvider(config: ConfigService): AiProviderPort {
   const provider = (config.get<string>('AI_PROVIDER') ?? 'claude')

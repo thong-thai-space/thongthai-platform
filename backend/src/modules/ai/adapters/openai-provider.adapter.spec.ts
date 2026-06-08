@@ -74,4 +74,35 @@ describe('OpenAiProviderAdapter', () => {
     const calls = create.mock.calls as Array<[{ model: string }]>;
     expect(calls[0][0].model).toBe('gpt-4o');
   });
+
+  it('falls back to the default model when OPENAI_MODEL is blank', async () => {
+    const create = jest.fn().mockResolvedValue({
+      choices: [{ message: { content: 'ok' } }],
+      usage: { prompt_tokens: 1, completion_tokens: 1 },
+    });
+    const adapter = new TestableOpenAi(create, '   ');
+    await adapter.createMessage({
+      model: 'x',
+      maxTokens: 10,
+      system: 's',
+      messages: [{ role: 'user', content: 'q' }],
+    });
+    const calls = create.mock.calls as Array<[{ model: string }]>;
+    expect(calls[0][0].model).toBe('gpt-4o-mini');
+  });
+
+  it('throws a clear error when OPENAI_API_KEY is blank', async () => {
+    // Real adapter (no client override) with a blank key.
+    const adapter = new OpenAiProviderAdapter({
+      get: () => '',
+    } as unknown as ConfigService);
+    await expect(
+      adapter.createMessage({
+        model: 'x',
+        maxTokens: 10,
+        system: 's',
+        messages: [{ role: 'user', content: 'q' }],
+      }),
+    ).rejects.toThrow(/OPENAI_API_KEY is required/);
+  });
 });

@@ -71,7 +71,22 @@ export function validateEnv(env: EnvRecord) {
   }
   ensure(env, 'JWT_SECRET');
   ensure(env, 'JWT_REFRESH_SECRET');
-  ensure(env, 'ANTHROPIC_API_KEY');
+
+  // Provider Router: require only the selected provider's API key, so switching
+  // providers stays config-only (no need to also hold an Anthropic key).
+  const aiProvider = (env.AI_PROVIDER?.trim() || 'claude').toLowerCase();
+  const providerKey: Record<string, string> = {
+    claude: 'ANTHROPIC_API_KEY',
+    anthropic: 'ANTHROPIC_API_KEY',
+    openai: 'OPENAI_API_KEY',
+    gemini: 'GEMINI_API_KEY',
+  };
+  const requiredKey = providerKey[aiProvider];
+  if (!requiredKey) {
+    throw new Error('AI_PROVIDER must be one of: claude, openai, gemini');
+  }
+  ensure(env, requiredKey);
+
   ensure(env, 'REDIS_URL');
   ensureUrl(env, 'FRONTEND_URL');
   ensureOptionalUrl(env, 'GOOGLE_CALLBACK_URL');
