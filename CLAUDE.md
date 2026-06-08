@@ -112,7 +112,7 @@ URLs: Frontend http://localhost:3000 · API http://localhost:4000/api/v1 · Swag
 | `PORT` | API port (default 4000) |
 | `FRONTEND_URL` | CORS origin |
 
-Feature-gated (enable as needed): `STORAGE_PROVIDER=r2` (+ R2 keys), `GOOGLE_CLIENT_ID/SECRET`, `RESEND_API_KEY`, `VAPID_*` (push notifications), `TURNSTILE_SECRET` (bot protection), `VOYAGE_API_KEY` (RAG embeddings — standalone Voyage key, not MongoDB Atlas; RAG disabled when blank).
+Feature-gated (enable as needed): `STORAGE_PROVIDER=r2` (+ R2 keys), `GOOGLE_CLIENT_ID/SECRET`, `RESEND_API_KEY`, `VAPID_*` (push notifications), `TURNSTILE_SECRET` (bot protection), `VOYAGE_API_KEY` (RAG embeddings — standalone Voyage key, not MongoDB Atlas; RAG disabled when blank), `SENTRY_DSN` (error reporting; disabled when blank — logs are structured JSON on stdout in production).
 
 `frontend/.env.local`: `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SOCKET_URL`.
 
@@ -230,7 +230,6 @@ The rules in **Engineering Standards** are _heuristics_, not commandments. Apply
 | `portfolio`, `health`, `email`, `export`, `security` modules | 🟢 | Repository-only (no `domain/` + `use-cases/`); functional but inconsistent with the rest |
 | Frontend not layered like the backend (no ports/use-cases) | 🟢 | Standard Next.js app; UI now built across dashboard/portal/member + GĐ2 (RAG, academy, invoices/quotes) |
 | No integration / E2E tests for cross-module flows | 🟡 | Only unit tests at use-case level today |
-| No Sentry / structured JSON logging | 🟡 | Pre-production checklist |
 | Strategic-plan apply uses Saga (idempotent), not `$transaction` | 🟢 | Intentional: avoids long-running locks. Documented in `ai-strategic-plan.use-case.ts` |
 
 ## Tech stack reference
