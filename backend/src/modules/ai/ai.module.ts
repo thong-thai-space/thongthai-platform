@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AiService } from './ai.service';
 import { AiController } from './ai.controller';
 import { AiPublicController } from './ai-public.controller';
@@ -9,7 +10,7 @@ import { DocxGeneratorService } from './services/docx-generator.service';
 import { AiPolicy } from './policies/ai.policy';
 import { AiRepository } from './repositories/ai.repository';
 import { AiNotificationAdapter } from './adapters/ai-notification.adapter';
-import { AiProviderAdapter } from './adapters/ai-provider.adapter';
+import { createAiProvider } from './adapters/ai-provider.factory';
 import {
   AI_NOTIFICATION_PORT,
   AI_PROVIDER_PORT,
@@ -51,10 +52,15 @@ import { AiStrategicPlanUseCase } from './use-cases/ai-strategic-plan.use-case';
     // Concrete adapters + port bindings
     AiRepository,
     AiNotificationAdapter,
-    AiProviderAdapter,
     { provide: AI_REPOSITORY, useExisting: AiRepository },
     { provide: AI_NOTIFICATION_PORT, useExisting: AiNotificationAdapter },
-    { provide: AI_PROVIDER_PORT, useExisting: AiProviderAdapter },
+    // Provider Router: the active LLM provider is chosen from AI_PROVIDER env
+    // (claude | openai | gemini). Swapping providers is config-only.
+    {
+      provide: AI_PROVIDER_PORT,
+      inject: [ConfigService],
+      useFactory: createAiProvider,
+    },
   ],
   // AI_PROVIDER_PORT is exported so the RAG module can reuse the LLM provider
   // for grounded answer generation (its Provider Router stays the single seam).
