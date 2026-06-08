@@ -7,7 +7,7 @@ import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { GlobalExceptionFilter } from '../../src/shared/filters/global-exception.filter';
 import { ResponseEnvelopeInterceptor } from '../../src/shared/interceptors/response-envelope.interceptor';
-import { EMBEDDING_PROVIDER } from '../../src/modules/rag/rag.constants';
+import { EMBEDDING_PROVIDER, EMBEDDING_DIMENSIONS } from '../../src/modules/rag/rag.constants';
 import { AI_PROVIDER_PORT } from '../../src/modules/ai/ai.constants';
 import type { EmbeddingProviderPort } from '../../src/modules/rag/domain/embedding.port';
 import type { AiProviderPort } from '../../src/modules/ai/domain/ai.provider.port';
@@ -18,13 +18,13 @@ export const E2E_PASSWORD = 'Demo@1234';
 export type E2EAgent = ReturnType<typeof request.agent>;
 
 // Deterministic fakes so e2e needs no external API keys (Voyage / Anthropic).
-// A constant 1024-dim vector means cosine similarity = 1 for every chunk, so the
-// query reliably retrieves the ingested document.
-const FAKE_DIMENSIONS = 1024;
-const constantVector = () => new Array<number>(FAKE_DIMENSIONS).fill(0.1);
+// A constant vector means cosine similarity = 1 for every chunk, so the query
+// reliably retrieves the ingested document. Width tracks the production constant
+// (and the pgvector column) to avoid drift.
+const constantVector = () => new Array<number>(EMBEDDING_DIMENSIONS).fill(0.1);
 
 const fakeEmbedding: EmbeddingProviderPort = {
-  dimensions: FAKE_DIMENSIONS,
+  dimensions: EMBEDDING_DIMENSIONS,
   embedDocuments: (texts) => Promise.resolve(texts.map(() => constantVector())),
   embedQuery: () => Promise.resolve(constantVector()),
 };
