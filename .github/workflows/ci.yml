@@ -52,6 +52,75 @@ jobs:
           REDIS_URL: redis://localhost:6379
           ANTHROPIC_API_KEY: test-anthropic-key
 
+  backend-e2e:
+    name: Backend E2E
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: thongthai_space
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://test:test@localhost:5432/thongthai_space?schema=public
+      JWT_SECRET: test-jwt-secret-32-characters-long-xxxxx
+      JWT_REFRESH_SECRET: test-jwt-refresh-secret-32-characters-xxx
+      FRONTEND_URL: http://localhost:3000
+      PORT: 4000
+      REDIS_URL: redis://localhost:6379
+      ANTHROPIC_API_KEY: test-anthropic-key
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: backend/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm db:generate
+
+      - name: Apply migrations
+        run: pnpm db:migrate:deploy
+
+      - name: E2E flow tests
+        run: pnpm test:e2e:flows
+
   frontend:
     name: Frontend Build and Test
     runs-on: ubuntu-latest
