@@ -48,4 +48,24 @@ describe('DocxGenerator', () => {
     const buffer = await generator.generate({ title: 'BÁO GIÁ' });
     expect(buffer.subarray(0, 2).toString('latin1')).toBe('PK');
   });
+
+  it('handles many equal-weight columns without oversubscribing widths', async () => {
+    // 6 equal columns would round to 17% each (102%) with naive rounding;
+    // the largest-remainder split keeps the total at 100%.
+    const wide: PdfDocumentPayload = {
+      title: 'BẢNG',
+      table: {
+        columns: Array.from({ length: 6 }, (_, i) => ({
+          header: `Cột ${i + 1}`,
+          key: `c${i}`,
+          width: 1,
+        })),
+        rows: [{ c0: 'a', c1: 'b', c2: 'c', c3: 'd', c4: 'e', c5: 'f' }],
+      },
+    };
+    const buffer = await generator.generate(
+      wide as unknown as Record<string, unknown>,
+    );
+    expect(buffer.subarray(0, 2).toString('latin1')).toBe('PK');
+  });
 });

@@ -170,22 +170,36 @@ export class DocxGenerator implements ExportGenerator {
     ];
   }
 
+  // Integer column percentages summing to exactly 100 (largest-remainder method),
+  // so Word never sees an oversubscribed (>100%) table and keeps the proportions.
+  private columnPercentages(columns: PdfTableColumn[]): number[] {
+    const totalWeight = columns.reduce((s, c) => s + c.width, 0) || 1;
+    const raw = columns.map((c) => (c.width / totalWeight) * 100);
+    const widths = raw.map((r) => Math.max(1, Math.floor(r)));
+    let remainder = 100 - widths.reduce((a, b) => a + b, 0);
+    const byFrac = raw
+      .map((r, i) => ({ i, frac: r - Math.floor(r) }))
+      .sort((a, b) => b.frac - a.frac);
+    for (let k = 0; remainder > 0 && byFrac.length; k++, remainder--) {
+      widths[byFrac[k % byFrac.length].i] += 1;
+    }
+    return widths;
+  }
+
   private table(
     columns: PdfTableColumn[],
     rows: Record<string, string | number>[],
   ): Table {
-    const totalWeight = columns.reduce((s, c) => s + c.width, 0);
-    const pct = (c: PdfTableColumn) =>
-      Math.max(1, Math.round((c.width / totalWeight) * 100));
+    const widths = this.columnPercentages(columns);
     const align = (c: PdfTableColumn) =>
       c.align === 'right' ? AlignmentType.RIGHT : AlignmentType.LEFT;
 
     const headerRow = new TableRow({
       tableHeader: true,
       children: columns.map(
-        (c) =>
+        (c, i) =>
           new TableCell({
-            width: { size: pct(c), type: WidthType.PERCENTAGE },
+            width: { size: widths[i], type: WidthType.PERCENTAGE },
             shading: { type: ShadingType.CLEAR, color: 'auto', fill: HEAD_BG },
             children: [
               new Paragraph({
@@ -208,9 +222,9 @@ export class DocxGenerator implements ExportGenerator {
       (row) =>
         new TableRow({
           children: columns.map(
-            (c) =>
+            (c, i) =>
               new TableCell({
-                width: { size: pct(c), type: WidthType.PERCENTAGE },
+                width: { size: widths[i], type: WidthType.PERCENTAGE },
                 children: [
                   new Paragraph({
                     alignment: align(c),
