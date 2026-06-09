@@ -229,7 +229,7 @@ The rules in **Engineering Standards** are _heuristics_, not commandments. Apply
 |---|---|---|
 | `portfolio`, `health`, `email`, `export`, `security` modules | 🟢 | Repository-only (no `domain/` + `use-cases/`); functional but inconsistent with the rest |
 | Frontend not layered like the backend (no ports/use-cases) | 🟢 | Standard Next.js app; UI now built across dashboard/portal/member + GĐ2 (RAG, academy, invoices/quotes) |
-| No integration / E2E tests for cross-module flows | 🟡 | Only unit tests at use-case level today |
+| E2E covers the pilot flows only | 🟢 | Real-DB E2E in `backend/test/flows` (CRM→billing, RAG) run by the `backend-e2e` CI job; other cross-module flows are still unit-only |
 | Strategic-plan apply uses Saga (idempotent), not `$transaction` | 🟢 | Intentional: avoids long-running locks. Documented in `ai-strategic-plan.use-case.ts` |
 
 ## Tech stack reference
