@@ -6,10 +6,14 @@ How to turn on the feature-gated integrations for the GĐ2 pilot. All of these a
 ## Where production config lives
 
 Production runs via Docker Compose on the server (`docker-compose.prod.yml`). The
-backend reads its environment from **`backend/.env.production`** on the server
-(`env_file:`). That file is **not** in git — copy it from
-[`backend/.env.production.example`](../backend/.env.production.example) and fill in
-real values on the server.
+backend reads its environment from **`backend/.env.production`** (`env_file:`).
+
+> **Important:** `backend/.env.production` is tracked in git but holds only
+> `CHANGE_ME_*` **placeholders** (mirrors
+> [`backend/.env.production.example`](../backend/.env.production.example)). Put the
+> **real** secrets into this file **on the server only** and never commit them —
+> e.g. keep a server-local copy and `git update-index --skip-worktree
+> backend/.env.production` so a `git pull` during deploy doesn't overwrite it.
 
 **Apply changes** after editing `backend/.env.production`:
 
@@ -48,14 +52,16 @@ boots. Only the **selected AI provider's** key is mandatory (see below).
 - Blank = RAG ingestion/query is disabled (the rest of the app is unaffected).
 - The pgvector column is fixed at 1024 dims (`voyage-3`); don't change the model
   without a migration.
-- **Verify:** `POST /api/v1/rag/documents` then `POST /api/v1/rag/query` return a
+- **Verify:** the RAG endpoints are JWT + OWNER/ADMIN guarded, so log in as an
+  owner/admin first and send the auth cookie (or Bearer token). Then
+  `POST /api/v1/rag/documents` followed by `POST /api/v1/rag/query` returns a
   real grounded answer instead of a "VOYAGE_API_KEY is not configured" error.
 
 ## 3. CMS images (+ avatars, portfolio) — Cloudflare R2
 
 | Var | Value |
 |---|---|
-| `STORAGE_PROVIDER` | `r2` (default `local` serves from the backend `/uploads` volume) |
+| `STORAGE_PROVIDER` | `r2` (default `local` writes to the backend's `uploads_data` Docker volume) |
 | `R2_ACCOUNT_ID` | Cloudflare account id |
 | `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` | R2 API token pair |
 | `R2_BUCKET_NAME` | Bucket name |
@@ -66,9 +72,10 @@ boots. Only the **selected AI provider's** key is mandatory (see below).
   won't break health checks).
 - **Verify:** upload an image in Dashboard → Content; the returned URL should
   point at `R2_PUBLIC_URL` (not `/uploads/...`) and load in the browser.
-- `local` is fine for the pilot, but uploads then live on the server volume
-  (back them up / they don't survive a volume reset). R2 is recommended once
-  images matter.
+- `local` is fine for the pilot: uploads persist in the `uploads_data` Docker
+  volume across redeploys (`docker-compose.prod.yml`). They're still tied to one
+  host and not CDN-served — switch to R2 once images matter for scale/CDN, and
+  back up the volume meanwhile.
 
 ## 4. (Optional) Switch AI provider
 
@@ -92,4 +99,4 @@ hold an Anthropic key to run on OpenAI/Gemini. Switching is just a config change
 - [ ] `SENTRY_DSN` set → a forced 5xx shows up in Sentry
 - [ ] `STORAGE_PROVIDER=r2` + `R2_*` (or accept local) → CMS image upload works
 - [ ] `RESEND_API_KEY` set if the pilot sends email; `TURNSTILE_SECRET_KEY` if bot protection is wanted
-- [ ] `GET /api/health` returns ok; `GET /api/v1/health/ready` shows database + redis `up`
+- [ ] `GET /api/healthz` returns ok; `GET /api/v1/health/ready` shows database + redis `up`

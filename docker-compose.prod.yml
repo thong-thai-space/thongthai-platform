@@ -48,13 +48,17 @@ services:
         condition: service_healthy
     ports:
       - '4000:4000'
+    volumes:
+      # Persist local uploads (CMS images, avatars) across redeploys when
+      # STORAGE_PROVIDER=local. Unused when STORAGE_PROVIDER=r2.
+      - uploads_data:/app/uploads
     healthcheck:
       test:
         [
           'CMD',
           'node',
           '-e',
-          "fetch('http://127.0.0.1:4000/api/health/ready').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+          "fetch('http://127.0.0.1:4000/api/v1/health/ready').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
         ]
       interval: 15s
       timeout: 5s
@@ -95,6 +99,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  uploads_data:
 
 networks:
   app-network:
