@@ -87,7 +87,10 @@ jobs:
           script_stop: true
           script: |
             set -e
-            curl -fsS "https://${{ secrets.PROD_DOMAIN }}/api/health" >/dev/null
+            # Liveness (no DB dep) then readiness (DB + Redis up). These are the
+            # routes the backend actually serves: /api/healthz and /api/v1/health/ready.
+            curl -fsS "https://${{ secrets.PROD_DOMAIN }}/api/healthz" >/dev/null
+            curl -fsS "https://${{ secrets.PROD_DOMAIN }}/api/v1/health/ready" >/dev/null
 
       - name: Frontend health check
         uses: appleboy/ssh-action@v1.2.0
